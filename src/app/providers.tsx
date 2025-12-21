@@ -1,0 +1,33 @@
+// src/app/providers.tsx
+'use client'; // client-only because next-themes is client-side
+
+import { ThemeProvider } from 'next-themes';
+import { type ReactNode, useEffect, useState } from 'react';
+import { ToastContainer } from 'react-toastify';
+
+type AppProviderProps = {
+  children: ReactNode;
+};
+
+export default function AppProvider({ children }: AppProviderProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    // Fallback for SSR, prevent hydration mismatch
+    return <>{children}</>;
+  }
+
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      {children}
+      <ToastContainer />
+    </ThemeProvider>
+  );
+}
