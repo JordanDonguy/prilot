@@ -8,3 +8,16 @@
 body {
   font-family: var(--font-figtree);
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.fade-in-fast {
+  animation: fadeInFast 0.1s ease-in-out forwards;
+}
