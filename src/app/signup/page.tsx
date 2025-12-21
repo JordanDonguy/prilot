@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { Github, Gitlab } from "lucide-react";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 export default function SignupPage() {
 	return (
-		<div className="min-h-screen flex justify-center items-center bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-gray-900">
-			<div className="max-w-md w-full p-8 border border-gray-300 dark:border-gray-700 rounded-2xl text-center shadow-md bg-white/40 dark:bg-zinc-900/25">
+		<div className="flex justify-center items-center min-h-screen bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-gray-900">
+			<div className="max-w-md w-full pt-4 pb-8 px-8 border border-gray-300 dark:border-gray-700 rounded-2xl text-center shadow-md bg-white/40 dark:bg-zinc-900/25">
+				<div className="flex justify-between items-center w-full max-w-md mb-8">
+					<Link href="/" className="hover:underline">
+						← Back
+					</Link>
+					<ThemeSwitcher className="bg-transparent! hover:bg-gray-300! hover:dark:bg-cyan-800!" />
+				</div>
 				<h1 className="text-2xl font-semibold mb-2">Welcome to PRilot</h1>
 				<h2 className="text-gray-700 dark:text-gray-300 mb-6">
 					Register to manage your repositories and PRs

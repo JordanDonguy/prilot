@@ -33,7 +33,7 @@ export default function LandingPage() {
 								Sign Up
 							</CustomLink>
 						</div>
-						<ThemeSwitcher className="mt-8 mx-auto bg-gray-300 dark:bg-cyan-700 hover:bg-gray-400/70 hover:dark:bg-cyan-500/70" />
+						<ThemeSwitcher className="mt-8 mx-auto bg-cyan-200 dark:bg-cyan-900 hover:bg-cyan-400/70 hover:dark:bg-cyan-500/70" />
 					</div>
 				</div>
 			</section>
@@ -54,7 +54,7 @@ export default function LandingPage() {
 							</h3>
 							<p className="text-gray-600 dark:text-gray-400">
 								Automatically generate comprehensive PR descriptions by
-								analyzing code changes between branches.
+								analyzing commit differences between branches.
 							</p>
 						</div>
 						<div className="text-center">
@@ -122,6 +122,49 @@ export default function LandingPage() {
 								</h3>
 								<p className="text-gray-600 dark:text-gray-400 text-sm">
 									{step.desc}
+								</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+
+			{/* Testimonials Section */}
+			<section className="py-20 bg-cyan-200 dark:bg-gray-900">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<h2 className="text-3xl text-center mb-12 text-gray-900 dark:text-white">
+						Loved by Developers
+					</h2>
+					<div className="grid md:grid-cols-3 gap-8">
+						{[
+							{
+								name: "Alice",
+								role: "Frontend Dev",
+								quote: "PRilot cut my PR writing time in half!",
+							},
+							{
+								name: "Bob",
+								role: "Backend Engineer",
+								quote: "The AI suggestions are surprisingly accurate.",
+							},
+							{
+								name: "Charlie",
+								role: "Full Stack Developer",
+								quote: "I can't imagine working without PRilot now.",
+							},
+						].map((t, i) => (
+							<div
+								key={i}
+								className="p-6 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md text-center"
+							>
+								<p className="text-gray-600 dark:text-gray-400 mb-4">
+									"{t.quote}"
+								</p>
+								<p className="font-semibold text-gray-900 dark:text-white">
+									{t.name}
+								</p>
+								<p className="text-sm text-gray-500 dark:text-gray-400">
+									{t.role}
 								</p>
 							</div>
 						))}
