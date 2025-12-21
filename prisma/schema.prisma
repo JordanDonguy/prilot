@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Provider {
+  github
+  gitlab
+}
+
+enum RepositoryRole {
+  owner
+  member
+}
+
+enum InvitationStatus {
+  pending
+  accepted
+  declined
+}
+
+enum PullRequestStatus {
+  draft
+  sent
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String?  // nullable, because provider-only accounts may not have a password
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens    RefreshToken[]
+  providerAccounts ProviderAccount[]
+  repositories     Repository[]        @relation("CreatedRepositories")
+  memberships      RepositoryMember[]
+  invitationsSent  Invitation[]        @relation("InvitedBy")
+  pullRequests     PullRequest[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model ProviderAccount {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+
+  provider       Provider
+  providerUserId String
+  username       String
+  accessToken    String
+  connectedAt    DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id])
+  pullRequests   PullRequest[]
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("provider_accounts")
+}
+
+model Repository {
+  id              String   @id @default(uuid()) @db.Uuid
+
+  provider        Provider
+  providerRepoId  String
+  owner           String
+  name            String
+  defaultBranch   String
+
+  createdById     String   @db.Uuid
+  createdAt       DateTime @default(now())
+
+  createdBy       User     @relation("CreatedRepositories", fields: [createdById], references: [id])
+  members         RepositoryMember[]
+  invitations     Invitation[]
+  pullRequests    PullRequest[]
+
+  @@unique([provider, providerRepoId])
+  @@index([createdById])
+  @@map("repositories")
+}
+
+model RepositoryMember {
+  id            String          @id @default(uuid()) @db.Uuid
+
+  repositoryId  String          @db.Uuid
+  userId        String          @db.Uuid
+  role          RepositoryRole
+  joinedAt      DateTime        @default(now())
+
+  repository    Repository      @relation(fields: [repositoryId], references: [id])
+  user          User            @relation(fields: [userId], references: [id])
+
+  @@unique([repositoryId, userId])
+  @@index([userId])
+  @@map("repository_members")
+}
+
+model Invitation {
+  id            String             @id @default(uuid()) @db.Uuid
+
+  repositoryId  String             @db.Uuid
+  email         String
+  invitedById   String             @db.Uuid
+  status        InvitationStatus
+  createdAt     DateTime           @default(now())
+
+  repository    Repository         @relation(fields: [repositoryId], references: [id])
+  invitedBy     User               @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  @@unique([repositoryId, email])
+  @@map("invitations")
+}
+
+model PullRequest {
+  id                String             @id @default(uuid()) @db.Uuid
+
+  repositoryId      String             @db.Uuid
+  createdById       String             @db.Uuid
+  providerAccountId String             @db.Uuid
+
+  baseBranch        String
+  compareBranch     String
+  language          String
+  title             String
+  description       String
+  providerPrUrl     String?            // nullable, only after send
+  status            PullRequestStatus  @default(draft)
+
+  createdAt         DateTime           @default(now())
+
+  repository        Repository      @relation(fields: [repositoryId], references: [id])
+  createdBy         User            @relation(fields: [createdById], references: [id])
+  providerAccount   ProviderAccount @relation(fields: [providerAccountId], references: [id])
+
+  @@index([repositoryId])
+  @@index([createdById])
+  @@map("pull_requests")
+}
