@@ -26,9 +26,12 @@ export async function POST(req: Request) {
     // Verify password
     await verifyPassword(user.password, password);
 
+    // Remove sensitive info
+    const { password: _password, ...safeUser } = user;
+
     // Create response + session
     const response = NextResponse.json(
-      { message: "Logged in successfully" },
+      { message: "Logged in successfully", user: safeUser },
       { status: 200 }
     );
 

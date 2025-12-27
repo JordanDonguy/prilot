@@ -1,12 +1,12 @@
 import "server-only";
 
-import jwt, { JwtPayload } from "jsonwebtoken";
-import crypto from "node:crypto";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import { config } from "./config";
-import { getPrisma } from "@/db";
+import type { NextResponse } from "next/server";
+import crypto from "node:crypto";
+import { config } from "@/lib/server/config";
 import { UnauthorizedError } from "@/lib/server/error";
+import { getPrisma } from "@/db";
 import type { User } from "@/db";
 
 export const ACCESS_TOKEN_DURATION_IN_MS = 60 * 60 * 1000; // 1h
