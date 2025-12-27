@@ -4,7 +4,7 @@ export const Button = ({
 }) => {
   return (
     <button
-      className={`w-20 h-8 flex items-center justify-center rounded-md text-sm font-medium transition-all hover:cursor-pointer disabled:pointer-events-none ${className}`}
+      className={`w-20 h-8 flex items-center justify-center rounded-md text-sm font-medium transition-all cursor-pointer disabled:cursor-not-allowed ${className}`}
       {...props}
     />
   );
