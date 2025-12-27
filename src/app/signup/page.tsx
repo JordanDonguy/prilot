@@ -1,11 +1,30 @@
-import Link from "next/link";
+"use client";
+
 import { Github, Gitlab } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import LoginSkeleton from "@/components/LoginSkeleton";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { useUser } from "@/contexts/UserContext";
 
 export default function SignupPage() {
+	const router = useRouter();
+	const { user, loading: userLoading } = useUser();
+
+	// Route guard
+	useEffect(() => {
+		if (!userLoading && user) {
+			router.replace("/dashboard");
+		}
+	}, [userLoading, user, router]);
+
+	// Loading fallback
+	if (userLoading || user) return <LoginSkeleton />;
+
 	return (
-		<div className="flex justify-center items-center min-h-screen bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-gray-900">
-			<div className="max-w-md w-full pt-4 pb-8 px-8 border border-gray-300 dark:border-gray-700 rounded-2xl text-center shadow-md bg-white/40 dark:bg-zinc-900/25">
+		<div className="flex justify-center items-center min-h-screen bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-[#13131d]">
+			<div className="max-w-md w-full pt-4 pb-8 px-8 md:border border-gray-300 dark:border-gray-700 rounded-2xl text-center md:shadow-md md:bg-white/40 md:dark:bg-zinc-900/25">
 				<div className="flex justify-between items-center w-full max-w-md mb-8">
 					<Link href="/" className="hover:underline">
 						← Back
@@ -94,17 +113,17 @@ export default function SignupPage() {
 					<span className="grow h-px bg-gray-300 dark:bg-gray-600"></span>
 				</div>
 
-				<div className="grid md:grid-cols-2 gap-4 justify-center">
+				<div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 justify-center">
 					<button
 						type="button"
-						className="flex justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+						className="flex w-full md:w-auto justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 					>
 						<Github className="w-5 h-5" />
 						GitHub
 					</button>
 					<button
 						type="button"
-						className="flex justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+						className="flex w-full md:w-auto justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 					>
 						<Gitlab className="w-5 h-5" />
 						GitLab

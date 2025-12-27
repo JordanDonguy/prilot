@@ -1,25 +1,37 @@
-import { ReactNode } from "react";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, type ReactNode } from "react";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import { getCurrentUser } from "@/lib/server/session";
-import { redirect } from "next/navigation";
+import { useUser } from "@/contexts/UserContext";
 
-export default async function DashboardLayout({
-	children,
-}: {
-	children: ReactNode;
-}) {
-	const user = await getCurrentUser();
+interface DashboardLayoutProps {
+  children: ReactNode;
+}
 
-	if (!user) redirect("/login");
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const router = useRouter();
+  const { user, loading } = useUser();
 
-	return (
-		<div className="flex h-screen bg-linear-to-b from-blue-50 to-white dark:from-gray-950 dark:to-gray-900">
-			<Sidebar />
-			<div className="flex-1 flex flex-col overflow-hidden">
-				<Header />
-				<main className="flex-1 overflow-y-auto">{children}</main>
-			</div>
-		</div>
-	);
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [loading, user, router]);
+  
+  // Show skeleton until user data is ready
+  if (loading || !user) return <DashboardSkeleton />;
+
+  return (
+    <div className="flex h-screen bg-linear-to-b from-blue-50 to-white dark:from-zinc-950 dark:to-[#13131d]">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
+    </div>
+  );
 }

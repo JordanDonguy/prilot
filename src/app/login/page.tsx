@@ -1,33 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import Link from "next/link";
 import { Github, Gitlab } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import z from "zod";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { passwordValidationSchema } from "@/lib/schemas/auth.schema";
-import z from "zod";
+import LoginSkeleton from "@/components/LoginSkeleton";
+import { useUser } from "@/contexts/UserContext";
 
 export default function LoginPage() {
 	const router = useRouter();
+	const { user, setUser, loading: userLoading } = useUser();
 	const [loading, setLoading] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [ready, setReady] = useState(false);
 
 	// Route guard
 	useEffect(() => {
-		const fetchUser = async () => {
-			const res = await fetch("/api/auth/me", {
-				credentials: "include",
-			});
-
-			if (res.ok) return router.replace("dashboard");
-			setReady(true);
-		};
-		fetchUser();
-	}, []);
+		if (!userLoading && user) {
+			router.replace("/dashboard");
+		}
+	}, [userLoading, user, router]);
 
 	// Login fetch
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -35,15 +31,16 @@ export default function LoginPage() {
 		setLoading(true);
 
 		try {
-			// Check if password is valid
+			// Validate password
 			const validatedPassword =
 				await passwordValidationSchema.parseAsync(password);
 
-			// If valid, send request
+			// Send login request
 			const res = await fetch("/api/auth/login", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email, password: validatedPassword }),
+				credentials: "include", // ensure cookies are included
 			});
 
 			const data = await res.json();
@@ -54,6 +51,10 @@ export default function LoginPage() {
 				return;
 			}
 
+			// Update context
+			setUser(data.user);
+
+			// Redirect to dashboard
 			router.push("/dashboard");
 			toast.success("Welcome back! 🚀");
 		} catch (err) {
@@ -69,16 +70,12 @@ export default function LoginPage() {
 		}
 	};
 
-	if (!ready)
-		return (
-			<div className="h-screen flex justify-center items-center bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-gray-900">
-				<div className="fade-in max-w-md h-148 w-full pt-4 pb-8 px-8 rounded-2xl text-center shadow-md bg-gray-100 dark:bg-zinc-800/25 animate-pulse"></div>
-			</div>
-		);
+	// Loading fallback
+	if (userLoading || user) return <LoginSkeleton />;
 
 	return (
-		<div className="flex justify-center items-center min-h-screen bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-gray-900">
-			<div className="fade-in-fast max-w-md w-full pt-4 pb-8 px-8 border border-gray-300 dark:border-gray-700 rounded-2xl text-center shadow-md bg-white/40 dark:bg-zinc-900/25">
+		<div className="flex justify-center items-center min-h-screen bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-[#13131d]">
+			<div className="fade-in-fast max-w-md w-full pt-4 pb-8 px-8 md:border border-gray-300 dark:border-gray-700 rounded-2xl text-center md:shadow-md md:bg-white/40 md:dark:bg-zinc-900/25">
 				<div className="flex justify-between items-center w-full max-w-md mb-8">
 					<Link href="/" className="hover:underline">
 						← Back
@@ -153,17 +150,17 @@ export default function LoginPage() {
 					</span>
 					<span className="grow h-px bg-gray-300 dark:bg-gray-600"></span>
 				</div>
-				<div className="grid md:grid-cols-2 gap-4 justify-center">
+				<div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 justify-center">
 					<button
 						type="button"
-						className="flex justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+						className="flex w-full md:w-auto justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 					>
 						<Github className="w-5 h-5" />
 						GitHub
 					</button>
 					<button
 						type="button"
-						className="flex justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+						className="flex w-full md:w-auto justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 					>
 						<Gitlab className="w-5 h-5" />
 						GitLab
