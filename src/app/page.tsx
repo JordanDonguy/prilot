@@ -1,12 +1,12 @@
-import { Code, GitBranch, Zap } from "lucide-react";
-import { CustomLink } from "@/components/CustomLink";
+import { GitBranch, Users, Zap } from "lucide-react";
+import LandingCTA from "@/components/LandingCTA";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 export default function LandingPage() {
 	return (
 		<div className="min-h-screen">
 			{/* Hero Section */}
-			<section className="relative overflow-hidden bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-gray-900">
+			<section className="relative overflow-hidden bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-[#13131d]">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
 					<div className="text-center">
 						<h1 className="font-semibold text-5xl md:text-6xl mb-6 bg-linear-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
@@ -19,27 +19,18 @@ export default function LandingPage() {
 							Compare branches, generate comprehensive PR descriptions, and
 							streamline your workflow with intelligent AI assistance.
 						</p>
-						<div className="flex gap-4 justify-center">
-							<CustomLink
-								href="/login"
-								className="bg-gray-200/40 dark:bg-gray-800/40 border border-gray-300 dark:border-gray-700 hover:bg-gray-300/50 hover:dark:bg-gray-600/70"
-							>
-								Login
-							</CustomLink>
-							<CustomLink
-								href="/signup"
-								className="text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-							>
-								Sign Up
-							</CustomLink>
-						</div>
+
+						{/* CTA Button */}
+						<LandingCTA />
+
+						{/* Theme Switcher */}
 						<ThemeSwitcher className="mt-8 mx-auto bg-cyan-200 dark:bg-cyan-900 hover:bg-cyan-400/70 hover:dark:bg-cyan-500/70" />
 					</div>
 				</div>
 			</section>
 
 			{/* Features Section */}
-			<section className="py-20 bg-white dark:bg-gray-900">
+			<section className="py-20 bg-white dark:bg-[#13131d]">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<h2 className="text-3xl text-center mb-16 text-gray-900 dark:text-white">
 						Why PRilot?
@@ -53,7 +44,7 @@ export default function LandingPage() {
 								AI-Powered Generation
 							</h3>
 							<p className="text-gray-600 dark:text-gray-400">
-								Automatically generate comprehensive PR descriptions by
+								Automatically generate comprehensive PR titles and descriptions by
 								analyzing commit differences between branches.
 							</p>
 						</div>
@@ -70,14 +61,14 @@ export default function LandingPage() {
 						</div>
 						<div className="text-center">
 							<div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-								<Code className="w-8 h-8 text-green-600 dark:text-green-400" />
+								<Users className="w-8 h-8 text-green-600 dark:text-green-400" />
 							</div>
 							<h3 className="text-xl mb-4 text-gray-900 dark:text-white">
-								Smart Templates
+								Team Collaboration
 							</h3>
 							<p className="text-gray-600 dark:text-gray-400">
-								Choose from various templates or create custom ones tailored to
-								your workflow.
+								Invite multiple members to your repository and collaborate
+								efficiently as a team.
 							</p>
 						</div>
 					</div>
@@ -85,7 +76,7 @@ export default function LandingPage() {
 			</section>
 
 			{/* How It Works */}
-			<section className="py-20 bg-gray-100 dark:bg-gray-950">
+			<section className="py-20 bg-gray-100 dark:bg-zinc-950">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<h2 className="text-3xl text-center mb-16 text-gray-900 dark:text-white">
 						How It Works
@@ -130,7 +121,7 @@ export default function LandingPage() {
 			</section>
 
 			{/* Testimonials Section */}
-			<section className="py-20 bg-cyan-200 dark:bg-gray-900">
+			<section className="py-20 bg-cyan-200 dark:bg-[#121927]">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<h2 className="text-3xl text-center mb-12 text-gray-900 dark:text-white">
 						Loved by Developers
@@ -152,10 +143,10 @@ export default function LandingPage() {
 								role: "Full Stack Developer",
 								quote: "I can't imagine working without PRilot now.",
 							},
-						].map((t, i) => (
+						].map((t) => (
 							<div
-								key={i}
-								className="p-6 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md text-center"
+								key={t.name}
+								className="p-6 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md text-center"
 							>
 								<p className="text-gray-600 dark:text-gray-400 mb-4">
 									"{t.quote}"
@@ -182,12 +173,7 @@ export default function LandingPage() {
 						Join developers who are saving hours every week with PRilot.
 					</p>
 
-					<CustomLink
-						href="/signup"
-						className="w-40 bg-white text-blue-600 hover:bg-gray-100"
-					>
-						Get Started Free
-					</CustomLink>
+					<LandingCTA variants="getStartedFree" />
 				</div>
 			</section>
 		</div>
