@@ -3,6 +3,7 @@
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { useUser } from "@/contexts/UserContext";
 
 type LogoutButtonProps = {
   /** Extra Tailwind/CSS classes for the button */
@@ -19,12 +20,14 @@ export default function LogoutButton({
   size = 24,
 }: LogoutButtonProps) {
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       router.push("/login");
-      toast.success("Successfully logged out! See you later 👋")
+      setUser(null);
+      toast.success("Successfully logged out! See you soon 👋")
     } catch (err) {
       console.error("Logout failed", err);
       toast.error("An error has occured when logging you out. Please try again later.")
@@ -35,7 +38,7 @@ export default function LogoutButton({
     <button
       type="button"
       onClick={handleLogout}
-      className={`flex items-center justify-center gap-2 rounded-full p-2 bg-gray-300 dark:bg-cyan-900
+      className={`flex items-center justify-center gap-2 rounded-full p-2 md:bg-gray-300 md:dark:bg-cyan-900
         hover:cursor-pointer hover:bg-gray-400/70 hover:dark:bg-cyan-500/70 transition-colors ${className}`}
       aria-label="Logout"
     >
