@@ -3,9 +3,18 @@
 
 :root {
   --font-figtree: 'Figtree', sans-serif;
+  --top: #dbeafe;
+  --bottom: #ffffff;
+}
+
+.dark {
+  --top: #09090b;
+  --bottom: #13131d;
 }
 
 body {
+  background: linear-gradient(to bottom, var(--top), var(--bottom));
+  background-color: var(--top);
   font-family: var(--font-figtree);
 }
 
@@ -21,3 +30,188 @@ body {
 .fade-in-fast {
   animation: fadeInFast 0.1s ease-in-out forwards;
 }
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* --------------------- */
+/* -- Markdown styles -- */
+/* --------------------- */
+ 
+  /* Headings */
+  .markdown h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 1.25rem 0 0.75rem; /* bigger spacing */
+  }
+
+  .markdown h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1.25rem 0 0.75rem;
+  }
+
+  .markdown h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem;
+  }
+
+  .markdown h1,
+  .markdown h2,
+  .markdown h3 {
+    padding-bottom: 0.25rem;       /* space between text and line */
+    margin-bottom: 0.75rem;        /* space after the line */
+    border-bottom: 1px solid #e5e7eb; /* light gray line */
+  }
+
+  .dark .markdown h1,
+  .dark .markdown h2,
+  .dark .markdown h3 {
+    border-bottom-color: #374151;  /* dark mode line */
+  }
+
+  /* Paragraphs */
+  .markdown p {
+    margin: 0.75rem 0; /* more space between lines */
+    white-space: pre-wrap;
+    opacity: 0.9;
+  }
+
+  .markdown strong {
+    font-weight: 800;
+  }
+
+  /* Lists */
+  .markdown ul {
+    list-style-type: disc; /* ensure bullets */
+    list-style-position: outside; /* bullets outside padding */
+    padding-left: 1.5rem; /* space for bullets */
+    opacity: 0.9;
+  }
+
+  .markdown ol {
+    list-style-type: decimal; /* numbers */
+    list-style-position: outside;
+    padding-left: 1.5rem;
+    opacity: 0.9;
+  }
+
+  .markdown li {
+    margin: 0.5rem 0; /* more spacing between list items */
+  }
+
+  /* Inline code */
+  .markdown code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+    background-color: #e5e7eb;
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+  }
+
+  .dark .markdown code {
+    background-color: #171c25;
+  }
+
+  /* Code blocks */
+  .markdown pre {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #e5e7eb;
+    color: #242424;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.8rem;
+  }
+
+  .dark .markdown pre {
+    background-color: #171c25;
+    color: #f9fafb;
+  }
+
+  .markdown pre code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  /* Blockquotes */
+  .markdown blockquote {
+    margin: 1rem 0; /* more vertical space */
+    padding-left: 1rem;
+    border-left: 3px solid #d1d5db;
+    color: #4b5563;
+  }
+
+  .dark .markdown blockquote {
+    border-left-color: #374151;
+    color: #9ca3af;
+  }
+
+  /* Links */
+  .markdown a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  .dark .markdown a {
+    color: #60a5fa;
+  }
+
+  /* Tables */
+  .markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+
+  .markdown th,
+  .markdown td {
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+
+  .markdown th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+  }
+
+  .dark .markdown th {
+    background-color: #1f2937;
+  }
+
+  /* Horizontal rule */
+  .markdown hr {
+    border: none;
+    border-top: 2px solid #d1d5db;
+    margin: 1.25rem 0;
+  }
+
+  .dark .markdown hr {
+    border-top-color: #374151;
+  }
+
+  /* Images */
+  .markdown img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+
+  /* Trim extra spacing at top/bottom */
+  .markdown > :first-child {
+    margin-top: 0;
+  }
+
+  .markdown > :last-child {
+    margin-bottom: 0;
+  }
