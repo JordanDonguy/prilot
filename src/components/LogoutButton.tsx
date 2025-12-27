@@ -25,8 +25,8 @@ export default function LogoutButton({
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
       setUser(null);
+      router.push("/login");
       toast.success("Successfully logged out! See you soon 👋")
     } catch (err) {
       console.error("Logout failed", err);
