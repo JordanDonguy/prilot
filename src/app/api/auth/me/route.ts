@@ -11,10 +11,7 @@ export async function GET() {
 			throw new UnauthorizedError("Unauthenticated");
 		}
 
-		// Remove sensitive fields
-		const { password, ...safeUser } = user;
-
-		return NextResponse.json({ user: safeUser });
+		return NextResponse.json(user);
 	} catch (error) {
 		return handleError(error);
 	}

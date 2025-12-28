@@ -1,6 +1,5 @@
-// prisma/seed.ts
-import { getPrisma } from "./index.ts";
 import argon2 from "argon2";
+import { getPrisma } from "./index.ts";
 
 const prisma = getPrisma();
 
@@ -9,7 +8,8 @@ async function resetTables() {
   await prisma.repositoryMember.deleteMany({});
   await prisma.invitation.deleteMany({});
   await prisma.repository.deleteMany({});
-  await prisma.providerAccount.deleteMany({});
+  await prisma.providerInstallation.deleteMany({});
+  await prisma.userOAuth.deleteMany({});
   await prisma.user.deleteMany({});
   console.log("🧹 Tables reset.");
 }
@@ -23,50 +23,74 @@ async function main() {
     data: {
       id: "66f3bda6-9e72-41ec-aa44-927a339ffc5a",
       email: "dev@example.com",
-			password: await argon2.hash("SuperPassword1!"),
-      providerAccounts: {
+      password: await argon2.hash("SuperPassword1!"),
+      oauthIds: {
         create: [
           {
             provider: "github",
             providerUserId: "123456",
             username: "dev-gh",
-            accessToken: "FAKE_GH_TOKEN",
           },
           {
             provider: "gitlab",
             providerUserId: "654321",
             username: "dev-gl",
-            accessToken: "FAKE_GL_TOKEN",
-          },
-        ],
-      },
-      repositories: {
-        create: [
-          {
-            provider: "github",
-            providerRepoId: "gh-repo-1",
-            owner: "dev-gh",
-            name: "my-gh-repo",
-            defaultBranch: "main",
-          },
-          {
-            provider: "gitlab",
-            providerRepoId: "gl-repo-1",
-            owner: "dev-gl",
-            name: "my-gl-repo",
-            defaultBranch: "main",
           },
         ],
       },
     },
     include: {
-      providerAccounts: true,
-      repositories: true,
+      oauthIds: true,
     },
   });
 
+  // Create installations for user
+  const githubInstallation = await prisma.providerInstallation.create({
+    data: {
+      provider: "github",
+      installationId: "inst-gh-1",
+      accountLogin: "dev-gh",
+      accountType: "user",
+    },
+  });
+
+  const gitlabInstallation = await prisma.providerInstallation.create({
+    data: {
+      provider: "gitlab",
+      installationId: "inst-gl-1",
+      accountLogin: "dev-gl",
+      accountType: "user",
+    },
+  });
+
+  // Create repositories linked to installations
+  const repos = await prisma.repository.createMany({
+    data: [
+      {
+        provider: "github",
+        providerRepoId: "gh-repo-1",
+        owner: "dev-gh",
+        name: "my-gh-repo",
+        defaultBranch: "main",
+        installationId: githubInstallation.id,
+        createdById: user.id,
+      },
+      {
+        provider: "gitlab",
+        providerRepoId: "gl-repo-1",
+        owner: "dev-gl",
+        name: "my-gl-repo",
+        defaultBranch: "main",
+        installationId: gitlabInstallation.id,
+        createdById: user.id,
+      },
+    ],
+  });
+
+  const allRepos = await prisma.repository.findMany({ where: { createdById: user.id } });
+
   // Make dev user owner of their repos
-  for (const repo of user.repositories) {
+  for (const repo of allRepos) {
     await prisma.repositoryMember.create({
       data: {
         repositoryId: repo.id,
@@ -74,51 +98,50 @@ async function main() {
         role: "owner",
       },
     });
-  }
 
-  // Create some Pull Requests for dev user
-  for (const repo of user.repositories) {
-    const account =
-      repo.provider === "github"
-        ? user.providerAccounts.find((a) => a.provider === "github")!
-        : user.providerAccounts.find((a) => a.provider === "gitlab")!;
-
+    // Create some Pull Requests for dev user
     await prisma.pullRequest.create({
       data: {
         repositoryId: repo.id,
         createdById: user.id,
-        providerAccountId: account.id,
         baseBranch: "main",
         compareBranch: "feature-1",
         language: "en",
         title: `Add feature for ${repo.name}`,
-        description: "Some PR description",
+        description: `🧑‍💻 Created by **${repo.owner}** via YourApp\n\nSome PR description`,
       },
     });
   }
 
-  // Create second user (repo owner)
+  // Second user
   const otherUser = await prisma.user.create({
     data: {
       id: "e45f90ed-b8f7-4a02-b8a6-3d722b379889",
       email: "other@example.com",
-      providerAccounts: {
+      oauthIds: {
         create: [
           {
             provider: "github",
             providerUserId: "789012",
             username: "other-gh",
-            accessToken: "FAKE_GH_TOKEN_2",
           },
         ],
       },
     },
-    include: {
-      providerAccounts: true,
+    include: { oauthIds: true },
+  });
+
+  // Create installation for second user
+  const otherInstallation = await prisma.providerInstallation.create({
+    data: {
+      provider: "github",
+      installationId: "inst-gh-2",
+      accountLogin: "other-gh",
+      accountType: "user",
     },
   });
 
-  // Second user creates a new repo
+  // Second user repo
   const otherRepo = await prisma.repository.create({
     data: {
       provider: "github",
@@ -126,11 +149,12 @@ async function main() {
       owner: "other-gh",
       name: "other-user-repo",
       defaultBranch: "main",
+      installationId: otherInstallation.id,
       createdById: otherUser.id,
     },
   });
 
-  // Make second user owner
+  // Owner membership
   await prisma.repositoryMember.create({
     data: {
       repositoryId: otherRepo.id,
@@ -139,7 +163,7 @@ async function main() {
     },
   });
 
-  // Invite dev user to the repo and add them as member
+  // Invite dev user and add as member
   await prisma.invitation.create({
     data: {
       repositoryId: otherRepo.id,
