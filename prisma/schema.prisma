@@ -42,7 +42,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   refreshTokens    RefreshToken[]
-  providerAccounts ProviderAccount[]
+  oauthIds         UserOAuth[]
   repositories     Repository[]        @relation("CreatedRepositories")
   memberships      RepositoryMember[]
   invitationsSent  Invitation[]        @relation("InvitedBy")
@@ -64,32 +64,45 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-model ProviderAccount {
+model UserOAuth {
   id             String   @id @default(uuid()) @db.Uuid
   userId         String   @db.Uuid
 
   provider       Provider
   providerUserId String
   username       String
-  accessToken    String
   connectedAt    DateTime @default(now())
 
   user           User     @relation(fields: [userId], references: [id])
-  pullRequests   PullRequest[]
 
   @@unique([provider, providerUserId])
   @@index([userId])
-  @@map("provider_accounts")
+  @@map("user_oauth")
+}
+
+
+model ProviderInstallation {
+  id             String   @id @default(uuid()) @db.Uuid
+  provider       Provider
+  installationId String   // GitHub installation_id or GitLab equivalent
+  accountLogin   String   // org or user name
+  accountType    String   // "user" | "organization"
+  createdAt      DateTime @default(now())
+  repositories   Repository[]
+
+  @@unique([provider, installationId])
 }
 
 model Repository {
   id              String   @id @default(uuid()) @db.Uuid
-
   provider        Provider
   providerRepoId  String
   owner           String
   name            String
   defaultBranch   String
+
+  installationId  String   @db.Uuid
+  installation    ProviderInstallation @relation(fields: [installationId], references: [id])
 
   createdById     String   @db.Uuid
   createdAt       DateTime @default(now())
@@ -101,7 +114,6 @@ model Repository {
 
   @@unique([provider, providerRepoId])
   @@index([createdById])
-  @@map("repositories")
 }
 
 model RepositoryMember {
@@ -141,7 +153,6 @@ model PullRequest {
 
   repositoryId      String             @db.Uuid
   createdById       String             @db.Uuid
-  providerAccountId String             @db.Uuid
 
   baseBranch        String
   compareBranch     String
@@ -153,9 +164,8 @@ model PullRequest {
 
   createdAt         DateTime           @default(now())
 
-  repository        Repository      @relation(fields: [repositoryId], references: [id])
-  createdBy         User            @relation(fields: [createdById], references: [id])
-  providerAccount   ProviderAccount @relation(fields: [providerAccountId], references: [id])
+  repository        Repository @relation(fields: [repositoryId], references: [id])
+  createdBy         User       @relation(fields: [createdById], references: [id])
 
   @@index([repositoryId])
   @@index([createdById])
