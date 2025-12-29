@@ -4,7 +4,7 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import type { NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { config } from "@/lib/server/config";
+import { config } from "./config";
 import { UnauthorizedError } from "@/lib/server/error";
 import { getPrisma } from "@/db";
 import type { User } from "@/db";
@@ -19,7 +19,7 @@ const prisma = getPrisma();
 // ----------------------------
 export function decodeJWT(accessToken: string): JwtPayload {
 	try {
-		return jwt.verify(accessToken, config.jwtSecret) as JwtPayload;
+		return jwt.verify(accessToken, config.jwt.secret) as JwtPayload;
 	} catch (error) {
 		if (error instanceof jwt.TokenExpiredError) {
 			throw new UnauthorizedError("Provided access token is expired");
@@ -37,7 +37,7 @@ export function decodeJWT(accessToken: string): JwtPayload {
 // ----- Generate access token -----
 // ---------------------------------
 export function generateAccessToken(user: User) {
-	return jwt.sign({ userId: user.id }, config.jwtSecret, {
+	return jwt.sign({ userId: user.id }, config.jwt.secret, {
 		expiresIn: ACCESS_TOKEN_DURATION_IN_MS / 1000,
 	});
 }
