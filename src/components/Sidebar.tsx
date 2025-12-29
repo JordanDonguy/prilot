@@ -106,7 +106,7 @@ export default function Sidebar() {
 				</Link>
 
 				{/* GitHub Section */}
-				<section className="mb-8">
+				<section className={`${showGithub ? "mb-8" : "mb-2"}`}>
 					<button
 						type="button"
 						onClick={() => setShowGithub(!showGithub)}
