@@ -1,4 +1,4 @@
-import { Clock, GitBranch, Plus, Users } from "lucide-react";
+import { Clock, GitBranch, GitPullRequest, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -10,7 +10,7 @@ import {
 	CardTitle,
 	StatCard,
 } from "@/components/Card";
-import { PRListItemLink } from "@/components/ListItem";
+import { PRListItem } from "@/components/ListItem";
 
 const mockRepo = {
 	id: "1",
@@ -95,7 +95,7 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
 				<StatCard
 					title="PRs Sent With PRilot"
 					value={mockRepo.openPRs}
-					icon={GitBranch}
+					icon={GitPullRequest}
 				/>
 				<StatCard title="Draft PRs" value="1" icon={Clock} />
 				<StatCard title="Active Branches" value="12" icon={GitBranch} />
@@ -111,7 +111,7 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
 				<CardContent>
 					<div className="space-y-3">
 						{mockPRs.map((pr) => (
-							<PRListItemLink
+							<PRListItem
 								key={pr.id}
 								href={`/dashboard/repo/${id}/pr/${pr.id}`}
 								title={pr.title}
