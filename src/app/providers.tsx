@@ -15,11 +15,6 @@ export default function AppProvider({ children }: AppProviderProps) {
 
 	useEffect(() => setMounted(true), []);
 
-	if (!mounted) {
-		// Fallback for SSR, prevent hydration mismatch
-		return <>{children}</>;
-	}
-
 	return (
 		<ThemeProvider
 			attribute="class"
@@ -28,10 +23,13 @@ export default function AppProvider({ children }: AppProviderProps) {
 			disableTransitionOnChange
 		>
 			<UserProvider>{children}</UserProvider>
-			<ToastContainer
-				position="bottom-center"
-				toastClassName="!bg-gray-100 dark:!bg-gray-800 dark:!text-gray-100 !border !border-gray-300 dark:!border-gray-700"
-			/>
+
+			{mounted && (
+				<ToastContainer
+					position="bottom-center"
+					toastClassName="!bg-gray-100 dark:!bg-gray-800 dark:!text-gray-100 !border !border-gray-300 dark:!border-gray-700"
+				/>
+			)}
 		</ThemeProvider>
 	);
 }

@@ -12,20 +12,23 @@ import {
 } from "@/components/Card";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { ConnectButton } from "@/components/ConnectButton";
-
-const mockUser = {
-	email: "john.doe@example.com",
-	created_at: "2023-06-12",
-	githubConnected: true,
-	gitlabConnected: false,
-};
+import { useUser } from "@/contexts/UserContext";
+import type { IOAuthProvider } from "@/types/user";
 
 export default function UserSettingsPage() {
+	const { user } = useUser();
 	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
 	function handleConnect(provider: "github" | "gitlab") {
 		toast.success(`${provider} account connected`);
 	}
+
+	// User object is guaranteed to be present due to route guard in layout.tsx
+	if (!user) return null;
+
+	// Check connected accounts
+	const githubConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account === "github") : false;
+	const gitlabConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account === "gitlab") : false;
 
 	return (
 		<div className="p-6 space-y-6">
@@ -50,14 +53,21 @@ export default function UserSettingsPage() {
 						<span className="text-sm text-gray-600 dark:text-gray-400">
 							Email
 						</span>
-						<span>{mockUser.email}</span>
+						<span>{user.email}</span>
+					</div>
+
+					<div className="flex justify-between items-center">
+						<span className="text-sm text-gray-600 dark:text-gray-400">
+							Username
+						</span>
+						<span>{user.username}</span>
 					</div>
 
 					<div className="flex justify-between items-center">
 						<span className="text-sm text-gray-600 dark:text-gray-400">
 							Member since
 						</span>
-						<span>{new Date(mockUser.created_at).toLocaleDateString()}</span>
+						<span>{new Date(user.createdAt).toLocaleDateString()}</span>
 					</div>
 				</CardContent>
 			</Card>
@@ -89,7 +99,7 @@ export default function UserSettingsPage() {
 				<CardContent className="space-y-3 grid lg:grid-cols-2 gap-4 lg:gap-0 mt-4">
 					<ConnectButton
 						providerName="GitHub"
-						connected={mockUser.githubConnected}
+						connected={githubConnected}
 						onConnect={() => handleConnect("github")}
 						icon={<Github />}
 						className="lg:pr-8 lg:border-r border-gray-500"
@@ -97,7 +107,7 @@ export default function UserSettingsPage() {
 
 					<ConnectButton
 						providerName="GitLab"
-						connected={mockUser.gitlabConnected}
+						connected={gitlabConnected}
 						onConnect={() => handleConnect("gitlab")}
 						icon={<Gitlab />}
 						className="lg:ml-8"

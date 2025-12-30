@@ -111,7 +111,8 @@ export default async function DashboardPage() {
 								key={pr.id}
 								title={pr.title}
 								subtitle={`${pr.repo} • ${pr.time}`}
-								badge={pr.status}
+								badge={mockRepos.find(r => r.name === pr.repo)?.provider}
+								status={pr.status}
 							/>
 						))}
 					</CardContent>

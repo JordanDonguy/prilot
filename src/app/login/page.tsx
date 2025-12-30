@@ -1,15 +1,16 @@
 "use client";
 
-import { Github, Gitlab } from "lucide-react";
+import { Gitlab } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import z from "zod";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
-import { passwordValidationSchema } from "@/lib/schemas/auth.schema";
+import GithubButton from "@/components/GithubButton";
 import LoginSkeleton from "@/components/LoginSkeleton";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useUser } from "@/contexts/UserContext";
+import { passwordValidationSchema } from "@/lib/schemas/auth.schema";
 
 export default function LoginPage() {
 	const router = useRouter();
@@ -151,13 +152,7 @@ export default function LoginPage() {
 					<span className="grow h-px bg-gray-300 dark:bg-gray-600"></span>
 				</div>
 				<div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 justify-center">
-					<button
-						type="button"
-						className="flex w-full md:w-auto justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-					>
-						<Github className="w-5 h-5" />
-						GitHub
-					</button>
+					<GithubButton />
 					<button
 						type="button"
 						className="flex w-full md:w-auto justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
