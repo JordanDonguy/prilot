@@ -155,6 +155,9 @@ export default function LoginPage() {
 					<GithubButton />
 					<button
 						type="button"
+						onClick={() => {
+							toast.info("GitLab auth isn't available yet.")
+						}}
 						className="flex w-full md:w-auto justify-center items-center gap-2 px-4 py-2 border border-gray-400 rounded-xl hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition"
 					>
 						<Gitlab className="w-5 h-5" />

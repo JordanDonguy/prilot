@@ -15,3 +15,10 @@ export const loginSchema = z.object({
 	email: z.email(),
 	password: z.string(),
 });
+
+export const signupSchema = z.object({
+	email: z.email(),
+	username: z.string().min(2).max(30),
+	password: passwordValidationSchema,
+	confirmPassword: passwordValidationSchema,
+});
