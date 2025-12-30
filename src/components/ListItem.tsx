@@ -61,7 +61,7 @@ export function DashboardListItem({
 				)}
 				{status === "sent" && (
 					<Link
-						href="https://github.com/JordanDonguy/traduxo/pull/9"
+						href="https://github.com"
 						target="blank"
 						className="flex gap-2 items-center text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline self-end"
 					>
