@@ -23,18 +23,17 @@ async function main() {
     data: {
       id: "66f3bda6-9e72-41ec-aa44-927a339ffc5a",
       email: "dev@example.com",
+      username: "devuser",
       password: await argon2.hash("SuperPassword1!"),
       oauthIds: {
         create: [
           {
             provider: "github",
             providerUserId: "123456",
-            username: "dev-gh",
           },
           {
             provider: "gitlab",
             providerUserId: "654321",
-            username: "dev-gl",
           },
         ],
       },
@@ -118,12 +117,12 @@ async function main() {
     data: {
       id: "e45f90ed-b8f7-4a02-b8a6-3d722b379889",
       email: "other@example.com",
+      username: "otheruser",
       oauthIds: {
         create: [
           {
             provider: "github",
             providerUserId: "789012",
-            username: "other-gh",
           },
         ],
       },

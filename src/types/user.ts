@@ -1,11 +1,9 @@
-export interface IOAuthProvider {
-  provider: string;
-  username: string;
-}
+export type IOAuthProvider = "github" | "gitlab";
 
 export interface IUser {
   id: string;
   email: string;
+  username: string;
   createdAt: Date;
   updatedAt: Date;
   oauthProviders?: IOAuthProvider[];

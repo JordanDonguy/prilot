@@ -27,8 +27,8 @@ export default function UserSettingsPage() {
 	if (!user) return null;
 
 	// Check connected accounts
-	const githubConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account.provider === "github") : false;
-	const gitlabConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account.provider === "gitlab") : false;
+	const githubConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account === "github") : false;
+	const gitlabConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account === "gitlab") : false;
 
 	return (
 		<div className="p-6 space-y-6">
@@ -54,6 +54,13 @@ export default function UserSettingsPage() {
 							Email
 						</span>
 						<span>{user.email}</span>
+					</div>
+
+					<div className="flex justify-between items-center">
+						<span className="text-sm text-gray-600 dark:text-gray-400">
+							Username
+						</span>
+						<span>{user.username}</span>
 					</div>
 
 					<div className="flex justify-between items-center">
