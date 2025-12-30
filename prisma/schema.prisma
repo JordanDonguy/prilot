@@ -37,6 +37,7 @@ enum PullRequestStatus {
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
+  username  String
   password  String?  // nullable, because provider-only accounts may not have a password
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,7 +71,6 @@ model UserOAuth {
 
   provider       Provider
   providerUserId String
-  username       String
   connectedAt    DateTime @default(now())
 
   user           User     @relation(fields: [userId], references: [id])
