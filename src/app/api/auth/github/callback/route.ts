@@ -114,42 +114,53 @@ export async function POST(req: Request) {
 			});
 		}
 
-		// Find existing user and include OAuth
-		let user = await prisma.user.findFirst({
-			where: {
-				oauthIds: {
-					some: { provider: "github", providerUserId: ghUser.id.toString() },
-				},
-			},
-			include: { oauthIds: true },
-		});
+		
+    // Step 1: find existing user by providerUserId
+    let user = await prisma.user.findFirst({
+      where: {
+        oauthIds: {
+          some: { provider: "github", providerUserId: ghUser.id.toString() },
+        },
+      },
+      include: { oauthIds: true },
+    });
 
-		if (!user) {
-			// No user yet → create user + GitHub OAuth
-			user = await prisma.user.create({
-				data: {
-					email,
-					oauthIds: {
-						create: {
-							provider: "github",
-							providerUserId: ghUser.id.toString(),
-							username: ghUser.login,
-						},
-					},
-				},
-				include: { oauthIds: true },
-			});
-		} else if (!user.oauthIds.find((o) => o.provider === "github")) {
-			// User exists but no GitHub OAuth → add it
-			await prisma.userOAuth.create({
-				data: {
-					userId: user.id,
-					provider: "github",
-					providerUserId: ghUser.id.toString(),
-					username: ghUser.login,
-				},
-			});
-		}
+    // Step 2: if not found, find by email
+    if (!user) {
+      user = await prisma.user.findUnique({
+        where: { email },
+        include: { oauthIds: true },
+      });
+
+      if (user) {
+        // Attach GitHub OAuth to existing user
+        await prisma.userOAuth.create({
+          data: {
+            userId: user.id,
+            provider: "github",
+            providerUserId: ghUser.id.toString(),
+          },
+        });
+      }
+    }
+
+    // Step 3: create new user if still not found
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email,
+          username: ghUser.login, // default username from GitHub
+          oauthIds: {
+            create: {
+              provider: "github",
+              providerUserId: ghUser.id.toString(),
+            },
+          },
+        },
+        include: { oauthIds: true },
+      });
+    }
+
 
 		// Generate JWT session
 		const accessToken = generateAccessToken(user);
@@ -157,10 +168,7 @@ export async function POST(req: Request) {
 
 		// Remove sensitive info
 		const { password: _password, oauthIds, ...safeUser } = user;
-		const oauthProviders = oauthIds.map((o) => ({
-			provider: o.provider,
-			username: o.username,
-		}));
+		const oauthProviders = oauthIds.map((o) => (o.provider));
 
 		// Return response with tokens set in cookies
 		const res = NextResponse.json({
