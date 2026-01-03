@@ -14,6 +14,10 @@ const envSchema = z.object({
 	// Frontend
 	FRONTEND_URL: z.url("FRONTEND_URL must be a valid URL"),
 
+	// GitHub App
+	GITHUB_APP_ID: z.string().min(1, "GITHUB_APP_ID is required"),
+	GITHUB_APP_PRIVATE_KEY: z.string().min(1, "GITHUB_APP_PRIVATE_KEY is required"),
+
 	// Node environment
 	NODE_ENV: z
 		.enum(["development", "production", "test"])
@@ -32,6 +36,9 @@ export const config = {
 	github: {
 		clientId: parsedEnv.GITHUB_CLIENT_ID,
 		clientSecret: parsedEnv.GITHUB_CLIENT_SECRET,
+		oauthRedirectUri: `${parsedEnv.FRONTEND_URL}/api/auth/github/callback`,
+		appId: parsedEnv.GITHUB_APP_ID,
+		appPrivateKey: parsedEnv.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n"),
 		redirectUri: `${parsedEnv.FRONTEND_URL}/login/github/callback`,
 	},
 	frontendUrl: parsedEnv.FRONTEND_URL,
