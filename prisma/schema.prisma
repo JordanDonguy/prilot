@@ -44,9 +44,9 @@ model User {
 
   refreshTokens    RefreshToken[]
   oauthIds         UserOAuth[]
-  repositories     Repository[]        @relation("CreatedRepositories")
+  installations    ProviderInstallation[]
   memberships      RepositoryMember[]
-  invitationsSent  Invitation[]        @relation("InvitedBy")
+  invitationsSent  Invitation[]               @relation("InvitedBy")
   pullRequests     PullRequest[]
 
   @@map("users")
@@ -80,40 +80,45 @@ model UserOAuth {
   @@map("user_oauth")
 }
 
-
 model ProviderInstallation {
   id             String   @id @default(uuid()) @db.Uuid
   provider       Provider
-  installationId String   // GitHub installation_id or GitLab equivalent
-  accountLogin   String   // org or user name
-  accountType    String   // "user" | "organization"
+  installationId String   // GitHub installation_id
+  accountLogin   String
+  accountType    String   // user | organization
   createdAt      DateTime @default(now())
+
+  createdById    String   @db.Uuid
+  createdBy      User     @relation(fields: [createdById], references: [id])
+
   repositories   Repository[]
 
   @@unique([provider, installationId])
+  @@unique([provider, createdById])
+  @@index([createdById])
 }
 
 model Repository {
   id              String   @id @default(uuid()) @db.Uuid
   provider        Provider
   providerRepoId  String
+
   owner           String
   name            String
+  isPrivate       Boolean
+
   defaultBranch   String
 
   installationId  String   @db.Uuid
   installation    ProviderInstallation @relation(fields: [installationId], references: [id])
 
-  createdById     String   @db.Uuid
   createdAt       DateTime @default(now())
 
-  createdBy       User     @relation("CreatedRepositories", fields: [createdById], references: [id])
   members         RepositoryMember[]
   invitations     Invitation[]
   pullRequests    PullRequest[]
 
   @@unique([provider, providerRepoId])
-  @@index([createdById])
 }
 
 model RepositoryMember {
