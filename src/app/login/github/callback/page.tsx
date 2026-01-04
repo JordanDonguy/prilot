@@ -54,7 +54,7 @@ export default function ConnectGitHubLoading() {
 	}, [router, setUser]);
 
 	return (
-		<div className="flex gap-4 items-center justify-center h-screen">
+		<div className="flex flex-col md:flex-row gap-4 items-center justify-center h-screen px-4 text-center">
 			<Github size={40} className="animate-pulse" />
 			<p className="text-2xl animate-pulse">Logging you in with GitHub...</p>
 		</div>
