@@ -10,15 +10,19 @@ import type { IRepository } from "@/types/repos";
 type ReposContextType = {
 	repositories: IRepository[];
 	refreshRepositories: () => Promise<void>;
+	loading: boolean;
 };
 
 const ReposContext = createContext<ReposContextType | undefined>(undefined);
 
 export function ReposProvider({ children }: { children: ReactNode }) {
 	const [repositories, setRepositories] = useState<IRepository[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	const refreshRepositories = async () => {
 		try {
+			setLoading(true);
+
 			const res = await fetch("/api/repos", {
 				method: "GET",
 				credentials: "include",
@@ -28,10 +32,11 @@ export function ReposProvider({ children }: { children: ReactNode }) {
 
 			const data = await res.json();
 			setRepositories(data.repositories as IRepository[]);
-      console.log(data)
 		} catch (err) {
 			console.error("Error fetching repositories:", err);
 			setRepositories([]);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -41,7 +46,9 @@ export function ReposProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	return (
-		<ReposContext.Provider value={{ repositories, refreshRepositories }}>
+		<ReposContext.Provider
+			value={{ repositories, refreshRepositories, loading }}
+		>
 			{children}
 		</ReposContext.Provider>
 	);
