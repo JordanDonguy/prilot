@@ -1,5 +1,9 @@
+"use client";
+
 import { Clock, GitBranch, GitPullRequest, Plus, Users } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useRepository } from "@/app/hooks/useRepository";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import {
@@ -11,52 +15,21 @@ import {
 	StatCard,
 } from "@/components/Card";
 import { PRListItem } from "@/components/ListItem";
+import RepoSkeleton from "@/components/RepoSkeleton";
 
-const mockRepo = {
-	id: "1",
-	name: "frontend-app",
-	provider: "github",
-	stars: 245,
-	forks: 38,
-	openPRs: 3,
-	totalCommits: 1234,
-};
+export default function RepositoryPage() {
+	const params = useParams();
+	const id = params.id;
 
-const mockPRs = [
-	{
-		id: 1,
-		title: "Add user authentication flow",
-		status: "sent",
-		baseBranch: "main",
-		compareBranch: "feature/auth",
-		createdAt: "2 hours ago",
-	},
-	{
-		id: 2,
-		title: "Update dependencies to latest versions",
-		status: "draft",
-		baseBranch: "develop",
-		compareBranch: "chore/deps-update",
-		createdAt: "1 day ago",
-	},
-	{
-		id: 3,
-		title: "Fix responsive layout issues",
-		status: "sent",
-		baseBranch: "main",
-		compareBranch: "fix/responsive",
-		createdAt: "3 days ago",
-	},
-];
+	const { repo, loading } = useRepository(id as string);
 
-type RepositoryPageProps = {
-	params: {
-		id: string;
-	};
-};
+	if (loading) return <RepoSkeleton />;
+	if (!repo) return null;
 
-export default async function RepositoryPage({ params }: RepositoryPageProps) {
-	const { id } = await params;
+	const pullRequests = repo.pullRequests ?? [];
+
+	const draftPRs = pullRequests.filter((pr) => pr.status === "draft").length;
+	const sentPRs = pullRequests.filter((pr) => pr.status === "sent").length;
 
 	return (
 		<div className="p-6 space-y-6">
@@ -65,13 +38,13 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
 				<div>
 					<div className="flex items-center gap-3 mb-2">
 						<h1 className="text-3xl text-gray-900 dark:text-white">
-							{mockRepo.name}
+							{repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)}
 						</h1>
-						<Badge>{mockRepo.provider}</Badge>
+						<Badge>{repo.provider}</Badge>
 					</div>
 					<p className="text-gray-600 dark:text-gray-400">
-						{mockRepo.stars} stars • {mockRepo.forks} forks •{" "}
-						{mockRepo.totalCommits} commits
+						{repo.commitsCount} commits on default branch{" "}
+						<span className="font-mono">({repo.defaultBranch})</span>
 					</p>
 				</div>
 				<div className="grid grid-cols-2 md:flex gap-3 mt-4 md:mt-0 w-full md:w-fit">
@@ -94,11 +67,15 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
 			<div className="grid gap-4 md:grid-cols-4">
 				<StatCard
 					title="PRs Sent With PRilot"
-					value={mockRepo.openPRs}
+					value={sentPRs}
 					icon={GitPullRequest}
 				/>
-				<StatCard title="Draft PRs" value="1" icon={Clock} />
-				<StatCard title="Active Branches" value="12" icon={GitBranch} />
+				<StatCard title="Draft PRs" value={draftPRs} icon={Clock} />
+				<StatCard
+					title="Active Branches"
+					value={repo.branches.length}
+					icon={GitBranch}
+				/>
 				<StatCard title="Contributors" value="8" icon={Users} />
 			</div>
 
@@ -110,17 +87,29 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-3">
-						{mockPRs.map((pr) => (
-							<PRListItem
-								key={pr.id}
-								href={`/dashboard/repo/${id}/pr/${pr.id}`}
-								title={pr.title}
-								status={pr.status}
-								compareBranch={pr.compareBranch}
-								baseBranch={pr.baseBranch}
-								createdAt={pr.createdAt}
-							/>
-						))}
+						{pullRequests.length > 0 ? (
+							pullRequests.map((pr) => (
+								<PRListItem
+									key={pr.id}
+									href={`/dashboard/repo/${id}/pr/${pr.id}`}
+									title={pr.title}
+									status={pr.status}
+									compareBranch={pr.compareBranch}
+									baseBranch={pr.baseBranch}
+									createdAt={pr.createdAt}
+								/>
+							))
+						) : (
+							<div className="flex flex-col pl-4 text-lg pt-4 gap-2">
+								<span className="text-gray-600 dark:text-gray-400">No PRs available yet...</span>
+								<Link
+									className="text-blue-600 dark:text-blue-400 group w-fit"
+									href={`/dashboard/repo/${id}/pr/new`}
+								>
+									👉 <span className="group-hover:underline underline-offset-2 pl-1">Create one</span>
+								</Link>
+							</div>
+						)}
 					</div>
 				</CardContent>
 			</Card>
