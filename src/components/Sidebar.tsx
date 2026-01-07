@@ -3,6 +3,7 @@
 import {
 	ChevronDown,
 	ChevronRight,
+	CirclePlus,
 	Folder,
 	Github,
 	Gitlab,
@@ -14,6 +15,11 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { useInstallations } from "@/contexts/InstallationContext";
+import { config } from "@/lib/client/config";
+import GithubAppButton from "./GithubAppButton";
+import { useRepos } from "@/contexts/ReposContext";
 
 const mockData = {
 	githubOwned: [
@@ -39,10 +45,28 @@ const mockData = {
 
 export default function Sidebar() {
 	const pathname = usePathname();
+	const { installations } = useInstallations();
+	const { repositories } = useRepos();
 
 	const [showGithub, setShowGithub] = useState(true);
 	const [showGitlab, setShowGitlab] = useState(true);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
+
+	const githubOwned = installations.filter(
+		(inst) => inst.provider === "github" && inst.accountType === "user",
+	);
+
+	const gitlabOwned = installations.filter(
+		(inst) => inst.provider === "gitlab" && inst.accountType === "user",
+	);
+
+	const githubRepositories = repositories.filter(
+		(r) => r.provider === "github",
+	);
+
+	const gitlabRepositories = repositories.filter(
+		(r) => r.provider === "gitlab",
+	);
 
 	return (
 		<>
@@ -128,24 +152,39 @@ export default function Sidebar() {
 							<h3 className="pl-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
 								Owned Repos
 							</h3>
-							<ul className="space-y-1">
-								{mockData.githubOwned.map((repo) => (
-									<li key={repo.id}>
-										<Link
-											onClick={() => {
-												setSidebarOpen(false);
-											}}
-											href={repo.url}
-											className="flex gap-4 items-center lg:ml-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-										>
-											<Folder size={16} className={`${pathname.includes(repo.url) && "text-blue-600 dark:text-blue-400 scale-120"}`} />
-											<span className="text-gray-900 dark:text-white text-sm">
-												{repo.name}
-											</span>
-										</Link>
-									</li>
-								))}
-							</ul>
+							{githubOwned.length > 0 ? (
+								<ul className="space-y-1">
+									{githubRepositories.map((repo) => (
+										<li key={repo.id}>
+											<Link
+												onClick={() => {
+													setSidebarOpen(false);
+												}}
+												href={`/dashboard/repo/${repo.id}`}
+												className="flex gap-4 items-center lg:ml-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+											>
+												<Folder
+													size={16}
+													className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
+												/>
+												<span className="text-gray-900 dark:text-white text-sm">
+													{repo.name.slice(0,1).toUpperCase() + repo.name.slice(1)}
+												</span>
+											</Link>
+										</li>
+									))}
+								</ul>
+							) : (
+								<div className="pl-4 mt-2 mb-6 text-sm">
+									<p className="text-gray-500 dark:text-gray-400">
+										No GitHub installation found
+									</p>
+									<GithubAppButton
+										appName={config.github.appName}
+										redirectUri={`${config.frontendUrl}/github/callback`}
+									/>
+								</div>
+							)}
 
 							<h3 className="pl-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 mt-2">
 								Invited Repos
@@ -160,7 +199,10 @@ export default function Sidebar() {
 											href={repo.url}
 											className="flex gap-4 items-center lg:ml-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
 										>
-											<Folder size={16} className={`${pathname.includes(repo.url) && "text-blue-600 dark:text-blue-400 scale-120"}`} />
+											<Folder
+												size={16}
+												className={`${pathname.includes(repo.url) && "text-blue-600 dark:text-blue-400 scale-120"}`}
+											/>
 											<span className="text-gray-900 dark:text-white text-sm">
 												{repo.name}
 											</span>
@@ -195,21 +237,44 @@ export default function Sidebar() {
 							<h3 className="pl-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
 								Owned Repos
 							</h3>
-							<ul className="space-y-1">
-								{mockData.gitlabOwned.map((repo) => (
-									<li key={repo.id}>
-										<Link
-											href={repo.url}
-											className="flex gap-4 items-center lg:ml-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-										>
-											<Folder size={16} className={`${pathname.includes(repo.url) && "text-blue-600 dark:text-blue-400 scale-120"}`} />
-											<span className="text-gray-900 dark:text-white text-sm">
-												{repo.name}
-											</span>
-										</Link>
-									</li>
-								))}
-							</ul>
+							{gitlabOwned.length > 0 ? (
+								<ul className="space-y-1">
+									{mockData.gitlabOwned.map((repo) => (
+										<li key={repo.id}>
+											<Link
+												onClick={() => {
+													setSidebarOpen(false);
+												}}
+												href={repo.url}
+												className="flex gap-4 items-center lg:ml-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+											>
+												<Folder
+													size={16}
+													className={`${pathname.includes(repo.url) && "text-blue-600 dark:text-blue-400 scale-120"}`}
+												/>
+												<span className="text-gray-900 dark:text-white text-sm">
+													{repo.name}
+												</span>
+											</Link>
+										</li>
+									))}
+								</ul>
+							) : (
+								<div className="pl-4 mt-2 mb-6 text-sm">
+									<p className="text-gray-500 dark:text-gray-400">
+										No GitLab installation found
+									</p>
+									<button
+										type="button"
+										onClick={() =>
+											toast.info("GitLab integration isn't available yet.")
+										}
+										className="flex items-center gap-2 text-blue-700 dark:text-blue-400 mt-2 cursor-pointer hover:underline"
+									>
+										<CirclePlus size={16} /> Connect your account
+									</button>
+								</div>
+							)}
 
 							<h3 className="pl-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 mt-2">
 								Invited Repos
@@ -221,7 +286,10 @@ export default function Sidebar() {
 											href={repo.url}
 											className="flex gap-4 items-center lg:ml-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
 										>
-											<Folder size={16} className={`${pathname.includes(repo.url) && "text-blue-600 dark:text-blue-400 scale-120"}`} />
+											<Folder
+												size={16}
+												className={`${pathname.includes(repo.url) && "text-blue-600 dark:text-blue-400 scale-120"}`}
+											/>
 											<span className="text-gray-900 dark:text-white text-sm">
 												{repo.name}
 											</span>

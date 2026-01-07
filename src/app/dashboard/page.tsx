@@ -1,3 +1,5 @@
+"use client";
+
 import { AlertCircle, CheckCircle, Clock, GitPullRequest } from "lucide-react";
 import {
 	Card,
@@ -5,9 +7,13 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-	StatCard
+	StatCard,
 } from "@/components/Card";
-import { DashboardListItem, DashboardListItemLink } from "@/components/ListItem";
+import {
+	DashboardListItem,
+	DashboardListItemLink,
+} from "@/components/ListItem";
+import { useRepos } from "@/contexts/ReposContext";
 
 const mockRepos = [
 	{
@@ -57,7 +63,19 @@ const recentPRs = [
 	},
 ];
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
+	const { repositories } = useRepos();
+
+	const totalDraftPrs = repositories.reduce(
+		(sum, repo) => sum + repo.draftPrCount,
+		0,
+	);
+
+	const totalSentPrs = repositories.reduce(
+		(sum, repo) => sum + repo.sentPrCount,
+		0,
+	);
+
 	return (
 		<div className="p-6 space-y-6">
 			<div>
@@ -73,19 +91,19 @@ export default async function DashboardPage() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<StatCard
 					title="Total Repositories"
-					value="12"
+					value={repositories.length}
 					icon={GitPullRequest}
 					comment="Connected to your accounts"
 				/>
 				<StatCard
 					title="PRs Sent With PRilot"
-					value="9"
+					value={totalSentPrs}
 					icon={Clock}
 					comment="Accross all repos"
 				/>
 				<StatCard
 					title="Drafts"
-					value="3"
+					value={totalDraftPrs}
 					icon={AlertCircle}
 					comment="Pending review"
 				/>
@@ -111,7 +129,7 @@ export default async function DashboardPage() {
 								key={pr.id}
 								title={pr.title}
 								subtitle={`${pr.repo} • ${pr.time}`}
-								badge={mockRepos.find(r => r.name === pr.repo)?.provider}
+								badge={mockRepos.find((r) => r.name === pr.repo)?.provider}
 								status={pr.status}
 							/>
 						))}
@@ -127,12 +145,12 @@ export default async function DashboardPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{mockRepos.map((repo) => (
+						{repositories.map((repo) => (
 							<DashboardListItemLink
 								key={repo.id}
 								href={`/dashboard/repo/${repo.id}`}
-								title={repo.name}
-								subtitle={`${repo.openPRs} open PRs • ${repo.lastActivity}`}
+								title={repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)}
+								subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
 								badge={repo.provider}
 							/>
 						))}
