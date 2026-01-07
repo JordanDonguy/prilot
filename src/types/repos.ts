@@ -8,10 +8,13 @@ export interface IRepository {
 	owner: string;
 	isPrivate: boolean;
 	defaultBranch: string;
+  draftPrCount: number;
+  sentPrCount: number;
 }
 
 export interface IRepositoryResponse {
 	repository: IRepository;
 	branches: string[];
 	pullRequests: IPullRequest[];
+  commitsCount: number;
 }

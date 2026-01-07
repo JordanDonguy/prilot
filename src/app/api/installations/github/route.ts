@@ -51,16 +51,16 @@ export async function POST(req: Request) {
 		});
 
 		// 4. Fetch repos from GitHub
-		const reposData = await githubFetch<IGitHubReposResponse>(
+		const reposList = await githubFetch<IGitHubReposResponse>(
 			installationId,
 			"/installation/repositories",
 		);
 
-		if (!reposData.repositories) {
+		if (!reposList.data.repositories) {
 			throw new BadRequestError("No repositories found for this installation");
 		}
 
-		const repos = reposData.repositories.map((r: IGitHubRepo) => ({
+		const repos = reposList.data.repositories.map((r: IGitHubRepo) => ({
 			provider: Provider.github,
 			providerRepoId: r.id.toString(),
 			name: r.name,
