@@ -29,15 +29,35 @@ export async function GET(
 	}
 
 	// 2. fetch branches from GitHub
-	const branchesData = await githubFetch<IGitHubBranch[]>(
+	const brancheList = await githubFetch<IGitHubBranch[]>(
 		repo.installation.installationId,
 		`/repos/${repo.owner}/${repo.name}/branches`,
 	);
 
 	// Get branche names
-	const brancheNames = branchesData.map((b) => b.name);
+	const brancheNames = brancheList.data.map((b) => b.name);
 
-	// 3. gather PRs from DB
+	// 3. Fetches commits count for default branch on GitHub
+	const { linkHeader } = await githubFetch<string[]>(
+		repo.installation.installationId,
+		`/repos/${repo.owner}/${repo.name}/commits?sha=${repo.defaultBranch}&per_page=1&page=1`,
+		{ returnLinkHeader: true },
+	);
+
+	// Calculate commits count using link header
+	let commitsCount = 0;
+
+	if (linkHeader) {
+		// match the page number just before rel="last"
+		const match = linkHeader.match(/&page=(\d+)>; rel="last"/);
+		if (match) {
+			commitsCount = parseInt(match[1], 10);
+		} else {
+			commitsCount = 1; // only 1 commit if no last page
+		}
+	}
+
+	// 4. gather PRs from DB
 	const pullRequests = repo.pullRequests.map((pr) => ({
 		id: pr.id,
 		title: pr.title,
@@ -58,5 +78,6 @@ export async function GET(
 		},
 		branches: brancheNames,
 		pullRequests,
+		commitsCount
 	});
 }

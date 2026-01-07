@@ -42,7 +42,40 @@ export async function GET() {
 			},
 		});
 
-		return NextResponse.json({ repositories });
+		// 3. Get PR counts for each repos and by status (draft, sent)
+		const prCounts = await prisma.pullRequest.groupBy({
+			by: ["repositoryId", "status"],
+			where: {
+				repositoryId: {
+					in: repositories.map((r) => r.id),
+				},
+				status: {
+					in: ["draft", "sent"],
+				},
+			},
+			_count: {
+				_all: true,
+			},
+		});
+
+		// 4. Merge PR counts with repos
+		const repositoriesWithPrCounts = repositories.map((repo) => {
+			const draftCount =
+				prCounts.find((c) => c.repositoryId === repo.id && c.status === "draft")
+					?._count._all ?? 0;
+
+			const sentCount =
+				prCounts.find((c) => c.repositoryId === repo.id && c.status === "sent")
+					?._count._all ?? 0;
+
+			return {
+				...repo,
+				draftPrCount: draftCount,
+				sentPrCount: sentCount,
+			};
+		});
+
+		return NextResponse.json({ repositories: repositoriesWithPrCounts });
 	} catch (error) {
 		return handleError(error);
 	}
