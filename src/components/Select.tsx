@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+import type { PRLanguage } from "@/types/languages";
 
 // ---------------------------
 // ------ Branch Select ------
@@ -90,11 +91,9 @@ export function MemberRoleSelect({
 // ---------------------------
 // ----- Language Select -----
 // ---------------------------
-type Language = "english" | "spanish" | "french" | "german";
-
 type LanguageSelectProps = {
-	value?: Language;
-	onChange?: (value: Language) => void;
+	value?: PRLanguage;
+	onChange?: (value: PRLanguage) => void;
 	className?: string;
 };
 
@@ -103,7 +102,14 @@ export function LanguageSelect({
 	onChange,
 	className = "",
 }: LanguageSelectProps) {
-	const languages: Language[] = ["english", "spanish", "french", "german"];
+	const languages: PRLanguage[] = [
+		"English",
+		"Spanish",
+		"French",
+		"German",
+		"Portuguese",
+		"Italian",
+	];
 
 	return (
 		<div className={`space-y-2 flex flex-col items-end ${className}`}>
@@ -112,7 +118,7 @@ export function LanguageSelect({
 				<select
 					id="language"
 					value={value}
-					onChange={(e) => onChange?.(e.target.value as Language)}
+					onChange={(e) => onChange?.(e.target.value as PRLanguage)}
 					className="py-2 pr-10 pl-4 rounded-lg bg-white/70 dark:bg-gray-800/70
               appearance-none text-start shadow-sm hover:cursor-pointer hover:opacity-80
               focus:outline-none transition-colors"
