@@ -7,76 +7,74 @@ import { getCurrentUser } from "@/lib/server/session";
 const prisma = getPrisma();
 
 export async function GET() {
-	try {
-		const user = await getCurrentUser();
-		if (!user) throw new UnauthorizedError("Unauthenticated");
+  try {
+    const user = await getCurrentUser();
+    if (!user) throw new UnauthorizedError("Unauthenticated");
 
-		// 1. Fetch installations created by this user
-		const installations = await prisma.providerInstallation.findMany({
-			where: { createdById: user.id },
-			select: { id: true },
-		});
+    // 1. Fetch repositories where user is a member
+    const repositories = await prisma.repository.findMany({
+      where: {
+        members: {
+          some: {
+            userId: user.id,
+          },
+        },
+      },
+      select: {
+        id: true,
+        provider: true,
+        owner: true,
+        name: true,
+        defaultBranch: true,
+        installationId: true,
+        createdAt: true,
+				isPrivate: true,
+        members: {
+          select: {
+            userId: true,
+            role: true,
+          },
+        },
+        _count: {
+          select: {
+            pullRequests: true,
+          },
+        },
+        pullRequests: {
+          select: {
+            status: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-		if (installations.length === 0) {
-			return NextResponse.json({ repositories: [] });
-		}
+    // 2. Map repositories to include PR counts and user role
+    const result = repositories.map((repo) => {
+      const userRole = repo.members.find((m) => m.userId === user.id)?.role ?? null;
 
-		const installationIds = installations.map((i) => i.id);
+      const draftPrCount = repo.pullRequests.filter((pr) => pr.status === "draft").length;
+      const sentPrCount = repo.pullRequests.filter((pr) => pr.status === "sent").length;
 
-		// 2. Fetch repositories linked to these installations
-		const repositories = await prisma.repository.findMany({
-			where: {
-				installationId: { in: installationIds },
-			},
-			select: {
-				id: true,
-				provider: true,
-				owner: true,
-				name: true,
-				defaultBranch: true,
-				installationId: true,
-				createdAt: true,
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		});
+      return {
+        id: repo.id,
+        name: repo.name,
+        provider: repo.provider,
+        owner: repo.owner,
+        defaultBranch: repo.defaultBranch,
+        installationId: repo.installationId,
+        createdAt: repo.createdAt,
+				isPrivate: repo.isPrivate,
+        userRole,
+        draftPrCount,
+        sentPrCount,
+      };
+    });
 
-		// 3. Get PR counts for each repos and by status (draft, sent)
-		const prCounts = await prisma.pullRequest.groupBy({
-			by: ["repositoryId", "status"],
-			where: {
-				repositoryId: {
-					in: repositories.map((r) => r.id),
-				},
-				status: {
-					in: ["draft", "sent"],
-				},
-			},
-			_count: {
-				_all: true,
-			},
-		});
-
-		// 4. Merge PR counts with repos
-		const repositoriesWithPrCounts = repositories.map((repo) => {
-			const draftCount =
-				prCounts.find((c) => c.repositoryId === repo.id && c.status === "draft")
-					?._count._all ?? 0;
-
-			const sentCount =
-				prCounts.find((c) => c.repositoryId === repo.id && c.status === "sent")
-					?._count._all ?? 0;
-
-			return {
-				...repo,
-				draftPrCount: draftCount,
-				sentPrCount: sentCount,
-			};
-		});
-
-		return NextResponse.json({ repositories: repositoriesWithPrCounts });
-	} catch (error) {
-		return handleError(error);
-	}
+    return NextResponse.json({ repositories: result });
+  } catch (error) {
+    return handleError(error);
+  }
 }
