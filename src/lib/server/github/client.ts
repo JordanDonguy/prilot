@@ -1,3 +1,4 @@
+import { GitHubApiError } from "../error";
 import { createInstallationAccessToken } from "./installation";
 
 interface GitHubFetchOptions {
@@ -28,7 +29,10 @@ export async function githubFetch<T = unknown>(
 					: undefined,
 	});
 
-	if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+	if (!res.ok) {
+		const body = await res.json().catch(() => null);
+		throw new GitHubApiError(res.status, body?.message ?? "GitHub API error");
+	}
 
 	const data = await res.json();
 
