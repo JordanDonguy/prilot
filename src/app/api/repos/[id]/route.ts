@@ -4,80 +4,79 @@ import { NotFoundError, UnauthorizedError } from "@/lib/server/error";
 import { githubFetch } from "@/lib/server/github/client";
 import type { IGitHubBranch } from "@/lib/server/github/types";
 import { getCurrentUser } from "@/lib/server/session";
+import { uuidParam } from "@/lib/schemas/id.schema";
 
 const prisma = getPrisma();
 
 export async function GET(
-	// biome-ignore lint/correctness/noUnusedFunctionParameters: req is required to then access params
-	req: Request,
+	_req: Request,
 	context: { params: Promise<{ id: string }> },
 ) {
 	const user = await getCurrentUser();
 	if (!user) throw new UnauthorizedError("Unauthenticated");
 
-	// unwrap params
-	const { id } = await context.params;
+	const { id } = await uuidParam("id").parseAsync(await context.params);
 
-	// 1. fetch repo + installation
+	// 1. Fetch repo with members and PRs
 	const repo = await prisma.repository.findUnique({
 		where: { id },
-		include: { installation: true, pullRequests: true },
+		include: { installation: true, members: true, pullRequests: true },
 	});
 
-	if (!repo || repo.installation.createdById !== user.id) {
-		throw new NotFoundError("Repository not found or unauthorized");
-	}
+	if (!repo) throw new NotFoundError("Repository not found");
 
-	// 2. fetch branches from GitHub
+	// 2. Check membership
+	const membership = repo.members.find((m) => m.userId === user.id);
+	if (!membership)
+		throw new NotFoundError("Repository not found or unauthorized");
+	const userRole = membership.role;
+
+	// 3. Fetch GitHub branches
 	const brancheList = await githubFetch<IGitHubBranch[]>(
 		repo.installation.installationId,
 		`/repos/${repo.owner}/${repo.name}/branches`,
 	);
-
-	// Get branche names
 	const brancheNames = brancheList.data.map((b) => b.name);
 
-	// 3. Fetches commits count for default branch on GitHub
+	// 4. Fetch commits count for default branch
 	const { linkHeader } = await githubFetch<string[]>(
 		repo.installation.installationId,
 		`/repos/${repo.owner}/${repo.name}/commits?sha=${repo.defaultBranch}&per_page=1&page=1`,
 		{ returnLinkHeader: true },
 	);
+	const commitsCount = linkHeader
+		? parseInt(linkHeader.match(/&page=(\d+)>; rel="last"/)?.[1] ?? "1", 10)
+		: 1;
 
-	// Calculate commits count using link header
-	let commitsCount = 0;
+	// 5. Filter PRs based on role
+	const pullRequests = repo.pullRequests
+		.filter((pr) => userRole === "owner" || pr.createdById === user.id)
+		.map((pr) => ({
+			id: pr.id,
+			title: pr.title,
+			status: pr.status,
+			baseBranch: pr.baseBranch,
+			compareBranch: pr.compareBranch,
+			createdAt: pr.createdAt,
+		}));
 
-	if (linkHeader) {
-		// match the page number just before rel="last"
-		const match = linkHeader.match(/&page=(\d+)>; rel="last"/);
-		if (match) {
-			commitsCount = parseInt(match[1], 10);
-		} else {
-			commitsCount = 1; // only 1 commit if no last page
-		}
-	}
-
-	// 4. gather PRs from DB
-	const pullRequests = repo.pullRequests.map((pr) => ({
-		id: pr.id,
-		title: pr.title,
-		status: pr.status,
-		baseBranch: pr.baseBranch,
-		compareBranch: pr.compareBranch,
-		createdAt: pr.createdAt,
-	}));
-
+	// 6. Return unified repo data
 	return NextResponse.json({
 		repository: {
 			id: repo.id,
 			name: repo.name,
 			provider: repo.provider,
 			owner: repo.owner,
-			isPrivate: repo.isPrivate,
 			defaultBranch: repo.defaultBranch,
+			installationId: repo.installation?.installationId ?? null,
+			createdAt: repo.createdAt,
+			userRole,
+			isPrivate: repo.isPrivate,
+			draftPrCount: pullRequests.filter((pr) => pr.status === "draft").length,
+			sentPrCount: pullRequests.filter((pr) => pr.status === "sent").length,
 		},
 		branches: brancheNames,
 		pullRequests,
-		commitsCount
+		commitsCount,
 	});
 }
