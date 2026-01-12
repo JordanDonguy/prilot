@@ -1,7 +1,10 @@
+"use client";
+
 import { Edit, GitPullRequest, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { MemberRoleSelect } from "@/components/Select";
+import { formatDateTime } from "@/lib/utils/formatDateTime";
 
 // ------------------------------
 // ------ Simple List item ------
@@ -104,6 +107,7 @@ type PRListItemProps = {
 	compareBranch: string;
 	baseBranch: string;
 	createdAt: string;
+	onDelete: () => void;
 };
 
 export function PRListItem({
@@ -113,6 +117,7 @@ export function PRListItem({
 	compareBranch,
 	baseBranch,
 	createdAt,
+	onDelete,
 }: PRListItemProps) {
 	return (
 		<div
@@ -139,15 +144,28 @@ export function PRListItem({
 				{/* -------- Created at and action link -------- */}
 				<div className="flex flex-col justify-between items-end h-full">
 					<span className="text-sm text-gray-500 dark:text-gray-400">
-						{createdAt}
+						{formatDateTime(createdAt)}
 					</span>
-					<Link
-						href={href}
-						target="blank"
-						className="block text-blue-600 dark:text-blue-400 font-medium hover:underline"
-					>
-						{status === "draft" ? "Edit" : "View on GitHub"}
-					</Link>
+					<div className="flex items-center gap-4">
+						{/* Delete PR draft button */}
+						{status === "draft" && (
+							<button
+								type="button"
+								onClick={onDelete}
+								className="text-red-500 font-medium text-base cursor-pointer underline-offset-2 hover:underline"
+							>
+								Delete
+							</button>
+						)}
+						{/* Edit / View PR button */}
+						<Link
+							href={href}
+							target={status === "sent" ? "_blank" : "_self"}
+							className="block text-blue-600 dark:text-blue-400 font-medium underline-offset-2 hover:underline"
+						>
+							{status === "draft" ? "Edit" : "View on GitHub"}
+						</Link>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -16,17 +16,28 @@ import {
 } from "@/components/Card";
 import { PRListItem } from "@/components/ListItem";
 import RepoSkeleton from "@/components/RepoSkeleton";
+import { useMemo } from "react";
 
 export default function RepositoryPage() {
 	const params = useParams();
 	const id = params.id;
 
-	const { repo, loading } = useRepository(id as string);
+	const { repo, loading, deletePR } = useRepository(id as string);
+
+	const pullRequests = repo?.pullRequests ?? [];
+
+	// Sort PRs by date (descending - new ones first)
+	const sortedPRs = useMemo(
+		() =>
+			[...pullRequests].sort(
+				(a, b) =>
+					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+			),
+		[pullRequests],
+	);
 
 	if (loading) return <RepoSkeleton />;
 	if (!repo) return null;
-
-	const pullRequests = repo.pullRequests ?? [];
 
 	const draftPRs = pullRequests.filter((pr) => pr.status === "draft").length;
 	const sentPRs = pullRequests.filter((pr) => pr.status === "sent").length;
@@ -87,26 +98,32 @@ export default function RepositoryPage() {
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-3">
-						{pullRequests.length > 0 ? (
-							pullRequests.map((pr) => (
+						{sortedPRs.length > 0 ? (
+							sortedPRs.map((pr) => (
 								<PRListItem
 									key={pr.id}
-									href={`/dashboard/repo/${id}/pr/${pr.id}`}
+									href={`/dashboard/repo/${id}/pr/edit/${pr.id}`}
 									title={pr.title}
 									status={pr.status}
 									compareBranch={pr.compareBranch}
 									baseBranch={pr.baseBranch}
 									createdAt={pr.createdAt}
+									onDelete={() => deletePR(pr.id)}
 								/>
 							))
 						) : (
 							<div className="flex flex-col pl-4 text-lg pt-4 gap-2">
-								<span className="text-gray-600 dark:text-gray-400">No PRs available yet...</span>
+								<span className="text-gray-600 dark:text-gray-400">
+									No PRs available yet...
+								</span>
 								<Link
 									className="text-blue-600 dark:text-blue-400 group w-fit"
 									href={`/dashboard/repo/${id}/pr/new`}
 								>
-									👉 <span className="group-hover:underline underline-offset-2 pl-1">Create one</span>
+									👉{" "}
+									<span className="group-hover:underline underline-offset-2 pl-1">
+										Create one
+									</span>
 								</Link>
 							</div>
 						)}
