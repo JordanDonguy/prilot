@@ -40,7 +40,8 @@ export default function PREditorPageContent({
 	>("edit");
 	const editorRef = useRef<HTMLDivElement | null>(null);
 
-	const startAutoSave = useRef(false);
+	const startAutoSave = useRef(false); // To start auto saving changes
+	const skipNextFetch = useRef(false); // To prevent fetching PR when generating a new one
 
 	// initialize branches
 	useEffect(() => {
@@ -53,6 +54,13 @@ export default function PREditorPageContent({
 	useEffect(() => {
 		const fetchDraftPR = async () => {
 			if (!prId) return;
+
+			// Skip fetch if PR was just created
+			if (skipNextFetch.current) {
+				skipNextFetch.current = false;
+				return;
+			};
+
 			setPrFetchLoading(true);
 
 			try {
@@ -117,6 +125,7 @@ export default function PREditorPageContent({
 				});
 
 				if (newPR) {
+					skipNextFetch.current = true;
 					setPrId(newPR.id);
 				}
 			} else {
