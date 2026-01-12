@@ -17,6 +17,7 @@
     "@prisma/client": "^7.2.0",
     "argon2": "^0.44.0",
     "cookie": "^1.1.1",
+    "groq-sdk": "^0.37.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
     "motion": "^12.23.26",

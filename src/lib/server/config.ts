@@ -18,6 +18,9 @@ const envSchema = z.object({
 	GITHUB_APP_ID: z.string().min(1, "GITHUB_APP_ID is required"),
 	GITHUB_APP_PRIVATE_KEY: z.string().min(1, "GITHUB_APP_PRIVATE_KEY is required"),
 
+	// Groq
+	GROQ_API_KEY: z.string().min(1, "GROQ_API_KEY is requried"),
+
 	// Node environment
 	NODE_ENV: z
 		.enum(["development", "production", "test"])
@@ -40,6 +43,9 @@ export const config = {
 		appId: parsedEnv.GITHUB_APP_ID,
 		appPrivateKey: parsedEnv.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n"),
 		redirectUri: `${parsedEnv.FRONTEND_URL}/login/github/callback`,
+	},
+	groq: {
+		apiKey: parsedEnv.GROQ_API_KEY
 	},
 	frontendUrl: parsedEnv.FRONTEND_URL,
 	nodeEnv: parsedEnv.NODE_ENV,

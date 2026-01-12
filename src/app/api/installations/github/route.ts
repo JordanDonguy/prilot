@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
 import { getPrisma, Provider } from "@/db";
-import {
-  BadRequestError,
-  UnauthorizedError,
-} from "@/lib/server/error";
+import { BadRequestError, UnauthorizedError } from "@/lib/server/error";
 import { verifyInstallation } from "@/lib/server/github/app";
 import { githubFetch } from "@/lib/server/github/client";
 import type {
-  IGitHubRepo,
-  IGitHubReposResponse,
+	IGitHubRepo,
+	IGitHubReposResponse,
 } from "@/lib/server/github/types";
 import { handleError } from "@/lib/server/handleError";
 import { getCurrentUser } from "@/lib/server/session";
@@ -69,9 +66,10 @@ export async function POST(req: Request) {
 			owner: r.owner.login,
 		}));
 
-		// 5. Upsert repos in DB
+		// 5. Upsert repos and repo members in DB
 		for (const repo of repos) {
-			await prisma.repository.upsert({
+			// 5.a. Upsert repositories
+			const dbRepo = await prisma.repository.upsert({
 				where: {
 					provider_providerRepoId: {
 						provider: repo.provider,
@@ -80,6 +78,24 @@ export async function POST(req: Request) {
 				},
 				update: { ...repo, installationId: dbInstallation.id },
 				create: { ...repo, installationId: dbInstallation.id },
+			});
+
+			// 5.b. Add current user as repo member to each repos with owner role
+			await prisma.repositoryMember.upsert({
+				where: {
+					repositoryId_userId: {
+						repositoryId: dbRepo.id,
+						userId: user.id,
+					},
+				},
+				update: {
+					role: "owner",
+				},
+				create: {
+					repositoryId: dbRepo.id,
+					userId: user.id,
+					role: "owner",
+				},
 			});
 		}
 

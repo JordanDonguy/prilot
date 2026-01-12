@@ -1,0 +1,75 @@
+import { type NextRequest, NextResponse } from "next/server";
+import sanitizeHtml from "sanitize-html";
+import { getPrisma } from "@/db";
+import { branchSchema } from "@/lib/schemas/branch.schema";
+import { uuidParam } from "@/lib/schemas/id.schema";
+import {
+	BadRequestError,
+	ForbiddenError,
+	NotFoundError,
+} from "@/lib/server/error";
+import { githubFetch } from "@/lib/server/github/client";
+import { handleError } from "@/lib/server/handleError";
+import { getCurrentUser } from "@/lib/server/session";
+import type { IGitHubCompareResponse } from "@/types/commits";
+
+const prisma = getPrisma();
+
+export async function GET(
+	req: NextRequest,
+	context: { params: Promise<{ repoId: string }> },
+) {
+	try {
+		// 1. Find user
+		const user = await getCurrentUser();
+		if (!user) throw new ForbiddenError("Unauthenticated");
+
+		// 2. Get and validate repo id
+		const { repoId } = await uuidParam("repoId").parseAsync(await context.params);
+
+		// 3. Get branch names from searchParams and validate
+		const { searchParams } = new URL(req.url);
+		const baseBranch = await branchSchema.parseAsync(searchParams.get("base"));
+		const compareBranch = await branchSchema.parseAsync(searchParams.get("compare"));
+
+		// 4. Sanitize branch names
+		const safeBaseBranch = sanitizeHtml(baseBranch);
+		const safeCompareBranch = sanitizeHtml(compareBranch);
+
+		if (!safeBaseBranch || !safeCompareBranch) {
+			throw new BadRequestError("Missing base or compare branch");
+		}
+
+		// 5. Get repository + installation + members
+		const repo = await prisma.repository.findUnique({
+			where: { id: repoId },
+			include: { installation: true, members: true },
+		});
+
+		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo.installation?.installationId) {
+			throw new BadRequestError("Repository has no linked installation");
+		}
+
+		// 6. Check membership
+		const isMember = repo.members.some((m) => m.userId === user.id);
+		if (!isMember) {
+			throw new ForbiddenError("You are not a member of this repository");
+		}
+
+		// 7. Fetch commits from GitHub
+		const commitList = await githubFetch<IGitHubCompareResponse>(
+			repo.installation.installationId,
+			`/repos/${repo.owner}/${repo.name}/compare/${safeBaseBranch}...${safeCompareBranch}`,
+		);
+
+		// 8. Filter merge commits & map messages
+		const commitMessages = commitList.data.commits
+			.filter((c) => c.parents.length === 1)
+			.map((c) => c.commit.message);
+
+		return NextResponse.json({ commits: commitMessages });
+	} catch (error) {
+		return handleError(error);
+	}
+}
