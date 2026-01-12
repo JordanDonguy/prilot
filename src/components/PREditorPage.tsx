@@ -1,5 +1,6 @@
 "use client";
 
+import debounce from "lodash.debounce";
 import { ArrowBigLeftDash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,8 +11,6 @@ import { PREditor } from "@/components/PREditor";
 import PREditorSkeleton from "@/components/PREditorSkeleton";
 import { BranchSelect, LanguageSelect } from "@/components/Select";
 import type { PRLanguage } from "@/types/languages";
-import debounce from "lodash.debounce";
-import type { IPullRequest } from "@/types/pullRequests";
 
 interface PREditorProps {
 	repoId: string;
@@ -109,25 +108,17 @@ export default function PREditorPageContent({
 
 			// create or update
 			if (!prId) {
-				const createRes = await fetch(
-					`/api/repos/${repoId}/pull-request/draft`,
-					{
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({
-							prTitle: generatedTitle,
-							prBody: generatedDescription,
-							baseBranch,
-							compareBranch,
-							language,
-						}),
-					},
-				);
-				if (!createRes.ok) throw new Error("Failed to create PR");
-				const data = (await createRes.json()) as IPullRequest;
+				const newPR = await addPR({
+					prTitle: generatedTitle,
+					prBody: generatedDescription,
+					baseBranch,
+					compareBranch,
+					language,
+				});
 
-				addPR(data);
-				setPrId(data.id);
+				if (newPR) {
+					setPrId(newPR.id);
+				}
 			} else {
 				const updateRes = await fetch(
 					`/api/repos/${repoId}/pull-request/${prId}`,
