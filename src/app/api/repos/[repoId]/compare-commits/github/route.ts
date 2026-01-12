@@ -17,7 +17,7 @@ const prisma = getPrisma();
 
 export async function GET(
 	req: NextRequest,
-	context: { params: Promise<{ id: string }> },
+	context: { params: Promise<{ repoId: string }> },
 ) {
 	try {
 		// 1. Find user
@@ -25,7 +25,7 @@ export async function GET(
 		if (!user) throw new ForbiddenError("Unauthenticated");
 
 		// 2. Get and validate repo id
-		const { id } = await uuidParam("id").parseAsync(await context.params);
+		const { repoId } = await uuidParam("repoId").parseAsync(await context.params);
 
 		// 3. Get branch names from searchParams and validate
 		const { searchParams } = new URL(req.url);
@@ -42,7 +42,7 @@ export async function GET(
 
 		// 5. Get repository + installation + members
 		const repo = await prisma.repository.findUnique({
-			where: { id },
+			where: { id: repoId },
 			include: { installation: true, members: true },
 		});
 

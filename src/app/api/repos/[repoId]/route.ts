@@ -10,16 +10,16 @@ const prisma = getPrisma();
 
 export async function GET(
 	_req: Request,
-	context: { params: Promise<{ id: string }> },
+	context: { params: Promise<{ repoId: string }> },
 ) {
 	const user = await getCurrentUser();
 	if (!user) throw new UnauthorizedError("Unauthenticated");
 
-	const { id } = await uuidParam("id").parseAsync(await context.params);
+	const { repoId } = await uuidParam("repoId").parseAsync(await context.params);
 
 	// 1. Fetch repo with members and PRs
 	const repo = await prisma.repository.findUnique({
-		where: { id },
+		where: { id: repoId },
 		include: { installation: true, members: true, pullRequests: true },
 	});
 

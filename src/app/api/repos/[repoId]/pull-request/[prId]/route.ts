@@ -87,10 +87,13 @@ export async function PATCH(
 		);
 		const { prId } = await uuidParam("prId").parseAsync(await context.params);
 
-		// 3. Validate inputs
+		// 3. Validate and sanitize inputs
 		const { prTitle, prBody } = await pullRequestSchema
 			.pick({ prTitle: true, prBody: true })
 			.parseAsync(await req.json());
+
+		const safePrTitle = sanitizeHtml(prTitle);
+		const safePrBody = sanitizeHtml(prBody);
 
 		// 4. Find PR in DB including current user's membership
 		const pr = await prisma.pullRequest.findUnique({
@@ -132,8 +135,8 @@ export async function PATCH(
 		await prisma.pullRequest.update({
 			where: { id: prId },
 			data: {
-				title: sanitizeHtml(prTitle),
-				description: sanitizeHtml(prBody),
+				title: safePrTitle,
+				description: safePrBody,
 			},
 		});
 

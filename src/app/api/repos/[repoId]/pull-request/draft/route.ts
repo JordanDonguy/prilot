@@ -11,7 +11,7 @@ const prisma = getPrisma();
 
 export async function POST(
 	req: NextRequest,
-	context: { params: Promise<{ id: string }> },
+	context: { params: Promise<{ repoId: string }> },
 ) {
 	try {
 		// 1. Find user
@@ -19,11 +19,11 @@ export async function POST(
 		if (!user) throw new ForbiddenError("Unauthenticated");
 
 		// 2. Get repository ID
-		const { id: repositoryId } = await uuidParam("id").parseAsync(await context.params);
+		const { repoId } = await uuidParam("repoId").parseAsync(await context.params);
 
 		// 3. Check if user is a member of this repo
 		const repo = await prisma.repository.findUnique({
-			where: { id: repositoryId },
+			where: { id: repoId },
 			include: { members: true },
 		});
 
@@ -41,7 +41,7 @@ export async function POST(
 		// 5. Insert new PR
 		const pr = await prisma.pullRequest.create({
 			data: {
-				repositoryId,
+				repositoryId: repoId,
 				title: sanitizeHtml(prTitle),
 				description: sanitizeHtml(prBody),
 				baseBranch,
