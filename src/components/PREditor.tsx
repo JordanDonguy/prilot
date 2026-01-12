@@ -31,7 +31,7 @@ export function PREditor({
 	onSend,
 }: PREditorProps) {
 	return (
-		<Card className="bg-white/70 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-100 dark:border-gray-800 shadow-sm">
+		<Card className="bg-white/70 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-100 dark:border-gray-800 shadow-sm px-2! md:px-4!">
 			<CardHeader>
 				<CardTitle className="text-xl">Pull Request Details</CardTitle>
 				<CardDescription className="text-lg">

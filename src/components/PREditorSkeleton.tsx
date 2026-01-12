@@ -4,7 +4,7 @@ import { ArrowBigLeftDash } from "lucide-react";
 
 export default function PREditorSkeleton() {
 	return (
-		<div className="p-2 md:p-6 space-y-6 animate-pulse">
+		<div className="p-2 md:p-6 space-y-6 animate-pulse fade-in-fast">
 			{/* Hero / Header */}
 			<section className="grid grid-cols-3 mb-10">
 				<div className="col-span-2 space-y-4">
