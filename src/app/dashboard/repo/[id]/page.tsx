@@ -1,9 +1,18 @@
 "use client";
 
-import { Clock, GitBranch, GitPullRequest, Plus, Users } from "lucide-react";
+import {
+	ChevronLeft,
+	ChevronRight,
+	Clock,
+	Filter,
+	GitBranch,
+	GitPullRequest,
+	Plus,
+	Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useRepository } from "@/app/hooks/useRepository";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import {
@@ -15,36 +24,54 @@ import {
 	StatCard,
 } from "@/components/Card";
 import { PRListItem } from "@/components/ListItem";
+import { type PRFilter, PRFilterModal } from "@/components/PRFilterModal";
 import RepoSkeleton from "@/components/RepoSkeleton";
-import { useMemo } from "react";
+import { usePullRequests } from "@/hooks/usePullRequest";
+import { useRepository } from "@/hooks/useRepository";
 
 export default function RepositoryPage() {
 	const params = useParams();
 	const id = params.id;
 
-	const { repo, loading, deletePR } = useRepository(id as string);
+	const { repo, loading } = useRepository(id as string);
+	const {
+		pullRequests,
+		loading: prLoading,
+		pagination,
+		loadNextPage,
+		loadPrevPage,
+		deletePR,
+	} = usePullRequests({
+		repoId: id as string,
+		initialPage: 1,
+		perPage: 5,
+	});
 
-	const pullRequests = repo?.pullRequests ?? [];
+	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	const [filter, setFilter] = useState<PRFilter>("all");
 
-	// Sort PRs by date (descending - new ones first)
-	const sortedPRs = useMemo(
-		() =>
-			[...pullRequests].sort(
-				(a, b) =>
-					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-			),
-		[pullRequests],
-	);
+	// Filter PRs by status and sort by date (descending - new ones first)
+	const filteredAndSortedPRs = useMemo(() => {
+		const filtered =
+			filter === "all"
+				? pullRequests
+				: pullRequests.filter((pr) => pr.status === filter);
+
+		return [...filtered].sort(
+			(a, b) =>
+				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+		);
+	}, [pullRequests, filter]);
 
 	if (loading) return <RepoSkeleton />;
 	if (!repo) return null;
 
-	const draftPRs = pullRequests.filter((pr) => pr.status === "draft").length;
-	const sentPRs = pullRequests.filter((pr) => pr.status === "sent").length;
+	const draftPRs = repo.draftPrCount;
+	const sentPRs = repo.sentPrCount;
 
 	return (
-		<div className="p-6 space-y-6">
-			{/* Repository Header */}
+		<div className="p-6 flex flex-col gap-6">
+			{/* ---- Repository Header ---- */}
 			<div className="flex flex-col md:flex-row items-start justify-between">
 				<div>
 					<div className="flex items-center gap-3 mb-2">
@@ -58,6 +85,8 @@ export default function RepositoryPage() {
 						<span className="font-mono">({repo.defaultBranch})</span>
 					</p>
 				</div>
+
+				{/* ---- Members and Generate a PR buttons ---- */}
 				<div className="grid grid-cols-2 md:flex gap-3 mt-4 md:mt-0 w-full md:w-fit">
 					<Link href={`/dashboard/repo/${id}/members`} className="w-full">
 						<Button className="w-full md:w-28 bg-gray-200 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 hover:bg-gray-300 hover:dark:bg-gray-700">
@@ -74,7 +103,7 @@ export default function RepositoryPage() {
 				</div>
 			</div>
 
-			{/* Stats Cards */}
+			{/* ---- Stats Cards ---- */}
 			<div className="grid gap-4 md:grid-cols-4">
 				<StatCard
 					title="PRs Sent With PRilot"
@@ -90,16 +119,39 @@ export default function RepositoryPage() {
 				<StatCard title="Contributors" value="8" icon={Users} />
 			</div>
 
-			{/* Pull Requests List */}
+			{/* ---- Pull Requests List ---- */}
 			<Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm">
-				<CardHeader>
-					<CardTitle>Recent Pull Requests</CardTitle>
-					<CardDescription>View and manage your PRs</CardDescription>
+				<CardHeader className="flex justify-between">
+					<div>
+						<CardTitle>Recent Pull Requests</CardTitle>
+						<CardDescription>View and manage your PRs</CardDescription>
+					</div>
+
+					{/* ---- Open filter modal button ---- */}
+					<Button
+						size="sm"
+						onClick={() => setIsFilterOpen(true)}
+						className="w-fit px-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-200 hover:dark:bg-gray-800 transition-colors"
+					>
+						<Filter className="w-4 h-4" />
+						Filter • {filter.slice(0, 1).toUpperCase() + filter.slice(1)} PRs
+					</Button>
 				</CardHeader>
+
+				{/* ---- Pull Requests items ---- */}
 				<CardContent>
 					<div className="space-y-3">
-						{sortedPRs.length > 0 ? (
-							sortedPRs.map((pr) => (
+						{prLoading ? (
+							<div className="space-y-3 fade-in-fast">
+								{/* -- Pull requests loading skeleton -- */}
+								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
+								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
+								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
+								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
+								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
+							</div>
+						) : filteredAndSortedPRs.length > 0 ? (
+							filteredAndSortedPRs.map((pr) => (
 								<PRListItem
 									key={pr.id}
 									href={`/dashboard/repo/${id}/pr/edit/${pr.id}`}
@@ -113,6 +165,7 @@ export default function RepositoryPage() {
 							))
 						) : (
 							<div className="flex flex-col pl-4 text-lg pt-4 gap-2">
+								{/* -- PNo Prs found fallback -- */}
 								<span className="text-gray-600 dark:text-gray-400">
 									No PRs available yet...
 								</span>
@@ -128,8 +181,42 @@ export default function RepositoryPage() {
 							</div>
 						)}
 					</div>
+
+					{/* ---- Pagination Controls ---- */}
+					{pagination.totalPages > 1 && (
+						<div className="flex justify-center gap-2 mt-4">
+							<Button
+								disabled={pagination.page === 1}
+								onClick={loadPrevPage}
+								className="hover:bg-gray-200 hover:dark:bg-gray-600 w-fit px-2"
+							>
+								<ChevronLeft />
+							</Button>
+							<span className="flex items-center px-2 text-gray-700 dark:text-gray-300">
+								Page {pagination.page} / {pagination.totalPages}
+							</span>
+							<Button
+								disabled={pagination.page === pagination.totalPages}
+								onClick={loadNextPage}
+								className="hover:bg-gray-200 hover:dark:bg-gray-600 w-fit px-2"
+							>
+								<ChevronRight />
+							</Button>
+						</div>
+					)}
 				</CardContent>
 			</Card>
+
+			{/* ---- PR filter modal ---- */}
+			<PRFilterModal
+				isOpen={isFilterOpen}
+				value={filter}
+				onClose={() => setIsFilterOpen(false)}
+				onSelect={(value) => {
+					setFilter(value);
+					setIsFilterOpen(false);
+				}}
+			/>
 		</div>
 	);
 }
