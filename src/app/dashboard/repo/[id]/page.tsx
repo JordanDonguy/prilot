@@ -30,6 +30,7 @@ import RepoSkeleton from "@/components/RepoSkeleton";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
 import { usePullRequests } from "@/hooks/usePullRequests";
 import { useRepository } from "@/hooks/useRepository";
+import { ConfirmDeletePRModal } from "@/components/ConfirmDeletePRModal";
 
 export default function RepositoryPage() {
 	const params = useParams();
@@ -53,6 +54,7 @@ export default function RepositoryPage() {
 	const { deleteDraftPR } = usePullRequestActions(repoId);
 
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	const [prToDelete, setPrToDelete] = useState<string | null>(null);
 
 	const draftPRs = repo?.draftPrCount ?? 0;
 	const sentPRs = repo?.sentPrCount ?? 0;
@@ -117,7 +119,7 @@ export default function RepositoryPage() {
 			</div>
 
 			{/* ---- Pull Requests List ---- */}
-			<Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm">
+			<Card className="bg-white/70 dark:bg-gray-800/20 border backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm">
 				<CardHeader className="flex justify-between">
 					<div>
 						<CardTitle>Recent Pull Requests</CardTitle>
@@ -163,7 +165,7 @@ export default function RepositoryPage() {
 									compareBranch={pr.compareBranch}
 									baseBranch={pr.baseBranch}
 									updatedAt={pr.updatedAt}
-									onDelete={() => deleteDraftPR(pr.id)}
+									onDelete={() => setPrToDelete(pr.id)}
 								/>
 							))
 						) : (
@@ -218,6 +220,17 @@ export default function RepositoryPage() {
 				onSelect={(value) => {
 					setFilter(value);
 					setIsFilterOpen(false);
+				}}
+			/>
+
+			{/* ---- Delete PR modal ---- */}
+			<ConfirmDeletePRModal
+				isOpen={Boolean(prToDelete)}
+				onClose={() => setPrToDelete(null)}
+				onConfirm={() => {
+					if (!prToDelete) return;
+					deleteDraftPR(prToDelete);
+					setPrToDelete(null);
 				}}
 			/>
 		</div>
