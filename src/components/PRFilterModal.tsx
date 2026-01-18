@@ -2,8 +2,7 @@
 
 import { X } from "lucide-react";
 import { motion } from "motion/react";
-
-export type PRFilter = "all" | "draft" | "sent";
+import type { PRFilter } from "@/types/pullRequests";
 
 type PRFilterModalProps = {
 	isOpen: boolean;
@@ -33,7 +32,7 @@ export function PRFilterModal({
 				initial={{ opacity: 0, scale: 0.5 }}
 				animate={{ opacity: 1, scale: 1 }}
 				exit={{ opacity: 0, scale: 0.5 }}
-				className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+				className="fixed mx-2 inset-0 z-50 flex items-center justify-center pointer-events-none"
 			>
 				<div className="pointer-events-auto w-full max-w-sm rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg">
 					{/* ---- Header ---- */}

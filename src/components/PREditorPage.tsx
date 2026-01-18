@@ -5,11 +5,12 @@ import { ArrowBigLeftDash, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { useRepository } from "@/app/hooks/useRepository";
 import { Button } from "@/components/Button";
 import { PREditor } from "@/components/PREditor";
 import PREditorSkeleton from "@/components/PREditorSkeleton";
 import { BranchSelect, LanguageSelect } from "@/components/Select";
+import { usePullRequestActions } from "@/hooks/usePullRequestActions";
+import { useRepository } from "@/hooks/useRepository";
 import type { PRLanguage } from "@/types/languages";
 
 interface PREditorProps {
@@ -22,7 +23,8 @@ export default function PREditorPageContent({
 	prId: initialPrId,
 }: PREditorProps) {
 	const router = useRouter();
-	const { repo, loading, addPR } = useRepository(repoId);
+	const { repo, loading } = useRepository(repoId);
+	const { addDraftPR } = usePullRequestActions(repoId);
 
 	const [prId, setPrId] = useState<string | null>(initialPrId ?? null);
 	const [prFetchLoading, setPrFetchLoading] = useState(!!initialPrId);
@@ -64,7 +66,7 @@ export default function PREditorPageContent({
 			setPrFetchLoading(true);
 
 			try {
-				const res = await fetch(`/api/repos/${repoId}/pull-request/${prId}`);
+				const res = await fetch(`/api/repos/${repoId}/pull-requests/${prId}`);
 				if (!res.ok) throw new Error("Failed to fetch PR");
 
 				const data = await res.json();
@@ -116,7 +118,7 @@ export default function PREditorPageContent({
 
 			// create or update
 			if (!prId) {
-				const newPR = await addPR({
+				const newPR = await addDraftPR({
 					prTitle: generatedTitle,
 					prBody: generatedDescription,
 					baseBranch,
@@ -130,7 +132,7 @@ export default function PREditorPageContent({
 				}
 			} else {
 				const updateRes = await fetch(
-					`/api/repos/${repoId}/pull-request/${prId}`,
+					`/api/repos/${repoId}/pull-requests/${prId}`,
 					{
 						method: "PATCH",
 						headers: { "Content-Type": "application/json" },
@@ -167,7 +169,7 @@ export default function PREditorPageContent({
 				if (!prId || !startAutoSave.current) return;
 
 				try {
-					await fetch(`/api/repos/${repoId}/pull-request/${prId}`, {
+					await fetch(`/api/repos/${repoId}/pull-requests/${prId}`, {
 						method: "PATCH",
 						headers: { "Content-Type": "application/json" },
 						body: JSON.stringify({ prTitle: title, prBody: description }),

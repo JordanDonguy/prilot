@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { MemberRoleSelect } from "@/components/Select";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
+import AnimatedSlide from "./animations/AnimatedSlide";
 
 // ------------------------------
 // ------ Simple List item ------
@@ -15,6 +16,9 @@ type DashboardListItemProps = {
 	badge?: string;
 	className?: string;
 	status?: string;
+	providerUrl?: string;
+	repoId?: string;
+	prId?: string;
 };
 
 export function DashboardListItem({
@@ -23,18 +27,25 @@ export function DashboardListItem({
 	badge,
 	className = "",
 	status,
+	providerUrl,
+	repoId,
+	prId,
 }: DashboardListItemProps) {
 	return (
-		<div
-			className={`flex items-center justify-between h-18 p-3 rounded-lg border
-        border-gray-200 dark:border-gray-700/70
+		<AnimatedSlide
+			y={20}
+			triggerOnView={false}
+			className={`flex items-center justify-between gap-6 h-18 p-3 rounded-lg
+        border border-gray-200 dark:border-gray-700/70
         bg-gray-100 dark:bg-zinc-950/90
         ${className}`}
 		>
-			<div className="flex flex-col justify-between h-full">
+			<div className="flex flex-col justify-between h-full w-0 flex-1">
 				{/* -------- Title and badge -------- */}
 				<div className="flex items-center gap-2">
-					<p className="text-sm text-gray-900 dark:text-white">{title}</p>
+					<p className="text-sm text-gray-900 dark:text-white truncate lg:max-w-xs">
+						{title}
+					</p>
 					{badge && <Badge className="text-xs">{badge}</Badge>}
 				</div>
 
@@ -56,7 +67,7 @@ export function DashboardListItem({
 				)}
 				{status === "draft" && (
 					<Link
-						href="/dashboard/repo/1/pr/new"
+						href={`/dashboard/repo/${repoId}/pr/edit/${prId}`}
 						className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline self-end"
 					>
 						Edit
@@ -64,7 +75,7 @@ export function DashboardListItem({
 				)}
 				{status === "sent" && (
 					<Link
-						href="https://github.com"
+						href={providerUrl ?? "https://github.com"}
 						target="blank"
 						className="flex gap-2 items-center text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline self-end"
 					>
@@ -72,7 +83,7 @@ export function DashboardListItem({
 					</Link>
 				)}
 			</div>
-		</div>
+		</AnimatedSlide>
 	);
 }
 
@@ -106,7 +117,7 @@ type PRListItemProps = {
 	status: string;
 	compareBranch: string;
 	baseBranch: string;
-	createdAt: string;
+	updatedAt: string;
 	onDelete: () => void;
 };
 
@@ -116,37 +127,40 @@ export function PRListItem({
 	status,
 	compareBranch,
 	baseBranch,
-	createdAt,
+	updatedAt,
 	onDelete,
 }: PRListItemProps) {
 	return (
-		<div
-			className="block h-22 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90
-        border border-gray-200 dark:border-gray-700/70"
+		<AnimatedSlide
+			y={20}
+			triggerOnView={false}
+			className="flex flex-col lg:h-22 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90
+        border border-gray-200 dark:border-gray-700/70 fade-in"
 		>
-			<div className="flex items-start justify-between h-full">
-				<div className="flex-1">
+			<div className="flex flex-col lg:flex-row items-start justify-between h-full">
+				<div className="w-full h-full flex flex-col justify-between">
 					{/* -------- Title and badge -------- */}
-					<div className="flex items-center gap-3 mb-2">
+					<div className="w-full flex justify-between lg:items-center gap-3 mb-2">
 						<p className="text-gray-900 dark:text-white">{title}</p>
-						<Badge>{status}</Badge>
+						<Badge className="h-fit">{status}</Badge>
 					</div>
 
 					{/* -------- Branches -------- */}
 					<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
 						<GitPullRequest className="w-4 h-4" />
-						<span className="font-mono text-xs">{compareBranch}</span>
+						<span className="font-mono text-xs truncate">{compareBranch}</span>
 						<span>→</span>
-						<span className="font-mono text-xs">{baseBranch}</span>
+						<span className="font-mono text-xs truncate">{baseBranch}</span>
 					</div>
 				</div>
 
 				{/* -------- Created at and action link -------- */}
-				<div className="flex flex-col justify-between items-end h-full">
-					<span className="text-sm text-gray-500 dark:text-gray-400">
-						{formatDateTime(createdAt)}
+				<div className="flex lg:flex-col justify-between items-end h-full w-full">
+					{/* ---- Date and time (desktop) ---- */}
+					<span className="text-sm text-gray-500 dark:text-gray-400 lg:block">
+						{formatDateTime(updatedAt)}
 					</span>
-					<div className="flex items-center gap-4">
+					<div className="flex items-center justify-between gap-4">
 						{/* Delete PR draft button */}
 						{status === "draft" && (
 							<button
@@ -168,7 +182,7 @@ export function PRListItem({
 					</div>
 				</div>
 			</div>
-		</div>
+		</AnimatedSlide>
 	);
 }
 

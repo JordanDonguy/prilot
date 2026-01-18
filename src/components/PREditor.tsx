@@ -63,16 +63,16 @@ export function PREditor({
 							<button
 								type="button"
 								onClick={() => setShowEditOrPreview("edit")}
-								className={`py-2 border-r border-gray-300 dark:border-gray-800 rounded-tl-lg hover:bg-gray-300 hover:dark:bg-gray-700 hover:cursor-pointer
-								${showEditOrPreview === "edit" ? "bg-gray-200/80 dark:bg-gray-800" : "dark:bg-zinc-950/30"}`}
+								className={`py-2 border-r border-gray-300 dark:border-gray-800 rounded-tl-lg hover:text-black hover:dark:text-white hover:cursor-pointer
+								${showEditOrPreview === "edit" ? "dark:bg-zinc-950" : "text-gray-500 dark:text-gray-400 bg-gray-200/70 dark:bg-zinc-950/30"}`}
 							>
 								Edit
 							</button>
 							<button
 								type="button"
 								onClick={() => setShowEditOrPreview("preview")}
-								className={`rounded-tr-lg hover:bg-gray-300 hover:dark:bg-gray-700 hover:cursor-pointer
-								${showEditOrPreview === "preview" ? "bg-gray-200/80 dark:bg-gray-800" : "dark:bg-zinc-950/30"}`}
+								className={`rounded-tr-lg hover:text-black hover:dark:text-white hover:cursor-pointer
+								${showEditOrPreview === "preview" ? "dark:bg-zinc-950" : "text-gray-500 dark:text-gray-400 bg-gray-200/70 dark:bg-zinc-950/30"}`}
 							>
 								Preview
 							</button>
