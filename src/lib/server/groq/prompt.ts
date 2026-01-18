@@ -1,8 +1,9 @@
 import type { PRLanguage } from "@/types/languages";
 
-export function buildPRPrompt(commits: string[], language: PRLanguage) {
+export function buildPRPrompt(commits: string[], language: PRLanguage, compareBranch: string) {
 	return `
 You are a senior software engineer writing a GitHub Pull Request.
+Compare branch name is: ${compareBranch}.
 
 The ENTIRE Pull Request MUST be written in ${language}.
 This includes the PR TITLE and ALL section headers and content.
