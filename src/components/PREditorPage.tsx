@@ -175,7 +175,6 @@ export default function PREditorPageContent({
 						headers: { "Content-Type": "application/json" },
 						body: JSON.stringify({ prTitle: title, prBody: description }),
 					});
-					console.log("Draft saved");
 				} catch (err) {
 					console.error("Failed to save draft", err);
 				}

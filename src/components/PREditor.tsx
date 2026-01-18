@@ -83,7 +83,7 @@ export function PREditor({
 								value={description}
 								onChange={(e) => setDescription(e.target.value)}
 								placeholder="Detailed description in Markdown..."
-								className="w-full block min-h-75 rounded-b-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 p-4 resize-none focus:outline-none"
+								className="w-full block min-h-75 max-h-[80vh] rounded-b-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 p-4 resize-none focus:outline-none"
 							/>
 						) : (
 							<div className="min-h-75 markdown p-4 rounded-b-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950">
