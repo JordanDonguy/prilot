@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import {
@@ -24,50 +25,46 @@ import {
 	StatCard,
 } from "@/components/Card";
 import { PRListItem } from "@/components/ListItem";
-import { type PRFilter, PRFilterModal } from "@/components/PRFilterModal";
+import { PRFilterModal } from "@/components/PRFilterModal";
 import RepoSkeleton from "@/components/RepoSkeleton";
-import { usePullRequests } from "@/hooks/usePullRequest";
+import { usePullRequestActions } from "@/hooks/usePullRequestActions";
+import { usePullRequests } from "@/hooks/usePullRequests";
 import { useRepository } from "@/hooks/useRepository";
 
 export default function RepositoryPage() {
 	const params = useParams();
 	const id = params.id;
+	const repoId = id as string;
 
-	const { repo, loading } = useRepository(id as string);
+	const { repo, loading } = useRepository(repoId);
 	const {
 		pullRequests,
 		loading: prLoading,
 		pagination,
 		loadNextPage,
 		loadPrevPage,
-		deletePR,
+		filter,
+		setFilter,
 	} = usePullRequests({
 		repoId: id as string,
 		initialPage: 1,
 		perPage: 5,
 	});
+	const { deleteDraftPR } = usePullRequestActions(repoId);
 
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
-	const [filter, setFilter] = useState<PRFilter>("all");
 
-	// Filter PRs by status and sort by date (descending - new ones first)
-	const filteredAndSortedPRs = useMemo(() => {
-		const filtered =
-			filter === "all"
-				? pullRequests
-				: pullRequests.filter((pr) => pr.status === filter);
+	const draftPRs = repo?.draftPrCount ?? 0;
+	const sentPRs = repo?.sentPrCount ?? 0;
 
-		return [...filtered].sort(
-			(a, b) =>
-				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-		);
-	}, [pullRequests, filter]);
+	// Precompute an array of unique keys to decide how many PR skeleton to render
+	const skeletonCount = Math.min(draftPRs + sentPRs, 5) || 1; // show at least 1 skeleton
+	const skeletonKeys = useMemo(() => {
+		return Array.from({ length: skeletonCount }, (_, i) => `skeleton-${i}`);
+	}, [skeletonCount]);
 
 	if (loading) return <RepoSkeleton />;
 	if (!repo) return null;
-
-	const draftPRs = repo.draftPrCount;
-	const sentPRs = repo.sentPrCount;
 
 	return (
 		<div className="p-6 flex flex-col gap-6">
@@ -104,7 +101,7 @@ export default function RepositoryPage() {
 			</div>
 
 			{/* ---- Stats Cards ---- */}
-			<div className="grid gap-4 md:grid-cols-4">
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<StatCard
 					title="PRs Sent With PRilot"
 					value={sentPRs}
@@ -131,10 +128,16 @@ export default function RepositoryPage() {
 					<Button
 						size="sm"
 						onClick={() => setIsFilterOpen(true)}
-						className="w-fit px-4 flex items-center gap-2 bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-200 hover:dark:bg-gray-800 transition-colors"
+						className="w-fit px-4 flex flex-col md:flex-row items-center bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-200 hover:dark:bg-gray-800 transition-colors"
 					>
-						<Filter className="w-4 h-4" />
-						Filter • {filter.slice(0, 1).toUpperCase() + filter.slice(1)} PRs
+						<span className="flex gap-2 items-center">
+							<Filter className="w-4 h-4" />
+							Filter
+						</span>
+						<span className="hidden md:block mx-1">•</span>
+						<span className="hidden md:block">
+							{filter.slice(0, 1).toUpperCase() + filter.slice(1)} PRs
+						</span>
 					</Button>
 				</CardHeader>
 
@@ -142,16 +145,16 @@ export default function RepositoryPage() {
 				<CardContent>
 					<div className="space-y-3">
 						{prLoading ? (
-							<div className="space-y-3 fade-in-fast">
-								{/* -- Pull requests loading skeleton -- */}
-								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
-								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
-								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
-								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
-								<div className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"></div>
-							</div>
-						) : filteredAndSortedPRs.length > 0 ? (
-							filteredAndSortedPRs.map((pr) => (
+							<AnimatedOpacity className="space-y-3">
+								{skeletonKeys.map((key) => (
+									<div
+										key={key}
+										className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"
+									></div>
+								))}
+							</AnimatedOpacity>
+						) : pullRequests.length > 0 ? (
+							pullRequests.map((pr) => (
 								<PRListItem
 									key={pr.id}
 									href={`/dashboard/repo/${id}/pr/edit/${pr.id}`}
@@ -159,8 +162,8 @@ export default function RepositoryPage() {
 									status={pr.status}
 									compareBranch={pr.compareBranch}
 									baseBranch={pr.baseBranch}
-									createdAt={pr.createdAt}
-									onDelete={() => deletePR(pr.id)}
+									updatedAt={pr.updatedAt}
+									onDelete={() => deleteDraftPR(pr.id)}
 								/>
 							))
 						) : (
