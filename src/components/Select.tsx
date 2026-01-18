@@ -28,9 +28,9 @@ export function BranchSelect({
 					value={value}
 					name={label}
 					onChange={(e) => onChange(e.target.value)}
-					className="w-full p-2 rounded-lg bg-white/70 dark:bg-gray-800/70
-            appearance-none shadow-sm hover:cursor-pointer hover:opacity-80
-            transition-colors focus:outline-none"
+					className="w-full p-2 rounded-lg bg-white/70 dark:bg-gray-800/25
+            appearance-none shadow-md hover:cursor-pointer hover:opacity-80
+            border border-gray-200/70 dark:border-gray-800 transition-colors focus:outline-none"
 				>
 					{options.map((opt) => (
 						<option key={opt} value={opt}>
@@ -119,9 +119,9 @@ export function LanguageSelect({
 					id="language"
 					value={value}
 					onChange={(e) => onChange?.(e.target.value as PRLanguage)}
-					className="py-2 pr-10 pl-4 rounded-lg bg-white/70 dark:bg-gray-800/70
-              appearance-none text-start shadow-sm hover:cursor-pointer hover:opacity-80
-              focus:outline-none transition-colors"
+					className="py-2 pr-10 pl-4 rounded-lg bg-white/70 dark:bg-gray-800/25
+              appearance-none text-start shadow-md hover:cursor-pointer hover:opacity-80
+               border border-gray-200/70 dark:border-gray-800 focus:outline-none transition-colors"
 				>
 					{languages.map((lang) => (
 						<option key={lang} value={lang}>

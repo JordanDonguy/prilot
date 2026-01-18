@@ -110,7 +110,7 @@ export default function PREditorPageContent({
 			const aiRes = await fetch("/api/pr/generate", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ commits, language }),
+				body: JSON.stringify({ commits, language, compareBranch }),
 			});
 			if (!aiRes.ok) throw new Error("Failed to generate PR with AI");
 			const { title: generatedTitle, description: generatedDescription } =
@@ -245,7 +245,7 @@ export default function PREditorPageContent({
 					<Button
 						onClick={handleGenerate}
 						disabled={!compareBranch || isGenerating}
-						className="h-auto w-56 py-2 my-12 mx-auto bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 group disabled:animate-pulse"
+						className="h-auto w-56 py-2 my-12 mx-auto bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
 					>
 						<span className="flex items-center group-hover:scale-110 transition">
 							<Sparkles className="w-4 h-4 mr-2" />

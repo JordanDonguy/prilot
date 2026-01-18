@@ -145,7 +145,7 @@ export default function DashboardPage() {
 			{/* ---- Recent Activity ---- */}
 			<div className="grid gap-6 xl:grid-cols-2">
 				{/* ---- Recent PRs ---- */}
-				<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/70 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm">
+				<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
 					<CardHeader>
 						<CardTitle>Recent Pull Requests</CardTitle>
 						<CardDescription>Your latest PR activity</CardDescription>
@@ -182,7 +182,7 @@ export default function DashboardPage() {
 				</Card>
 
 				{/* ---- Top repositories ---- */}
-				<Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm">
+				<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
 					<CardHeader>
 						<CardTitle>Your Repositories</CardTitle>
 						<CardDescription>

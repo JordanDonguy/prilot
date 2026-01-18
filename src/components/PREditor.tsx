@@ -31,7 +31,7 @@ export function PREditor({
 	onSend,
 }: PREditorProps) {
 	return (
-		<Card className="bg-white/70 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-100 dark:border-gray-800 shadow-sm px-2! md:px-4!">
+		<Card className="bg-white/70 dark:bg-gray-800/20 backdrop-blur-sm border border-gray-200/70 dark:border-gray-800 shadow-lg px-2! md:px-4!">
 			<CardHeader>
 				<CardTitle className="text-xl">Pull Request Details</CardTitle>
 				<CardDescription className="text-lg">
@@ -49,7 +49,7 @@ export function PREditor({
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 						placeholder="Brief description of changes"
-						className="rounded-md w-1/2 py-2 px-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-950 focus:outline-none"
+						className="rounded-md w-1/2 py-2 px-4 border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 focus:outline-none"
 					/>
 				</div>
 
@@ -58,8 +58,8 @@ export function PREditor({
 					<label htmlFor="description" className="text-lg">
 						Description
 					</label>
-					<div className="w-full rounded-xl shadow-sm">
-						<div className="grid w-full grid-cols-2 border-t border-x border-gray-200 dark:border-gray-800 rounded-t-lg">
+					<div className="w-full rounded-xl">
+						<div className="grid w-full grid-cols-2 border-t border-x border-gray-300 dark:border-gray-800 rounded-t-lg">
 							<button
 								type="button"
 								onClick={() => setShowEditOrPreview("edit")}
@@ -83,10 +83,10 @@ export function PREditor({
 								value={description}
 								onChange={(e) => setDescription(e.target.value)}
 								placeholder="Detailed description in Markdown..."
-								className="w-full block min-h-75 rounded-b-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-950 p-4 resize-none focus:outline-none"
+								className="w-full block min-h-75 rounded-b-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 p-4 resize-none focus:outline-none"
 							/>
 						) : (
-							<div className="min-h-75 markdown p-4 rounded-b-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-950">
+							<div className="min-h-75 markdown p-4 rounded-b-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950">
 								<ReactMarkdown>{description}</ReactMarkdown>
 							</div>
 						)}

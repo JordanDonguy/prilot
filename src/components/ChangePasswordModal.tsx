@@ -35,7 +35,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.5 }}
-        className="w-full max-w-md rounded-xl bg-white dark:bg-gray-800/90 p-6"
+        className="w-full max-w-md rounded-xl bg-white dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-800 p-6"
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Change password</h2>
@@ -56,7 +56,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               id="currentPassword"
               type="password"
               placeholder="Current password"
-              className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-2 rounded-lg bg-gray-300/40 dark:bg-gray-950/40 focus:outline-none"
+              className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-2 rounded-lg bg-gray-300/40 dark:bg-gray-900/40 focus:outline-none"
               value={passwords.current}
               onChange={(e) =>
                 setPasswords({ ...passwords, current: e.target.value })
@@ -71,7 +71,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               id="newPassword"
               type="password"
               placeholder="New password"
-              className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-2 rounded-lg bg-gray-300/40 dark:bg-gray-950/40 focus:outline-none"
+              className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-2 rounded-lg bg-gray-300/40 dark:bg-gray-900/40 focus:outline-none"
               value={passwords.new}
               onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
             />
@@ -84,7 +84,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               id="confirmPassword"
               type="password"
               placeholder="Confirm new password"
-              className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-2 rounded-lg bg-gray-300/40 dark:bg-gray-950/40 focus:outline-none"
+              className="mt-2 w-full border border-gray-300 dark:border-gray-700 p-2 rounded-lg bg-gray-300/40 dark:bg-gray-900/40 focus:outline-none"
               value={passwords.confirm}
               onChange={(e) =>
                 setPasswords({ ...passwords, confirm: e.target.value })

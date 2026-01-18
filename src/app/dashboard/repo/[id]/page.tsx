@@ -88,13 +88,13 @@ export default function RepositoryPage() {
 				{/* ---- Members and Generate a PR buttons ---- */}
 				<div className="grid grid-cols-2 md:flex gap-3 mt-4 md:mt-0 w-full md:w-fit">
 					<Link href={`/dashboard/repo/${id}/members`} className="w-full">
-						<Button className="w-full md:w-28 bg-gray-200 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 hover:bg-gray-300 hover:dark:bg-gray-700">
+						<Button className="w-full md:w-28 bg-gray-200 dark:bg-gray-900 shadow-md border border-gray-300 dark:border-gray-800 hover:bg-gray-300 hover:dark:bg-gray-700">
 							<Users className="w-4 h-4 mr-2" />
 							Members
 						</Button>
 					</Link>
 					<Link href={`/dashboard/repo/${id}/pr/new`} className="w-full">
-						<Button className="w-full md:w-30 bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-400 group">
+						<Button className="w-full md:w-30 bg-gray-900 text-white shadow-md dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-400 group">
 							<Plus className="w-4 h-4 mr-2 group-hover:rotate-90 duration-250" />
 							Generate PR
 						</Button>
@@ -119,7 +119,7 @@ export default function RepositoryPage() {
 			</div>
 
 			{/* ---- Pull Requests List ---- */}
-			<Card className="bg-white/70 dark:bg-gray-800/20 border backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm">
+			<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
 				<CardHeader className="flex justify-between">
 					<div>
 						<CardTitle>Recent Pull Requests</CardTitle>

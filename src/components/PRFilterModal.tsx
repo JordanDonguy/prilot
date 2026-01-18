@@ -34,7 +34,7 @@ export function PRFilterModal({
 				exit={{ opacity: 0, scale: 0.5 }}
 				className="fixed mx-2 inset-0 z-50 flex items-center justify-center pointer-events-none"
 			>
-				<div className="pointer-events-auto w-full max-w-sm rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg">
+				<div className="pointer-events-auto w-full max-w-sm rounded-xl bg-white dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-800 p-6 shadow-lg">
 					{/* ---- Header ---- */}
 					<div className="flex items-center justify-between mb-6">
 						<h3 className="text-lg font-semibold">Filter Pull Requests</h3>

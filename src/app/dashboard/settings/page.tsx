@@ -43,7 +43,7 @@ export default function UserSettingsPage() {
 			</div>
 
 			{/* Account info */}
-			<Card className="bg-white/70 dark:bg-gray-800/70 shadow-sm">
+			<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
 				<CardHeader>
 					<CardTitle>Account</CardTitle>
 					<CardDescription>Your personal information</CardDescription>
@@ -73,7 +73,7 @@ export default function UserSettingsPage() {
 			</Card>
 
 			{/* Security */}
-			<Card className="bg-white/70 dark:bg-gray-800/70 shadow-sm">
+			<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
 				<CardHeader className="pb-2">
 					<CardTitle>Security</CardTitle>
 					<CardDescription>Password & authentication</CardDescription>
@@ -91,7 +91,7 @@ export default function UserSettingsPage() {
 			</Card>
 
 			{/* Connected accounts */}
-			<Card className="bg-white/70 dark:bg-gray-800/70 shadow-sm">
+			<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
 				<CardHeader className="pb-2">
 					<CardTitle>Connected accounts</CardTitle>
 					<CardDescription>Link external providers</CardDescription>

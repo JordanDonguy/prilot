@@ -135,12 +135,12 @@ export function PRListItem({
 			y={20}
 			triggerOnView={false}
 			className="flex flex-col lg:h-22 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90
-        border border-gray-200 dark:border-gray-700/70 fade-in"
+        border border-gray-200 dark:border-gray-700/70"
 		>
 			<div className="flex flex-col lg:flex-row items-start justify-between h-full">
-				<div className="w-full h-full flex flex-col justify-between">
+				<div className="h-full flex flex-col justify-between w-full lg:w-fit">
 					{/* -------- Title and badge -------- */}
-					<div className="w-full flex justify-between lg:items-center gap-3 mb-2">
+					<div className="w-full flex justify-between gap-3 mb-2">
 						<p className="text-gray-900 dark:text-white">{title}</p>
 						<Badge className="h-fit">{status}</Badge>
 					</div>
@@ -155,7 +155,7 @@ export function PRListItem({
 				</div>
 
 				{/* -------- Created at and action link -------- */}
-				<div className="flex lg:flex-col justify-between items-end h-full w-full">
+				<div className="flex lg:flex-col justify-between items-end h-full w-full lg:w-fit">
 					{/* ---- Date and time (desktop) ---- */}
 					<span className="text-sm text-gray-500 dark:text-gray-400 lg:block">
 						{formatDateTime(updatedAt)}
