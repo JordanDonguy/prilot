@@ -5,7 +5,7 @@ export interface IPullRequest {
   status: "draft" | "sent";
   baseBranch: string;
   compareBranch: string;
-  createdAt: string;
+  updatedAt: string;
 };
 
 // ---- Pagination info ----
@@ -16,6 +16,8 @@ export interface IPagination {
   totalPages: number;
 }
 
+// ---- Filter info ----
+export type PRFilter = "all" | "draft" | "sent";
 
 // ---- Paginated PRs response ----
 export interface IPaginatedPRsResponse {
