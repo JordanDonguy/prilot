@@ -12,6 +12,7 @@ import { BranchSelect, LanguageSelect } from "@/components/Select";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
 import { useRepository } from "@/hooks/useRepository";
 import type { PRLanguage } from "@/types/languages";
+import AnimatedSlide from "./animations/AnimatedSlide";
 
 interface PREditorProps {
 	repoId: string;
@@ -204,20 +205,24 @@ export default function PREditorPageContent({
 	if (!repo) return null;
 
 	return (
-		<div className="p-2 md:p-6 space-y-6 fade-in-fast">
+		<div className="p-2 md:p-6 space-y-6">
 			<section className="grid grid-cols-3 mb-8">
-				<div className="col-span-2">
+				<AnimatedSlide x={-20} triggerOnView={false} className="col-span-2">
 					<h1 className="text-3xl mb-2 text-gray-900 dark:text-white">
 						Generate Pull Request
 					</h1>
 					<p className="text-gray-600 dark:text-gray-400 hidden md:inline">
 						Select branches and let AI generate a comprehensive PR description
 					</p>
-				</div>
-				<LanguageSelect value={language} onChange={setLanguage} />
-				<p className="text-gray-600 dark:text-gray-400 mt-2 col-span-3 md:hidden">
-					Select branches and let AI generate a comprehensive PR description
-				</p>
+				</AnimatedSlide>
+				<AnimatedSlide x={20} triggerOnView={false}>
+					<LanguageSelect value={language} onChange={setLanguage} />
+				</AnimatedSlide>
+				<AnimatedSlide x={-20} triggerOnView={false}>
+					<p className="text-gray-600 dark:text-gray-400 mt-2 col-span-3 md:hidden">
+						Select branches and let AI generate a comprehensive PR description
+					</p>
+				</AnimatedSlide>
 			</section>
 
 			<div className="flex flex-col">
@@ -225,33 +230,39 @@ export default function PREditorPageContent({
 				<section>
 					<div className="relative grid grid-cols-2 gap-20">
 						{/* Branch selectors */}
-						<BranchSelect
-							label="Base Branch"
-							value={baseBranch}
-							onChange={setBaseBranch}
-							options={repo.branches}
-						/>
+						<AnimatedSlide x={-20} triggerOnView={false}>
+							<BranchSelect
+								label="Base Branch"
+								value={baseBranch}
+								onChange={setBaseBranch}
+								options={repo.branches}
+							/>
+						</AnimatedSlide>
 						<div className="absolute inset-0 w-full h-full flex justify-center items-center pt-8 pointer-events-none">
 							<ArrowBigLeftDash size={28} />
 						</div>
-						<BranchSelect
-							label="Compare Branch"
-							value={compareBranch}
-							onChange={setCompareBranch}
-							options={repo.branches}
-						/>
+						<AnimatedSlide x={20} triggerOnView={false}>
+							<BranchSelect
+								label="Compare Branch"
+								value={compareBranch}
+								onChange={setCompareBranch}
+								options={repo.branches}
+							/>
+						</AnimatedSlide>
 					</div>
 
-					<Button
-						onClick={handleGenerate}
-						disabled={!compareBranch || isGenerating}
-						className="h-auto w-56 py-2 my-12 mx-auto bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
-					>
-						<span className="flex items-center group-hover:scale-110 transition">
-							<Sparkles className="w-4 h-4 mr-2" />
-							{isGenerating ? "Generating..." : "Generate with AI"}
-						</span>
-					</Button>
+					<AnimatedSlide y={20} triggerOnView={false}>
+						<Button
+							onClick={handleGenerate}
+							disabled={!compareBranch || isGenerating}
+							className="h-auto w-56 py-2 my-12 mx-auto bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
+						>
+							<span className="flex items-center group-hover:scale-110 transition">
+								<Sparkles className="w-4 h-4 mr-2" />
+								{isGenerating ? "Generating..." : "Generate with AI"}
+							</span>
+						</Button>
+					</AnimatedSlide>
 				</section>
 
 				{/* PR Editor */}

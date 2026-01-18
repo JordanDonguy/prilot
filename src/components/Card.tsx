@@ -1,13 +1,27 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import AnimatedSlide from "./animations/AnimatedSlide";
 
 interface CardProps {
 	children: ReactNode;
 	className?: string;
+	animatedSlideXValue?: number;
 }
 
-export function Card({ children, className = "" }: CardProps) {
-	return <div className={`rounded-xl p-4 ${className}`}>{children}</div>;
+export function Card({
+	children,
+	className = "",
+	animatedSlideXValue = -20,
+}: CardProps) {
+	return (
+		<AnimatedSlide
+			x={animatedSlideXValue}
+			triggerOnView={false}
+			className={`rounded-xl p-4 ${className}`}
+		>
+			{children}
+		</AnimatedSlide>
+	);
 }
 
 export function CardHeader({ children, className = "" }: CardProps) {
@@ -51,7 +65,9 @@ type StatCardProps = {
 
 export function StatCard({ title, value, icon: Icon, comment }: StatCardProps) {
 	return (
-		<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
+		<Card 
+		animatedSlideXValue={20}
+		className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 				<CardTitle className="text-sm">{title}</CardTitle>
 				<Icon className="h-4 w-4 text-gray-500 dark:text-gray-400" />

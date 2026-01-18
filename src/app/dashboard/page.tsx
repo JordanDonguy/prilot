@@ -3,6 +3,7 @@
 import { AlertCircle, CheckCircle, Clock, GitPullRequest } from "lucide-react";
 import { useEffect, useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
+import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import {
 	Card,
 	CardContent,
@@ -105,14 +106,14 @@ export default function DashboardPage() {
 
 	return (
 		<div className="p-6 space-y-6">
-			<div>
+			<AnimatedSlide x={-20} triggerOnView={false}>
 				<h1 className="text-3xl mb-2 text-gray-900 dark:text-white">
 					Dashboard
 				</h1>
 				<p className="text-gray-600 dark:text-gray-400">
 					Overview of your repositories and recent activity
 				</p>
-			</div>
+			</AnimatedSlide>
 
 			{/* ---- Stats Cards ---- */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

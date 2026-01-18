@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
+import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import {
@@ -24,13 +25,13 @@ import {
 	CardTitle,
 	StatCard,
 } from "@/components/Card";
+import { ConfirmDeletePRModal } from "@/components/ConfirmDeletePRModal";
 import { PRListItem } from "@/components/ListItem";
 import { PRFilterModal } from "@/components/PRFilterModal";
 import RepoSkeleton from "@/components/RepoSkeleton";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
 import { usePullRequests } from "@/hooks/usePullRequests";
 import { useRepository } from "@/hooks/useRepository";
-import { ConfirmDeletePRModal } from "@/components/ConfirmDeletePRModal";
 
 export default function RepositoryPage() {
 	const params = useParams();
@@ -72,7 +73,7 @@ export default function RepositoryPage() {
 		<div className="p-6 flex flex-col gap-6">
 			{/* ---- Repository Header ---- */}
 			<div className="flex flex-col md:flex-row items-start justify-between">
-				<div>
+				<AnimatedSlide x={-20} triggerOnView={false}>
 					<div className="flex items-center gap-3 mb-2">
 						<h1 className="text-3xl text-gray-900 dark:text-white">
 							{repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)}
@@ -83,10 +84,10 @@ export default function RepositoryPage() {
 						{repo.commitsCount} commits on default branch{" "}
 						<span className="font-mono">({repo.defaultBranch})</span>
 					</p>
-				</div>
+				</AnimatedSlide>
 
 				{/* ---- Members and Generate a PR buttons ---- */}
-				<div className="grid grid-cols-2 md:flex gap-3 mt-4 md:mt-0 w-full md:w-fit">
+				<AnimatedSlide x={20} triggerOnView={false} className="grid grid-cols-2 md:flex gap-3 mt-4 md:mt-0 w-full md:w-fit">
 					<Link href={`/dashboard/repo/${id}/members`} className="w-full">
 						<Button className="w-full md:w-28 bg-gray-200 dark:bg-gray-900 shadow-md border border-gray-300 dark:border-gray-800 hover:bg-gray-300 hover:dark:bg-gray-700">
 							<Users className="w-4 h-4 mr-2" />
@@ -99,7 +100,7 @@ export default function RepositoryPage() {
 							Generate PR
 						</Button>
 					</Link>
-				</div>
+				</AnimatedSlide>
 			</div>
 
 			{/* ---- Stats Cards ---- */}

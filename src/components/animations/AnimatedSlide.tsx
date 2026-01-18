@@ -4,8 +4,6 @@ import { motion, type Variants } from "framer-motion";
 
 type AnimatedSlideProps = {
 	children: React.ReactNode;
-	/* Initial opacity state (optional, default to 0) */
-	opacity?: number;
 	/** Initial slide offset on X axis. Optional. */
 	x?: number;
 	/** Initial slide offset on Y axis. Optional. */
@@ -23,7 +21,6 @@ type AnimatedSlideProps = {
 
 export default function AnimatedSlide({
 	children,
-	opacity = 0,
 	x = 0,
 	y = 0,
 	damping = 20,
@@ -34,12 +31,10 @@ export default function AnimatedSlide({
 }: AnimatedSlideProps) {
 	const variants: Variants = {
 		hidden: {
-			opacity,
 			x: x,
 			y,
 		},
 		visible: {
-			opacity: 1,
 			x: 0,
 			y: 0,
 			transition: {
