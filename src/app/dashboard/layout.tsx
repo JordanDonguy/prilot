@@ -32,9 +32,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 			<ReposProvider>
 				<div className="flex h-screen bg-linear-to-b from-blue-50 to-white dark:from-zinc-950 dark:to-[#13131d]">
 					<Sidebar />
-					<div className="flex-1 flex flex-col overflow-hidden">
+					<div className="flex-1 flex flex-col overflow-y-auto">
 						<Header />
-						<main className="flex-1 overflow-y-auto">{children}</main>
+						<main className="flex-1 ">{children}</main>
 					</div>
 				</div>
 			</ReposProvider>
