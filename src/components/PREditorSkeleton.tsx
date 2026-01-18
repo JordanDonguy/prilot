@@ -1,10 +1,11 @@
 "use client";
 
 import { ArrowBigLeftDash } from "lucide-react";
+import AnimatedOpacity from "./animations/AnimatedOpacity";
 
 export default function PREditorSkeleton() {
 	return (
-		<div className="p-2 md:p-6 space-y-6 animate-pulse">
+		<AnimatedOpacity className="p-2 md:p-6 space-y-6 animate-pulse">
 			{/* Hero / Header */}
 			<section className="grid grid-cols-3 mb-10">
 				<div className="col-span-2 space-y-4">
@@ -36,6 +37,6 @@ export default function PREditorSkeleton() {
 
 			{/* PR Editor */}
 			<section className="h-100 bg-gray-300 dark:bg-gray-700 rounded-xl"></section>
-		</div>
+		</AnimatedOpacity>
 	);
 }

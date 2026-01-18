@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: index for key is ok for skeleton loader */
-import { Card, CardContent, CardHeader } from "./Card";
+import { CardContent, CardHeader } from "./Card";
 
 export default function RepoSkeleton() {
 	return (
@@ -24,7 +24,7 @@ export default function RepoSkeleton() {
 			</div>
 
 			{/* PR list skeleton */}
-			<Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm">
+			<div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-sm p-4 rounded-xl">
 				<CardHeader>
 					<div className="h-6 w-48 bg-gray-300 dark:bg-gray-700 rounded"></div>
 					<div className="h-4 w-64 bg-gray-300 dark:bg-gray-700 rounded mt-1"></div>
@@ -37,7 +37,7 @@ export default function RepoSkeleton() {
 						/>
 					))}
 				</CardContent>
-			</Card>
+			</div>
 		</div>
 	);
 }

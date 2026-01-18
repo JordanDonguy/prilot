@@ -3,10 +3,10 @@
 ## 📝 Overview
 
 **PRilot** is an intelligent developer tool designed to **simplify and accelerate pull request workflows**.  
-It can analyze commit differences between branches and assist in **automatically generating pull requests using AI** and **GitHub / GitLab integration**.
+It can analyze commit differences between branches and assist in **automatically generating pull requests using AI** and **GitHub / GitLab integration**.  
 
-Currently in development, the project includes currently a functional UI with mock data and credentials-based authentication.  
-Full AI-powered PR generation, repository integrations, and team collaboration features are still in progress.
+**Currently in development**. The project already includes **GitHub integration** and **AI-powered pull request generation**.  
+Upcoming features include sending pull requests directly to GitHub, two-way GitHub synchronization (webhooks), repository member invitations, and GitLab integration.  
 
 ---
 
@@ -91,11 +91,3 @@ Full AI-powered PR generation, repository integrations, and team collaboration f
    ```
 
 7. Open [http://localhost:3000](http://localhost:3000) to view the app.
-
-
----
-
-## ⚠️ Notes
-
-* The project is **still in development**. Only the UI with mock data and credentials authentication is currently functional.
-* AI-powered PR generation, Git integrations, and team features are in progress.

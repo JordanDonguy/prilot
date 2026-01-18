@@ -19,7 +19,9 @@ export async function POST(
 		if (!user) throw new ForbiddenError("Unauthenticated");
 
 		// 2. Get repository ID
-		const { repoId } = await uuidParam("repoId").parseAsync(await context.params);
+		const { repoId } = await uuidParam("repoId").parseAsync(
+			await context.params,
+		);
 
 		// 3. Check if user is a member of this repo
 		const repo = await prisma.repository.findUnique({
@@ -51,7 +53,17 @@ export async function POST(
 			},
 		});
 
-		return NextResponse.json({ prId: pr.id }, { status: 201 });
+		return NextResponse.json(
+			{
+				id: pr.id,
+				title: pr.title,
+				status: pr.status,
+				baseBranch: pr.baseBranch,
+				compareBranch: pr.compareBranch,
+				createdAt: pr.createdAt,
+			},
+			{ status: 201 },
+		);
 	} catch (error) {
 		return handleError(error);
 	}

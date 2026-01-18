@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 type ThemeSwitcherProps = {
 	/** Extra Tailwind/CSS classes for the button */
@@ -18,6 +19,14 @@ export default function ThemeSwitcher({
 	size = 24,
 }: ThemeSwitcherProps) {
 	const { resolvedTheme, setTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+
+	// Only render after mounting to prevent hydration mismatch
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) return null;
 
 	const isDark = resolvedTheme === "dark";
 

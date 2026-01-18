@@ -5,7 +5,7 @@ import { buildPRPrompt } from "@/lib/server/groq/prompt";
 export async function POST(req: Request) {
 	try {
 		// 1. Get commit messages list and PR language
-		const { commits, language = "English" } = await req.json();
+		const { commits, language = "English", compareBranch } = await req.json();
 
 		if (!Array.isArray(commits) || commits.length === 0) {
 			return NextResponse.json(
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 			messages: [
 				{
 					role: "user",
-					content: buildPRPrompt(commits, language),
+					content: buildPRPrompt(commits, language, compareBranch),
 				},
 			],
 		});
