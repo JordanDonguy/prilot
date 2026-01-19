@@ -19,6 +19,7 @@ type PREditorProps = {
 	setDescription: (val: string) => void;
 	setShowEditOrPreview: (val: "edit" | "preview") => void;
 	onSend: () => void;
+	isSendingPr: boolean;
 };
 
 export function PREditor({
@@ -29,6 +30,7 @@ export function PREditor({
 	setDescription,
 	setShowEditOrPreview,
 	onSend,
+	isSendingPr,
 }: PREditorProps) {
 	return (
 		<Card className="bg-white/70 dark:bg-gray-800/20 backdrop-blur-sm border border-gray-200/70 dark:border-gray-800 shadow-lg px-2! md:px-4!">
@@ -97,7 +99,7 @@ export function PREditor({
 				<button
 					type="button"
 					onClick={onSend}
-					disabled={!title || !description}
+					disabled={!title || !description || isSendingPr}
 					title={
 						!title || !description
 							? "Please enter title and description to send PR"
@@ -105,11 +107,11 @@ export function PREditor({
 					}
 					className={`w-56 h-10 my-8 mx-auto flex justify-center items-center rounded-lg
             shadow-sm bg-gray-100 dark:bg-zinc-950/60 border border-gray-300 dark:border-gray-800
-            ${!title || !description ? "cursor-not-allowed opacity-60" : "hover:bg-gray-200 hover:dark:bg-gray-800 hover:cursor-pointer"}
+            ${!title || !description || isSendingPr ? "cursor-not-allowed opacity-60" : "hover:bg-gray-200 hover:dark:bg-gray-800 hover:cursor-pointer"}
           `}
 				>
 					<Send className="w-4 h-4 mr-2" />
-					Send Pull Request
+					{isSendingPr ? "Sending your PR..." : "Send Pull Request"}
 				</button>
 			</CardContent>
 		</Card>
