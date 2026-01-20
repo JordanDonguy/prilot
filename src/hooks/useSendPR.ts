@@ -15,7 +15,9 @@ export function useSendPR(repoId: string, prId: string | null) {
 
 		try {
 			const res = await fetch(
-				`/api/repos/${repoId}/pull-requests/${prId}/send`,
+				`/api/repos/${repoId}/pull-requests/${prId}/send`, {
+          method: "POST"
+        },
 			);
 
 			if (res.ok) {
