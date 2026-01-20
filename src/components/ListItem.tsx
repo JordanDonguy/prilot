@@ -179,7 +179,7 @@ export function PRListItem({
 							target={status === "sent" ? "_blank" : "_self"}
 							className="block text-blue-600 dark:text-blue-400 font-medium underline-offset-2 hover:underline"
 						>
-							{status === "draft" ? "Edit" : `View on ${provider}`}
+							{status === "draft" ? "Edit" : `View on ${provider === "gitlab" ? "GitLab" : "GitHub"}`}
 						</Link>
 					</div>
 				</div>

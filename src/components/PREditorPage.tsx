@@ -141,6 +141,7 @@ export default function PREditorPageContent({
 						👉
 						<Link
 							href={providerPrUrl}
+							target="blank"
 							className="text-blue-600 dark:text-blue-500 hover:underline underline-offset-2"
 						>
 							{providerPrUrl}
