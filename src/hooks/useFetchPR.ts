@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import type { PRLanguage } from "@/types/languages";
 import type { IPullRequest } from "@/types/pullRequests";
@@ -12,15 +12,16 @@ interface IDraftPR extends IPullRequest {
 export function useFetchPR({
 	repoId,
 	prId,
+	skipNextFetch
 }: {
 	repoId: string;
 	prId: string | null;
+	skipNextFetch: React.RefObject<boolean>
 }) {
 	const router = useRouter();
 	const [pullRequest, setPullRequest] = useState<IDraftPR | null>();
 
 	const [loading, setLoading] = useState(!!prId);
-	const skipNextFetch = useRef(false); // Ref to prevent double fetches
 
 	useEffect(() => {
 		if (!prId || pullRequest) return;
@@ -53,7 +54,7 @@ export function useFetchPR({
 		};
 
 		fetchPR();
-	}, [prId, repoId, router.replace, pullRequest]);
+	}, [prId, repoId, router.replace, pullRequest, skipNextFetch]);
 
 	return { pullRequest, loading, skipNextFetch };
 }

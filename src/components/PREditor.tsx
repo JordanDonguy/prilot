@@ -12,8 +12,8 @@ import {
 } from "./Card";
 
 type PREditorProps = {
-	title: string;
-	description: string;
+	title: string | undefined;
+	description: string | undefined;
 	showEditOrPreview: "edit" | "preview";
 	setTitle: (val: string) => void;
 	setDescription: (val: string) => void;
@@ -48,7 +48,7 @@ export function PREditor({
 					</label>
 					<input
 						id="pr-title"
-						value={title}
+						value={title ?? ""}
 						onChange={(e) => setTitle(e.target.value)}
 						placeholder="Brief description of changes"
 						className="rounded-md w-1/2 py-2 px-4 border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 focus:outline-none"
@@ -82,7 +82,7 @@ export function PREditor({
 
 						{showEditOrPreview === "edit" ? (
 							<AutoResizeTextarea
-								value={description}
+								value={description ?? ""}
 								onChange={(e) => setDescription(e.target.value)}
 								placeholder="Detailed description in Markdown..."
 								className="w-full block min-h-75 max-h-[80vh] rounded-b-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 p-4 resize-none focus:outline-none"

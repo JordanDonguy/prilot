@@ -2,7 +2,7 @@
 
 import { ArrowBigLeftDash, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { PREditor } from "@/components/PREditor";
 import PREditorSkeleton from "@/components/PREditorSkeleton";
@@ -29,13 +29,14 @@ export default function PREditorPageContent({
 	const [baseBranch, setBaseBranch] = useState("");
 	const [compareBranch, setCompareBranch] = useState("");
 	const [language, setLanguage] = useState<PRLanguage>("English");
-	const [title, setTitle] = useState("");
-	const [description, setDescription] = useState("");
+	const [title, setTitle] = useState<string | undefined>();
+	const [description, setDescription] = useState<string | undefined>();
 	const [showEditOrPreview, setShowEditOrPreview] = useState<
 		"edit" | "preview"
 	>("edit");
 
-	const startAutoSave = useRef(false);
+	const startAutoSave = useRef(false); // To start auto saving PR in db when editing manually
+	const skipNextFetch = useRef(false); // To prevent fetching PR after generating one
 	const editorRef = useRef<HTMLDivElement | null>(null);
 
 	// ----- Hooks -----
@@ -44,13 +45,44 @@ export default function PREditorPageContent({
 	const { pullRequest, loading: prFetchLoading } = useFetchPR({
 		repoId,
 		prId,
+		skipNextFetch,
 	});
 
-	const { isGenerating, generatePR } = useGeneratePR(repoId);
+	const { isGenerating, generatePR } = useGeneratePR({
+		repoId,
+		prId,
+		baseBranch,
+		compareBranch,
+		language,
+		setPrId,
+	});
 
 	const { isSendingPr, providerPrUrl, sendPR } = useSendPR(repoId, prId);
 
 	useAutoSavePR({ prId, repoId, title, description, startAutoSave });
+
+	// ----- Functions -----
+	const handleGenerate = useCallback(async () => {
+		startAutoSave.current = false; // suspend auto save
+		skipNextFetch.current = true; // prevent fetching PR after prId is modified
+
+		const { success, generatedTitle, generatedDescription } =
+			await generatePR();
+
+		if (success) {
+			setTitle(generatedTitle);
+			setDescription(generatedDescription);
+			setShowEditOrPreview("preview");
+
+			// Scroll to pull requests editor
+			editorRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+		}
+
+		startAutoSave.current = true; // restore auto save
+	}, [generatePR]);
 
 	// ----- Effects -----
 	// Set default and compare branches
@@ -168,7 +200,7 @@ export default function PREditorPageContent({
 
 					<AnimatedSlide y={20} triggerOnView={false}>
 						<Button
-							onClick={generatePR}
+							onClick={handleGenerate}
 							disabled={!compareBranch || isGenerating || isSendingPr}
 							className="h-auto w-56 py-2 my-12 mx-auto bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
 						>
