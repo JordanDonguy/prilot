@@ -31,7 +31,7 @@ export default function UserSettingsPage() {
 	const gitlabConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account === "gitlab") : false;
 
 	return (
-		<div className="p-6 space-y-6">
+		<div className="p-6 space-y-6 fade-in-fast">
 			{/* Header */}
 			<div>
 				<h1 className="text-3xl text-gray-900 dark:text-white mb-2">
