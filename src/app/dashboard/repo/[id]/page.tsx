@@ -160,13 +160,14 @@ export default function RepositoryPage() {
 							pullRequests.map((pr) => (
 								<PRListItem
 									key={pr.id}
-									href={`/dashboard/repo/${id}/pr/edit/${pr.id}`}
+									href={pr.providerPrUrl ?? `/dashboard/repo/${id}/pr/edit/${pr.id}`}
 									title={pr.title}
 									status={pr.status}
 									compareBranch={pr.compareBranch}
 									baseBranch={pr.baseBranch}
 									updatedAt={pr.updatedAt}
 									onDelete={() => setPrToDelete(pr.id)}
+									provider={repo.provider}
 								/>
 							))
 						) : (
