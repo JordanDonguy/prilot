@@ -29,8 +29,8 @@ import { ConfirmDeletePRModal } from "@/components/ConfirmDeletePRModal";
 import { PRListItem } from "@/components/ListItem";
 import { PRFilterModal } from "@/components/PRFilterModal";
 import RepoSkeleton from "@/components/RepoSkeleton";
+import { useFetchPRs } from "@/hooks/useFetchPRs";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
-import { usePullRequests } from "@/hooks/usePullRequests";
 import { useRepository } from "@/hooks/useRepository";
 
 export default function RepositoryPage() {
@@ -47,7 +47,7 @@ export default function RepositoryPage() {
 		loadPrevPage,
 		filter,
 		setFilter,
-	} = usePullRequests({
+	} = useFetchPRs({
 		repoId: id as string,
 		initialPage: 1,
 		perPage: 5,
@@ -70,7 +70,7 @@ export default function RepositoryPage() {
 	if (!repo) return null;
 
 	return (
-		<div className="p-6 flex flex-col gap-6">
+		<div className="p-6 flex flex-col gap-6 fade-in-fast">
 			{/* ---- Repository Header ---- */}
 			<div className="flex flex-col md:flex-row items-start justify-between">
 				<AnimatedSlide x={-20} triggerOnView={false}>
@@ -152,7 +152,7 @@ export default function RepositoryPage() {
 								{skeletonKeys.map((key) => (
 									<div
 										key={key}
-										className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-zinc-950/90 animate-pulse"
+										className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-gray-800 animate-pulse"
 									></div>
 								))}
 							</AnimatedOpacity>
@@ -160,13 +160,14 @@ export default function RepositoryPage() {
 							pullRequests.map((pr) => (
 								<PRListItem
 									key={pr.id}
-									href={`/dashboard/repo/${id}/pr/edit/${pr.id}`}
+									href={pr.providerPrUrl ?? `/dashboard/repo/${id}/pr/edit/${pr.id}`}
 									title={pr.title}
 									status={pr.status}
 									compareBranch={pr.compareBranch}
 									baseBranch={pr.baseBranch}
 									updatedAt={pr.updatedAt}
 									onDelete={() => setPrToDelete(pr.id)}
+									provider={repo.provider}
 								/>
 							))
 						) : (

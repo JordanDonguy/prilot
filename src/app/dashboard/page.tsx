@@ -105,7 +105,7 @@ export default function DashboardPage() {
 	})();
 
 	return (
-		<div className="p-6 space-y-6">
+		<div className="p-6 space-y-6 fade-in-fast">
 			<AnimatedSlide x={-20} triggerOnView={false}>
 				<h1 className="text-3xl mb-2 text-gray-900 dark:text-white">
 					Dashboard

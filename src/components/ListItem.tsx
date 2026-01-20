@@ -79,7 +79,7 @@ export function DashboardListItem({
 						target="blank"
 						className="flex gap-2 items-center text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline self-end"
 					>
-						View on GitHub
+						View on {providerUrl?.includes("gitlab") ? "GitLab" : "GitHub"}
 					</Link>
 				)}
 			</div>
@@ -119,6 +119,7 @@ type PRListItemProps = {
 	baseBranch: string;
 	updatedAt: string;
 	onDelete: () => void;
+	provider: string;
 };
 
 export function PRListItem({
@@ -129,6 +130,7 @@ export function PRListItem({
 	baseBranch,
 	updatedAt,
 	onDelete,
+	provider,
 }: PRListItemProps) {
 	return (
 		<AnimatedSlide
@@ -177,7 +179,7 @@ export function PRListItem({
 							target={status === "sent" ? "_blank" : "_self"}
 							className="block text-blue-600 dark:text-blue-400 font-medium underline-offset-2 hover:underline"
 						>
-							{status === "draft" ? "Edit" : "View on GitHub"}
+							{status === "draft" ? "Edit" : `View on ${provider === "gitlab" ? "GitLab" : "GitHub"}`}
 						</Link>
 					</div>
 				</div>

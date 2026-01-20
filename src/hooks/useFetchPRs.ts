@@ -10,7 +10,7 @@ interface UsePullRequestsOptions {
 	initialFilter?: PRFilter;
 }
 
-export function usePullRequests({
+export function useFetchPRs({
 	repoId,
 	initialPage = 1,
 	perPage = 5,
@@ -26,9 +26,9 @@ export function usePullRequests({
 		totalPages: 1,
 	});
 	const [filter, setFilter] = useState<PRFilter>(initialFilter);
-	const [loading, setLoading] = useState(false);
 
-	const isFetchingRef = useRef(false);
+	const [loading, setLoading] = useState(false);
+	const isFetchingRef = useRef(false); // Ref to prevent double fetches
 
 	const fetchPRs = useCallback(
 		async (page = initialPage) => {

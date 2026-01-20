@@ -12,13 +12,14 @@ import {
 } from "./Card";
 
 type PREditorProps = {
-	title: string;
-	description: string;
+	title: string | undefined;
+	description: string | undefined;
 	showEditOrPreview: "edit" | "preview";
 	setTitle: (val: string) => void;
 	setDescription: (val: string) => void;
 	setShowEditOrPreview: (val: "edit" | "preview") => void;
 	onSend: () => void;
+	isSendingPr: boolean;
 };
 
 export function PREditor({
@@ -29,6 +30,7 @@ export function PREditor({
 	setDescription,
 	setShowEditOrPreview,
 	onSend,
+	isSendingPr,
 }: PREditorProps) {
 	return (
 		<Card className="bg-white/70 dark:bg-gray-800/20 backdrop-blur-sm border border-gray-200/70 dark:border-gray-800 shadow-lg px-2! md:px-4!">
@@ -46,7 +48,7 @@ export function PREditor({
 					</label>
 					<input
 						id="pr-title"
-						value={title}
+						value={title ?? ""}
 						onChange={(e) => setTitle(e.target.value)}
 						placeholder="Brief description of changes"
 						className="rounded-md w-1/2 py-2 px-4 border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 focus:outline-none"
@@ -80,7 +82,7 @@ export function PREditor({
 
 						{showEditOrPreview === "edit" ? (
 							<AutoResizeTextarea
-								value={description}
+								value={description ?? ""}
 								onChange={(e) => setDescription(e.target.value)}
 								placeholder="Detailed description in Markdown..."
 								className="w-full block min-h-75 max-h-[80vh] rounded-b-xl border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 p-4 resize-none focus:outline-none"
@@ -97,7 +99,7 @@ export function PREditor({
 				<button
 					type="button"
 					onClick={onSend}
-					disabled={!title || !description}
+					disabled={!title || !description || isSendingPr}
 					title={
 						!title || !description
 							? "Please enter title and description to send PR"
@@ -105,11 +107,11 @@ export function PREditor({
 					}
 					className={`w-56 h-10 my-8 mx-auto flex justify-center items-center rounded-lg
             shadow-sm bg-gray-100 dark:bg-zinc-950/60 border border-gray-300 dark:border-gray-800
-            ${!title || !description ? "cursor-not-allowed opacity-60" : "hover:bg-gray-200 hover:dark:bg-gray-800 hover:cursor-pointer"}
+            ${!title || !description || isSendingPr ? "cursor-not-allowed opacity-60" : "hover:bg-gray-200 hover:dark:bg-gray-800 hover:cursor-pointer"}
           `}
 				>
 					<Send className="w-4 h-4 mr-2" />
-					Send Pull Request
+					{isSendingPr ? "Sending your PR..." : "Send Pull Request"}
 				</button>
 			</CardContent>
 		</Card>

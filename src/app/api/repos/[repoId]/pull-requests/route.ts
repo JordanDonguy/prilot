@@ -61,8 +61,8 @@ export async function GET(
 				status: true,
 				baseBranch: true,
 				compareBranch: true,
-				createdAt: true,
 				updatedAt: true,
+				providerPrUrl: true
 			},
 			orderBy: { updatedAt: "desc" },
 			skip,

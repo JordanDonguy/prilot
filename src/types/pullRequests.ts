@@ -6,6 +6,7 @@ export interface IPullRequest {
   baseBranch: string;
   compareBranch: string;
   updatedAt: string;
+  providerPrUrl?: string | null;
 };
 
 // ---- Pagination info ----

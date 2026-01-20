@@ -1,16 +1,17 @@
 "use client";
 
-import debounce from "lodash.debounce";
 import { ArrowBigLeftDash, Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "react-toastify";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { PREditor } from "@/components/PREditor";
 import PREditorSkeleton from "@/components/PREditorSkeleton";
 import { BranchSelect, LanguageSelect } from "@/components/Select";
-import { usePullRequestActions } from "@/hooks/usePullRequestActions";
+import { useAutoSavePR } from "@/hooks/useAutoSavePR";
+import { useFetchPR } from "@/hooks/useFetchPR";
+import { useGeneratePR } from "@/hooks/useGeneratePR";
 import { useRepository } from "@/hooks/useRepository";
+import { useSendPR } from "@/hooks/useSendPR";
 import type { PRLanguage } from "@/types/languages";
 import AnimatedSlide from "./animations/AnimatedSlide";
 
@@ -23,188 +24,136 @@ export default function PREditorPageContent({
 	repoId,
 	prId: initialPrId,
 }: PREditorProps) {
-	const router = useRouter();
-	const { repo, loading } = useRepository(repoId);
-	const { addDraftPR } = usePullRequestActions(repoId);
-
+	// ----- State -----
 	const [prId, setPrId] = useState<string | null>(initialPrId ?? null);
-	const [prFetchLoading, setPrFetchLoading] = useState(!!initialPrId);
-
 	const [baseBranch, setBaseBranch] = useState("");
 	const [compareBranch, setCompareBranch] = useState("");
 	const [language, setLanguage] = useState<PRLanguage>("English");
-
-	const [title, setTitle] = useState("");
-	const [description, setDescription] = useState("");
-
-	const [isGenerating, setIsGenerating] = useState(false);
+	const [title, setTitle] = useState<string | undefined>();
+	const [description, setDescription] = useState<string | undefined>();
 	const [showEditOrPreview, setShowEditOrPreview] = useState<
 		"edit" | "preview"
 	>("edit");
+
+	const startAutoSave = useRef(false); // To start auto saving PR in db when editing manually
+	const skipNextFetch = useRef(false); // To prevent fetching PR after generating one
 	const editorRef = useRef<HTMLDivElement | null>(null);
 
-	const startAutoSave = useRef(false); // To start auto saving changes
-	const skipNextFetch = useRef(false); // To prevent fetching PR when generating a new one
+	// ----- Hooks -----
+	const { repo, loading } = useRepository(repoId);
 
-	// initialize branches
-	useEffect(() => {
-		if (loading || prId) return;
-		setBaseBranch(repo.defaultBranch);
-		setCompareBranch(repo.branches[0]);
-	}, [loading, repo, prId]);
+	const { pullRequest, loading: prFetchLoading } = useFetchPR({
+		repoId,
+		prId,
+		skipNextFetch,
+	});
 
-	// fetch PR if editing
-	useEffect(() => {
-		const fetchDraftPR = async () => {
-			if (!prId) return;
+	const { isGenerating, generatePR } = useGeneratePR({
+		repoId,
+		prId,
+		baseBranch,
+		compareBranch,
+		language,
+		setPrId,
+	});
 
-			// Skip fetch if PR was just created
-			if (skipNextFetch.current) {
-				skipNextFetch.current = false;
-				return;
-			};
+	const { isSendingPr, providerPrUrl, sendPR } = useSendPR(repoId, prId);
 
-			setPrFetchLoading(true);
+	useAutoSavePR({ prId, repoId, title, description, startAutoSave });
 
-			try {
-				const res = await fetch(`/api/repos/${repoId}/pull-requests/${prId}`);
-				if (!res.ok) throw new Error("Failed to fetch PR");
+	// ----- Functions -----
+	const handleGenerate = useCallback(async () => {
+		startAutoSave.current = false; // suspend auto save
+		skipNextFetch.current = true; // prevent fetching PR after prId is modified
 
-				const data = await res.json();
+		const { success, generatedTitle, generatedDescription } =
+			await generatePR();
 
-				setLanguage(data.language);
-				setBaseBranch(data.baseBranch);
-				setCompareBranch(data.compareBranch);
-				setTitle(data.title);
-				setDescription(data.description);
-				setShowEditOrPreview("preview");
-			} catch (err) {
-				console.error(err);
-				toast.error("Failed to load draft PR");
-			} finally {
-				setPrFetchLoading(false);
-			}
-		};
-		fetchDraftPR();
-	}, [prId, repoId]);
-
-	// generate/update PR
-	const handleGenerate = async () => {
-		if (!compareBranch) return;
-		setIsGenerating(true);
-		setTitle("");
-		setDescription("");
-		startAutoSave.current = false;
-
-		try {
-			const compareRes = await fetch(
-				`/api/repos/${repoId}/compare-commits/github?base=${baseBranch}&compare=${compareBranch}`,
-			);
-			if (!compareRes.ok) throw new Error("Failed to fetch commits");
-
-			const { commits }: { commits: string[] } = await compareRes.json();
-			if (!commits.length) {
-				toast.info("No commit differences found");
-				return;
-			}
-
-			const aiRes = await fetch("/api/pr/generate", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ commits, language, compareBranch }),
-			});
-			if (!aiRes.ok) throw new Error("Failed to generate PR with AI");
-			const { title: generatedTitle, description: generatedDescription } =
-				await aiRes.json();
-
-			// create or update
-			if (!prId) {
-				const newPR = await addDraftPR({
-					prTitle: generatedTitle,
-					prBody: generatedDescription,
-					baseBranch,
-					compareBranch,
-					language,
-				});
-
-				if (newPR) {
-					skipNextFetch.current = true;
-					setPrId(newPR.id);
-				}
-			} else {
-				const updateRes = await fetch(
-					`/api/repos/${repoId}/pull-requests/${prId}`,
-					{
-						method: "PATCH",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({
-							prTitle: generatedTitle,
-							prBody: generatedDescription,
-						}),
-					},
-				);
-				if (!updateRes.ok) throw new Error("Failed to update PR");
-			}
-
+		if (success) {
 			setTitle(generatedTitle);
 			setDescription(generatedDescription);
 			setShowEditOrPreview("preview");
-			requestAnimationFrame(() =>
-				editorRef.current?.scrollIntoView({
-					behavior: "smooth",
-					block: "start",
-				}),
-			);
-		} catch (err) {
-			console.error(err);
-			toast.error("Failed to generate PR");
-		} finally {
-			setIsGenerating(false);
+
+			// Scroll to pull requests editor
+			editorRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
 		}
-	};
 
-	// Debounced save function
-	const saveDraft = useMemo(
-		() =>
-			debounce(async (title: string, description: string) => {
-				if (!prId || !startAutoSave.current) return;
+		startAutoSave.current = true; // restore auto save
+	}, [generatePR]);
 
-				try {
-					await fetch(`/api/repos/${repoId}/pull-requests/${prId}`, {
-						method: "PATCH",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ prTitle: title, prBody: description }),
-					});
-				} catch (err) {
-					console.error("Failed to save draft", err);
-				}
-			}, 1000),
-		[prId, repoId],
-	);
-
-	// Watch for changes
+	// ----- Effects -----
+	// Set default and compare branches
 	useEffect(() => {
-		if (!startAutoSave.current) return;
-		saveDraft(title, description);
-	}, [title, description, saveDraft]);
+		if (!repo) return;
+		setBaseBranch(repo.defaultBranch);
+		setCompareBranch(
+			repo.branches.length > 1
+				? repo.branches[0] !== repo.defaultBranch
+					? repo.branches[0]
+					: repo.branches[1]
+				: repo.branches[0],
+		);
+	}, [repo]);
 
-	// Cancel auto-save on unmount
+	// Set PR infos if editing a draft
 	useEffect(() => {
-		return () => {
-			saveDraft.cancel();
-		};
-	}, [saveDraft]);
+		if (!pullRequest) return;
 
-	const handleSend = () => {
-		router.push(`/dashboard/repo/${repoId}`);
-		toast.success("Pull request sent! 🚀");
-	};
+		// Set PR infos in local state
+		setPrId(pullRequest.id);
+		setTitle(pullRequest.title);
+		setDescription(pullRequest.description);
+		setBaseBranch(pullRequest.baseBranch);
+		setCompareBranch(pullRequest.compareBranch);
+		setLanguage(pullRequest.language);
+		setShowEditOrPreview("preview");
+	}, [pullRequest]);
 
+	// ----- JSX fallbacks ------
+	// Loading fallback
 	if (loading || prFetchLoading) return <PREditorSkeleton />;
+
+	// Return null if no repo (redirected to dashboard in hook already if no repo found)
 	if (!repo) return null;
 
+	// After a pull-request is sent, show link to provider PR
+	if (providerPrUrl)
+		return (
+			<div className="flex flex-col">
+				<h1 className="p-2 md:p-6 text-3xl mb-2 text-gray-900 dark:text-white">
+					Generate Pull Request
+				</h1>
+				<AnimatedSlide
+					y={40}
+					triggerOnView={false}
+					className="my-8 lg:my-16 flex flex-col justify-center text-start w-fit mx-auto text-xl p-4 rounded-xl border bg-white/70 dark:bg-gray-800/25 border-gray-300 dark:border-gray-700 shadow-lg"
+				>
+					<span className="text-2xl mb-4">
+						Your Pull-Request has been successfully sent! 🚀
+					</span>
+					<span className="text-gray-800 dark:text-gray-200 mb-2">
+						You can review it and merge it here:
+					</span>
+					<div className="flex gap-2">
+						👉
+						<Link
+							href={providerPrUrl}
+							target="blank"
+							className="text-blue-600 dark:text-blue-500 hover:underline underline-offset-2"
+						>
+							{providerPrUrl}
+						</Link>
+					</div>
+				</AnimatedSlide>
+			</div>
+		);
+
+	// ----- JSX ------
 	return (
-		<div className="p-2 md:p-6 space-y-6">
+		<div className="p-2 md:p-6 space-y-6 fade-in-fast">
 			<section className="grid grid-cols-3 mb-8">
 				<AnimatedSlide x={-20} triggerOnView={false} className="col-span-2">
 					<h1 className="text-3xl mb-2 text-gray-900 dark:text-white">
@@ -253,7 +202,7 @@ export default function PREditorPageContent({
 					<AnimatedSlide y={20} triggerOnView={false}>
 						<Button
 							onClick={handleGenerate}
-							disabled={!compareBranch || isGenerating}
+							disabled={!compareBranch || isGenerating || isSendingPr}
 							className="h-auto w-56 py-2 my-12 mx-auto bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
 						>
 							<span className="flex items-center group-hover:scale-110 transition">
@@ -279,7 +228,8 @@ export default function PREditorPageContent({
 							setDescription(v);
 						}}
 						setShowEditOrPreview={setShowEditOrPreview}
-						onSend={handleSend}
+						onSend={sendPR}
+						isSendingPr={isSendingPr}
 					/>
 				</div>
 			</div>
