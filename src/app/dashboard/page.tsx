@@ -146,62 +146,68 @@ export default function DashboardPage() {
 			{/* ---- Recent Activity ---- */}
 			<div className="grid gap-6 xl:grid-cols-2">
 				{/* ---- Recent PRs ---- */}
-				<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
-					<CardHeader>
-						<CardTitle>Recent Pull Requests</CardTitle>
-						<CardDescription>Your latest PR activity</CardDescription>
-					</CardHeader>
-					<CardContent
-						className={`flex flex-col space-y-4 h-full ${recentPRs.length === 0 && !loading && "justify-center"}`}
-					>
-						{loading ? (
-							<AnimatedOpacity>
-								{/* -- PRs loading skeleton */}
-								<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
-								<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
-								<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
-							</AnimatedOpacity>
-						) : recentPRs.length > 0 ? (
-							recentPRs.map((pr) => (
-								<DashboardListItem
-									key={pr.id}
-									title={pr.title}
-									subtitle={`${pr.repoName.slice(0, 1).toUpperCase() + pr.repoName.slice(1)} • ${formatDateTime(pr.updatedAt)}`}
-									badge={pr.provider}
-									status={pr.status}
-									providerUrl={pr.providerPrUrl}
-									repoId={pr.repoId}
-									prId={pr.id}
-								/>
-							))
-						) : (
-							<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
-								No recent PRs found
-							</p>
-						)}
-					</CardContent>
-				</Card>
+				<AnimatedSlide x={20} y={-20} triggerOnView={false}>
+					<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+						<CardHeader>
+							<CardTitle>Recent Pull Requests</CardTitle>
+							<CardDescription>Your latest PR activity</CardDescription>
+						</CardHeader>
+						<CardContent
+							className={`flex flex-col space-y-4 h-full ${recentPRs.length === 0 && !loading && "justify-center"}`}
+						>
+							{loading ? (
+								<AnimatedOpacity>
+									{/* -- PRs loading skeleton */}
+									<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
+									<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
+									<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
+								</AnimatedOpacity>
+							) : recentPRs.length > 0 ? (
+								recentPRs.map((pr) => (
+									<DashboardListItem
+										key={pr.id}
+										title={pr.title}
+										subtitle={`${pr.repoName.slice(0, 1).toUpperCase() + pr.repoName.slice(1)} • ${formatDateTime(pr.updatedAt)}`}
+										badge={pr.provider}
+										status={pr.status}
+										providerUrl={pr.providerPrUrl}
+										repoId={pr.repoId}
+										prId={pr.id}
+									/>
+								))
+							) : (
+								<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
+									No recent PRs found
+								</p>
+							)}
+						</CardContent>
+					</Card>
+				</AnimatedSlide>
 
 				{/* ---- Top repositories ---- */}
-				<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
-					<CardHeader>
-						<CardTitle>Your Repositories</CardTitle>
-						<CardDescription>
-							Quick access to your most active repos
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						{topRepos.map((repo) => (
-							<DashboardListItemLink
-								key={repo.id}
-								href={`/dashboard/repo/${repo.id}`}
-								title={repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)}
-								subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
-								badge={repo.provider}
-							/>
-						))}
-					</CardContent>
-				</Card>
+				<AnimatedSlide x={-20} y={-20} triggerOnView={false}>
+					<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+						<CardHeader>
+							<CardTitle>Your Repositories</CardTitle>
+							<CardDescription>
+								Quick access to your most active repos
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							{topRepos.map((repo) => (
+								<DashboardListItemLink
+									key={repo.id}
+									href={`/dashboard/repo/${repo.id}`}
+									title={
+										repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)
+									}
+									subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
+									badge={repo.provider}
+								/>
+							))}
+						</CardContent>
+					</Card>
+				</AnimatedSlide>
 			</div>
 		</div>
 	);

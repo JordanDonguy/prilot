@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { MemberRoleSelect } from "@/components/Select";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
-import AnimatedSlide from "./animations/AnimatedSlide";
+import AnimatedScale from "./animations/AnimatedScale";
 
 // ------------------------------
 // ------ Simple List item ------
@@ -32,8 +32,8 @@ export function DashboardListItem({
 	prId,
 }: DashboardListItemProps) {
 	return (
-		<AnimatedSlide
-			y={20}
+		<AnimatedScale
+			scale={0.9}
 			triggerOnView={false}
 			className={`flex items-center justify-between gap-6 h-18 p-3 rounded-lg
         border border-gray-200 dark:border-gray-700/70
@@ -83,7 +83,7 @@ export function DashboardListItem({
 					</Link>
 				)}
 			</div>
-		</AnimatedSlide>
+		</AnimatedScale>
 	);
 }
 
@@ -133,8 +133,8 @@ export function PRListItem({
 	provider,
 }: PRListItemProps) {
 	return (
-		<AnimatedSlide
-			y={20}
+		<AnimatedScale
+			scale={0.94}
 			triggerOnView={false}
 			className="flex flex-col lg:h-22 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90
         border border-gray-200 dark:border-gray-700/70"
@@ -179,12 +179,14 @@ export function PRListItem({
 							target={status === "sent" ? "_blank" : "_self"}
 							className="block text-blue-600 dark:text-blue-400 font-medium underline-offset-2 hover:underline"
 						>
-							{status === "draft" ? "Edit" : `View on ${provider === "gitlab" ? "GitLab" : "GitHub"}`}
+							{status === "draft"
+								? "Edit"
+								: `View on ${provider === "gitlab" ? "GitLab" : "GitHub"}`}
 						</Link>
 					</div>
 				</div>
 			</div>
-		</AnimatedSlide>
+		</AnimatedScale>
 	);
 }
 

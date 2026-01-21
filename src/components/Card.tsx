@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import AnimatedSlide from "./animations/AnimatedSlide";
+import AnimatedScale from "./animations/AnimatedScale";
 
 interface CardProps {
 	children: ReactNode;
@@ -8,20 +8,8 @@ interface CardProps {
 	animatedSlideXValue?: number;
 }
 
-export function Card({
-	children,
-	className = "",
-	animatedSlideXValue = -20,
-}: CardProps) {
-	return (
-		<AnimatedSlide
-			x={animatedSlideXValue}
-			triggerOnView={false}
-			className={`rounded-xl p-4 ${className}`}
-		>
-			{children}
-		</AnimatedSlide>
-	);
+export function Card({ children, className = "" }: CardProps) {
+	return <div className={`rounded-xl p-4 ${className}`}>{children}</div>;
 }
 
 export function CardHeader({ children, className = "" }: CardProps) {
@@ -65,21 +53,21 @@ type StatCardProps = {
 
 export function StatCard({ title, value, icon: Icon, comment }: StatCardProps) {
 	return (
-		<Card 
-		animatedSlideXValue={20}
-		className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
-			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-				<CardTitle className="text-sm">{title}</CardTitle>
-				<Icon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-			</CardHeader>
-			<CardContent>
-				<div className="text-2xl">{value}</div>
-			</CardContent>
-			{comment && (
-				<p className="-mt-1 text-xs text-gray-500 dark:text-gray-400">
-					{comment}
-				</p>
-			)}
-		</Card>
+		<AnimatedScale scale={0.9} triggerOnView={false}>
+			<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
+				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+					<CardTitle className="text-sm">{title}</CardTitle>
+					<Icon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+				</CardHeader>
+				<CardContent>
+					<div className="text-2xl">{value}</div>
+				</CardContent>
+				{comment && (
+					<p className="-mt-1 text-xs text-gray-500 dark:text-gray-400">
+						{comment}
+					</p>
+				)}
+			</Card>
+		</AnimatedScale>
 	);
 }
