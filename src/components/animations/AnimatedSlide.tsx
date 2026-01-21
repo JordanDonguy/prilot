@@ -17,17 +17,20 @@ type AnimatedSlideProps = {
 	amount?: number;
 	/** Additional className */
 	className?: string;
+	/* Optionnal ref */
+	ref?: React.RefObject<HTMLDivElement | null>;
 };
 
 export default function AnimatedSlide({
 	children,
 	x = 0,
 	y = 0,
-	damping = 20,
-	mass = 0.3,
+	damping = 18,
+	mass = 0.5,
 	triggerOnView,
 	amount = 0.5,
 	className = "",
+	ref,
 }: AnimatedSlideProps) {
 	const variants: Variants = {
 		hidden: {
@@ -51,6 +54,7 @@ export default function AnimatedSlide({
 
 	return (
 		<motion.div
+			ref={ref}
 			className={className}
 			variants={variants}
 			initial="hidden"
