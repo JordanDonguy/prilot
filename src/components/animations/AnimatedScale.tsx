@@ -15,8 +15,6 @@ type AnimatedScaleProps = {
 	triggerOnView?: boolean;
 	/* Optionnal scale value, default to 0 */
 	scale?: number;
-	/* Optionnal opacity value, default to 0 */
-	opacity?: number;
 };
 
 export default function AnimatedScale({
@@ -28,16 +26,13 @@ export default function AnimatedScale({
 	delay = 0,
 	triggerOnView,
 	scale = 0,
-	opacity = 0,
 }: AnimatedScaleProps) {
 	const variants: Variants = {
 		hidden: {
-			opacity: opacity,
 			scale: scale,
 			rotate: 0,
 		},
 		visible: {
-			opacity: 1,
 			scale: 1,
 			transition: {
 				type: "spring",
