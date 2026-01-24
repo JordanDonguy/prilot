@@ -143,13 +143,21 @@ model Invitation {
   repositoryId  String             @db.Uuid
   email         String
   invitedById   String             @db.Uuid
-  status        InvitationStatus
+
+  token         String             @unique
+  status        InvitationStatus   @default(pending)
+
+  expiresAt     DateTime
+  acceptedAt    DateTime?
+  declinedAt    DateTime?
+
   createdAt     DateTime           @default(now())
 
   repository    Repository         @relation(fields: [repositoryId], references: [id])
   invitedBy     User               @relation("InvitedBy", fields: [invitedById], references: [id])
 
   @@unique([repositoryId, email])
+  @@index([email])
   @@map("invitations")
 }
 
