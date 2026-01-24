@@ -127,7 +127,7 @@ model RepositoryMember {
   repositoryId  String          @db.Uuid
   userId        String          @db.Uuid
   role          RepositoryRole
-  joinedAt      DateTime        @default(now())
+  createdAt     DateTime        @default(now())
 
   repository    Repository      @relation(fields: [repositoryId], references: [id])
   user          User            @relation(fields: [userId], references: [id])
