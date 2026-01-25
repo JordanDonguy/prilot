@@ -49,7 +49,7 @@ export function BranchSelect({
 // ---- Member Role Select ----
 // ----------------------------
 type MemberRoleSelectProps = {
-	value?: string;
+	value?: string | null;
 	onChange: (value: "admin" | "member") => void;
 };
 
@@ -62,7 +62,7 @@ export function MemberRoleSelect({
 	return (
 		<div className="relative hover:cursor-pointer transition-colors">
 			<select
-				value={value}
+				value={value ?? ""}
 				onChange={(e) => onChange(e.target.value as "admin" | "member")}
 				className={`text-sm py-2 pr-10 pl-4 rounded-lg appearance-none
           shadow-sm hover:cursor-pointer hover:opacity-85 focus:outline-none transition-colors

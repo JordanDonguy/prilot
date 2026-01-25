@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { MemberRoleSelect } from "@/components/Select";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
+import type { Member } from "@/types/members";
 import AnimatedScale from "./animations/AnimatedScale";
 
 // ------------------------------
@@ -193,18 +194,12 @@ export function PRListItem({
 // ------------------------------
 // ------ Member List Item ------
 // ------------------------------
-export type Member = {
-	email: string;
-	first_name: string;
-	last_name: string;
-	role: string;
-};
-
 type MemberListItemProps = {
 	member: Member;
 	updateMemberRole: (email: string, role: string) => void;
 	onDelete: (member: Member) => void;
 	className?: string;
+	showDeleteButton: boolean;
 };
 
 export function MemberListItem({
@@ -212,25 +207,26 @@ export function MemberListItem({
 	updateMemberRole,
 	onDelete,
 	className = "",
+	showDeleteButton,
 }: MemberListItemProps) {
 	return (
-		<article
-			className={`flex justify-between p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-700/70 ${className}`}
+		<AnimatedScale
+			scale={0.94}
+			triggerOnView={false}
+			className={`flex flex-col md:flex-row gap-4 justify-between min-h-20 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-700/70 ${className}`}
 		>
 			<div className="flex gap-4 items-center">
 				{/* -------- Avatar -------- */}
 				<div className="flex items-start justify-between">
 					<span className="w-10 h-10 flex justify-center items-center rounded-full bg-blue-200 dark:bg-blue-900 text-sm font-semibold">
-						{member.first_name.slice(0, 1).toUpperCase()}
-						{member.last_name.slice(0, 1).toUpperCase()}
+						{member.username?.slice(0, 1).toUpperCase() ||
+							member.email.slice(0, 1).toUpperCase()}
 					</span>
 				</div>
 
 				{/* -------- Name and email -------- */}
 				<div className="flex flex-col h-full">
-					<span>
-						{member.first_name} {member.last_name}
-					</span>
+					<span>{member.username || member.email.split("@")[0]}</span>
 					<span className="text-sm text-gray-600 dark:text-gray-400">
 						{member.email}
 					</span>
@@ -238,19 +234,23 @@ export function MemberListItem({
 			</div>
 
 			{/* -------- Role select and delete button -------- */}
-			<div className="flex gap-4 items-center">
+			<div className="flex gap-4 items-center justify-between md:justify-normal">
 				<MemberRoleSelect
 					value={member.role}
 					onChange={(value) => updateMemberRole(member.email, value)}
 				/>
-				<button
-					type="button"
-					onClick={() => onDelete(member)}
-					className="hover:scale-105 hover:cursor-pointer transition-transform"
-				>
-					<Trash2 size={20} className="text-red-500" />
-				</button>
+
+				{/* ---- Delete button (only for member, not for owner) ---- */}
+				{member.role !== "owner" && showDeleteButton && (
+					<button
+						type="button"
+						onClick={() => onDelete(member)}
+						className="hover:scale-105 hover:cursor-pointer transition-transform"
+					>
+						<Trash2 size={20} className="text-red-500" />
+					</button>
+				)}
 			</div>
-		</article>
+		</AnimatedScale>
 	);
 }
