@@ -186,7 +186,7 @@ export default function DashboardPage() {
 
 				{/* ---- Top repositories ---- */}
 				<AnimatedSlide x={-20} y={-20} triggerOnView={false}>
-					<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+					<Card className="bg-white/70 dark:bg-gray-800/25 h-full backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
 						<CardHeader>
 							<CardTitle>Your Repositories</CardTitle>
 							<CardDescription>
@@ -194,17 +194,23 @@ export default function DashboardPage() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							{topRepos.map((repo) => (
-								<DashboardListItemLink
-									key={repo.id}
-									href={`/dashboard/repo/${repo.id}`}
-									title={
-										repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)
-									}
-									subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
-									badge={repo.provider}
-								/>
-							))}
+							{topRepos.length > 0 ? (
+								topRepos.map((repo) => (
+									<DashboardListItemLink
+										key={repo.id}
+										href={`/dashboard/repo/${repo.id}`}
+										title={
+											repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)
+										}
+										subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
+										badge={repo.provider}
+									/>
+								))
+							) : (
+								<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
+									No recent repository found
+								</p>
+							)}
 						</CardContent>
 					</Card>
 				</AnimatedSlide>

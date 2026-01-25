@@ -19,35 +19,52 @@ import { toast } from "react-toastify";
 import { useInstallations } from "@/contexts/InstallationContext";
 import { useRepos } from "@/contexts/ReposContext";
 import { config } from "@/lib/client/config";
+import type { IInvitation } from "@/types/repos";
 import GithubAppButton from "./GithubAppButton";
+import { PendingInviteModal } from "./PendingInviteModal";
 
 export default function Sidebar() {
 	const pathname = usePathname();
 	const { installations } = useInstallations();
-	const { repositories } = useRepos();
+	const { repositories, invitations } = useRepos();
 
 	const [showGithub, setShowGithub] = useState(true);
 	const [showGitlab, setShowGitlab] = useState(true);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 
+	const [selectedInvitation, setSelectedInvitation] =
+		useState<IInvitation | null>();
+
 	// provider installations
-	const githubInstall = installations.find((inst) => inst.provider === "github");
-	const gitlabInstall = installations.find((inst) => inst.provider === "gitlab");
+	const githubInstall = installations.find(
+		(inst) => inst.provider === "github",
+	);
+	const gitlabInstall = installations.find(
+		(inst) => inst.provider === "gitlab",
+	);
 
 	// Owned repos
 	const githubOwned = repositories.filter(
-		(r) => r.provider === "github" && r.userRole === "owner"
+		(r) => r.provider === "github" && r.userRole === "owner",
 	);
 	const gitlabOwned = repositories.filter(
-		(r) => r.provider === "gitlab" && r.userRole === "owner"
+		(r) => r.provider === "gitlab" && r.userRole === "owner",
 	);
 
-	// Invited repos
-	const githubInvited = repositories.filter(
-		(r) => r.provider === "github" && r.userRole === "member"
+	// User is a member but not owner
+	const githubMemberRepos = repositories.filter(
+		(r) => r.provider === "github" && r.userRole === "member",
 	);
-	const gitlabInvited = repositories.filter(
-		(r) => r.provider === "gitlab" && r.userRole === "member"
+	const gitlabMemberRepos = repositories.filter(
+		(r) => r.provider === "gitlab" && r.userRole === "member",
+	);
+
+	// Pending invitations
+	const githubPendingInvites = invitations.filter(
+		(i) => i.repositoryProvider === "github",
+	);
+	const gitlabPendingInvites = invitations.filter(
+		(i) => i.repositoryProvider === "gitlab",
 	);
 
 	return (
@@ -118,7 +135,11 @@ export default function Sidebar() {
 							<Github />
 							GitHub
 						</h2>
-						{showGithub ? <ChevronDown className="mb-2" /> : <ChevronRight className="mb-2" />}
+						{showGithub ? (
+							<ChevronDown className="mb-2" />
+						) : (
+							<ChevronRight className="mb-2" />
+						)}
 					</button>
 
 					{showGithub && (
@@ -132,11 +153,13 @@ export default function Sidebar() {
 							)}
 
 							{/* Installation exists but no repos */}
-							{githubInstall && githubOwned.length === 0 && githubInvited.length === 0 && (
-								<div className="pl-4 mt-2 mb-6 text-sm text-gray-500 dark:text-gray-400">
-									GitHub connected, but no repos found
-								</div>
-							)}
+							{githubInstall &&
+								githubOwned.length === 0 &&
+								githubMemberRepos.length === 0 && (
+									<div className="pl-4 mt-2 mb-6 text-sm text-gray-500 dark:text-gray-400">
+										GitHub connected, but no repos found
+									</div>
+								)}
 
 							{/* Owned repos */}
 							{githubOwned.length > 0 && (
@@ -157,7 +180,8 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() + repo.name.slice(1)}
+														{repo.name.charAt(0).toUpperCase() +
+															repo.name.slice(1)}
 													</span>
 												</Link>
 											</li>
@@ -167,13 +191,15 @@ export default function Sidebar() {
 							)}
 
 							{/* Invited repos */}
-							{githubInvited.length > 0 && (
+							{(githubMemberRepos.length > 0 ||
+								githubPendingInvites.length > 0) && (
 								<>
 									<h3 className="pl-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 mt-2">
 										Invited Repos
 									</h3>
 									<ul className="space-y-1">
-										{githubInvited.map((repo) => (
+										{/* Existing member repos */}
+										{githubMemberRepos.map((repo) => (
 											<li key={repo.id}>
 												<Link
 													onClick={() => setSidebarOpen(false)}
@@ -185,9 +211,31 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() + repo.name.slice(1)}
+														{repo.name.charAt(0).toUpperCase() +
+															repo.name.slice(1)}
 													</span>
 												</Link>
+											</li>
+										))}
+
+										{/* Pending invitations */}
+										{githubPendingInvites.map((inv) => (
+											<li key={inv.id} className="pr-4">
+												<button
+													type="button"
+													onClick={() => setSelectedInvitation(inv)}
+													className="flex w-full gap-4 items-center lg:ml-4 p-2 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+												>
+													<Folder
+														size={16}
+														className={`${pathname.includes(inv.repositoryId) && "text-blue-600 dark:text-blue-400 scale-120"}`}
+													/>
+													<span className="text-gray-900 dark:text-white text-sm">
+														⚠️{" "}
+														{inv.repositoryName.charAt(0).toUpperCase() +
+															inv.repositoryName.slice(1)}
+													</span>
+												</button>
 											</li>
 										))}
 									</ul>
@@ -208,7 +256,11 @@ export default function Sidebar() {
 							<Gitlab />
 							GitLab
 						</h2>
-						{showGitlab ? <ChevronDown className="mb-2" /> : <ChevronRight className="mb-2" />}
+						{showGitlab ? (
+							<ChevronDown className="mb-2" />
+						) : (
+							<ChevronRight className="mb-2" />
+						)}
 					</button>
 
 					{showGitlab && (
@@ -217,7 +269,9 @@ export default function Sidebar() {
 							{!gitlabInstall && (
 								<button
 									type="button"
-									onClick={() => toast.info("GitLab integration isn't available yet.")}
+									onClick={() =>
+										toast.info("GitLab integration isn't available yet.")
+									}
 									className="flex items-center gap-2 text-blue-700 dark:text-blue-400 mt-2 cursor-pointer hover:underline"
 								>
 									<CirclePlus size={16} /> Connect GitLab
@@ -225,11 +279,13 @@ export default function Sidebar() {
 							)}
 
 							{/* Installation exists but no repos */}
-							{gitlabInstall && gitlabOwned.length === 0 && gitlabInvited.length === 0 && (
-								<div className="pl-4 mt-2 mb-6 text-sm text-gray-500 dark:text-gray-400">
-									GitLab connected, but no repos found
-								</div>
-							)}
+							{gitlabInstall &&
+								gitlabOwned.length === 0 &&
+								gitlabMemberRepos.length === 0 && (
+									<div className="pl-4 mt-2 mb-6 text-sm text-gray-500 dark:text-gray-400">
+										GitLab connected, but no repos found
+									</div>
+								)}
 
 							{/* Owned repos */}
 							{gitlabOwned.length > 0 && (
@@ -250,7 +306,8 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() + repo.name.slice(1)}
+														{repo.name.charAt(0).toUpperCase() +
+															repo.name.slice(1)}
 													</span>
 												</Link>
 											</li>
@@ -260,13 +317,15 @@ export default function Sidebar() {
 							)}
 
 							{/* Invited repos */}
-							{gitlabInvited.length > 0 && (
+							{(gitlabMemberRepos.length > 0 ||
+								gitlabPendingInvites.length > 0) && (
 								<>
 									<h3 className="pl-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 mt-2">
 										Invited Repos
 									</h3>
 									<ul className="space-y-1">
-										{gitlabInvited.map((repo) => (
+										{/* Existing member repos */}
+										{gitlabMemberRepos.map((repo) => (
 											<li key={repo.id}>
 												<Link
 													onClick={() => setSidebarOpen(false)}
@@ -278,9 +337,31 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() + repo.name.slice(1)}
+														{repo.name.charAt(0).toUpperCase() +
+															repo.name.slice(1)}
 													</span>
 												</Link>
+											</li>
+										))}
+
+										{/* Pending invitations */}
+										{gitlabPendingInvites.map((inv) => (
+											<li key={inv.id} className="w-full">
+												<button
+													type="button"
+													onClick={() => setSelectedInvitation(inv)}
+													className="w-full flex gap-4 items-center lg:ml-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+												>
+													<Folder
+														size={16}
+														className={`${pathname.includes(inv.repositoryId) && "text-blue-600 dark:text-blue-400 scale-120"}`}
+													/>
+													<span className="text-gray-900 dark:text-white text-sm">
+														⚠️{" "}
+														{inv.repositoryName.charAt(0).toUpperCase() +
+															inv.repositoryName.slice(1)}
+													</span>
+												</button>
 											</li>
 										))}
 									</ul>
@@ -290,6 +371,12 @@ export default function Sidebar() {
 					)}
 				</section>
 			</aside>
+
+			<PendingInviteModal
+				isOpen={!!selectedInvitation}
+				invitation={selectedInvitation}
+				onClose={() => setSelectedInvitation(null)}
+			/>
 		</>
 	);
 }
