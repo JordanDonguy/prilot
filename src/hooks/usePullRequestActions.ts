@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import { useRepos } from "@/contexts/ReposContext";
 import { useRepoStore } from "@/stores/repoStore";
 
 interface CreatePRPayload {
@@ -10,6 +11,7 @@ interface CreatePRPayload {
 }
 
 export function usePullRequestActions(repoId: string) {
+	const { updateGlobalDraftPrCount, updateGlobalSentPrCount } = useRepos();
 	const repo = useRepoStore((s) => s.repos[repoId]);
 	const updateDraftPrCount = useRepoStore((s) => s.updateDraftPrCount);
 
@@ -28,7 +30,9 @@ export function usePullRequestActions(repoId: string) {
 			return null;
 		}
 
-		updateDraftPrCount(repo.id, +1);
+		updateDraftPrCount(repoId, +1);				// Update local repo draft PR count
+		updateGlobalDraftPrCount(repoId, +1); // Update local repos (dashboard) draft PR count
+
 		toast.success("Pull request created ✨");
 
 		return res.json();
@@ -47,7 +51,11 @@ export function usePullRequestActions(repoId: string) {
 			return;
 		}
 
-		updateDraftPrCount(repo.id, -1);
+		updateDraftPrCount(repo.id, -1); // Update local repo draft PR count
+
+		updateGlobalDraftPrCount(repoId, -1); // Update local repos (dashboard) draft PR count
+		updateGlobalSentPrCount(repoId, +1);  // Update local repos (dashboard) sent PR count
+
 		toast.success("Pull request deleted 🗑️");
 	};
 
