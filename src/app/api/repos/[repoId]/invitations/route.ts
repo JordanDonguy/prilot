@@ -31,7 +31,14 @@ export async function POST(
 		// 2. Validate body
 		const { email } = await emailSchema.parseAsync(await req.json());
 
-		// 3. Fetch repo + permission check
+		// 3. Prevent inviting self
+		if (email.toLowerCase() === user.email.toLowerCase()) {
+			throw new ConflictError(
+				"You cannot invite yourself to your own repository",
+			);
+		}
+
+		// 4. Fetch repo + permission check
 		const repo = await prisma.repository.findUnique({
 			where: { id: repoId },
 			include: {
@@ -47,7 +54,7 @@ export async function POST(
 		);
 		if (!isOwner) throw new ForbiddenError("Forbidden");
 
-		// 4. Prevent duplicate pending invitation
+		// 5. Prevent duplicate pending invitation
 		const existingInvitation = await prisma.invitation.findFirst({
 			where: {
 				repositoryId: repo.id,
@@ -57,7 +64,7 @@ export async function POST(
 		});
 		if (existingInvitation) throw new ConflictError("Invitation already sent");
 
-		// 5. Create invitation
+		// 6. Create invitation
 		const token = crypto.randomBytes(32).toString("hex");
 
 		await prisma.invitation.create({
@@ -70,9 +77,9 @@ export async function POST(
 			},
 		});
 
-		// 6. Send email
-		const inviteUrl = `${config.frontendUrl}/invitations/accept?token=${token}`;
-		const declineUrl = `${config.frontendUrl}/invitations/decline?token=${token}`;
+		// 7. Send email
+		const inviteUrl = `${config.frontendUrl}/invitations/${token}/accept`;
+		const declineUrl = `${config.frontendUrl}/invitations/${token}/decline`;
 
 		const result = await sendRepoInviteEmail({
 			to: email,
