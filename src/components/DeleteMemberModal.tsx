@@ -8,9 +8,10 @@ type DeleteMemberModalProps = {
   member: Member | null;
   onClose: () => void;
   onConfirm: () => void;
+  disabled?: boolean;
 };
 
-export function DeleteMemberModal({ member, onClose, onConfirm }: DeleteMemberModalProps) {
+export function DeleteMemberModal({ member, onClose, onConfirm, disabled }: DeleteMemberModalProps) {
   if (!member) return null;
 
   return (
@@ -48,9 +49,10 @@ export function DeleteMemberModal({ member, onClose, onConfirm }: DeleteMemberMo
           </button>
 
           <button
+            disabled={disabled}
             type="button"
             onClick={onConfirm}
-            className="px-4 h-9 rounded-lg bg-red-600 text-white hover:cursor-pointer hover:opacity-90"
+            className="px-4 h-9 rounded-lg bg-red-600 text-white hover:cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Remove
           </button>

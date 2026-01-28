@@ -37,6 +37,7 @@ export function AddMemberModal({
 			}
 
 			toast.success(`Invitation sent to ${email}!`);
+			onClose();
 			setEmail("");
 		} catch (err) {
 			console.log("Error sending email invite: ", err);
