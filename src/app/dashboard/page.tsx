@@ -97,18 +97,21 @@ export default function DashboardPage() {
 	const weeklyComparisonLabel = (() => {
 		if (!weeklyStats) return undefined;
 
-		if (weeklyStats.lastWeek === 0 && weeklyStats.thisWeek > 0) {
+		const { thisWeek, lastWeek } = weeklyStats;
+
+		if (lastWeek === 0 && thisWeek > 0) {
 			return "New activity this week";
 		}
 
-		if (weeklyStats.lastWeek === 0 && weeklyStats.thisWeek === 0) {
+		if (lastWeek === 0 && thisWeek === 0) {
 			return "No activity yet";
 		}
 
-		const pct = Math.round(
-			getPercentageChange(weeklyStats.thisWeek, weeklyStats.lastWeek),
-		);
+		if (lastWeek > 0 && thisWeek === 0) {
+			return "No activity this week";
+		}
 
+		const pct = Math.round(getPercentageChange(thisWeek, lastWeek));
 		return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
 	})();
 
