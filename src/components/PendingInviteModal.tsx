@@ -1,7 +1,8 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { motion } from "motion/react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { useRepos } from "@/contexts/ReposContext";
 import type { IInvitation } from "@/types/repos";
@@ -19,10 +20,12 @@ export function PendingInviteModal({
 	onClose,
 }: PendingInviteModalProps) {
 	const { refreshData } = useRepos();
+	const [loadingAction, setLoadingAction] = useState<"accept" | "decline" | null>(null);
 
 	if (!isOpen || !invitation) return null;
 
 	const handleAction = async (action: "accept" | "decline") => {
+		setLoadingAction(action);
 		try {
 			const res = await fetch(`/api/invitations/${action}`, {
 				method: "POST",
@@ -50,6 +53,8 @@ export function PendingInviteModal({
 			toast.error(
 				(err instanceof Error && err.message) || "Failed to process invitation",
 			);
+		} finally {
+			setLoadingAction(null);
 		}
 	};
 
@@ -93,15 +98,31 @@ export function PendingInviteModal({
 					<div className="flex flex-col md:flex-row w-full gap-4 mt-6">
 						<Button
 							onClick={() => handleAction("accept")}
-							className="flex-1 w-full rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 transition-colors"
+							disabled={loadingAction !== null}
+							className="flex-1 w-full rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-4 py-2 transition-colors flex items-center justify-center gap-2"
 						>
-							Accept
+							{loadingAction === "accept" ? (
+								<>
+									<Loader2 className="w-4 h-4 animate-spin" />
+									Processing...
+								</>
+							) : (
+								"Accept"
+							)}
 						</Button>
 						<Button
 							onClick={() => handleAction("decline")}
-							className="flex-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 px-4 py-2 transition-colors"
+							disabled={loadingAction !== null}
+							className="flex-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 transition-colors flex items-center justify-center gap-2"
 						>
-							Decline
+							{loadingAction === "decline" ? (
+								<>
+									<Loader2 className="w-4 h-4 animate-spin" />
+									Processing...
+								</>
+							) : (
+								"Decline"
+							)}
 						</Button>
 					</div>
 				</div>
