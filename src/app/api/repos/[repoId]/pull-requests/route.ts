@@ -38,13 +38,9 @@ export async function GET(
 	const membership = repo.members.find((m) => m.userId === user.id);
 	if (!membership)
 		throw new NotFoundError("Repository not found or unauthorized");
-	const userRole = membership.role;
 
 	// 5. Build PR filter
-	const baseFilter: Prisma.PullRequestWhereInput =
-		userRole === "owner"
-			? { repositoryId: repo.id }
-			: { repositoryId: repo.id, createdById: user.id };
+	const baseFilter: Prisma.PullRequestWhereInput = { repositoryId: repo.id, createdById: user.id };
 
 	const prFilter: Prisma.PullRequestWhereInput =
 		statusFilter && statusFilter !== "all"

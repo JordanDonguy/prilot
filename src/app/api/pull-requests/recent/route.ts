@@ -29,7 +29,14 @@ export async function GET(_req: NextRequest) {
 		// 3. Fetch last 3 PRs and PR counts for this week and previous week
 		const [recentPRs, thisWeekCount, lastWeekCount] = await Promise.all([
 			prisma.pullRequest.findMany({
-				where: { createdById: user.id },
+				where: {
+					createdById: user.id,
+					repository: {
+						members: {
+							some: { userId: user.id }, // user must still be a member or the repo
+						},
+					},
+				},
 				orderBy: { updatedAt: "desc" },
 				take: 3,
 				select: {

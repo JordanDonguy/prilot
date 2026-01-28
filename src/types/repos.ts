@@ -1,3 +1,15 @@
+// ---- Repo invitation info ----
+export interface IInvitation {
+  id: string;
+  token: string;
+  repositoryId: string;
+  repositoryName: string;
+	repositoryProvider: "github" | "gitlab";
+  invitedBy: string;
+  createdAt: string;
+  expiresAt: string;
+};
+
 // ---- Repo info ----
 export interface IRepository {
   id: string;
@@ -11,6 +23,7 @@ export interface IRepository {
   isPrivate: boolean;
   draftPrCount: number;
   sentPrCount: number; 
+  membersCount?: number;
 }
 
 // ---- Full repo API response ----

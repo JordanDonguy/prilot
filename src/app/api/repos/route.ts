@@ -8,16 +8,15 @@ const prisma = getPrisma();
 
 export async function GET() {
   try {
+    // 1. Find user
     const user = await getCurrentUser();
     if (!user) throw new UnauthorizedError("Unauthenticated");
 
-    // 1. Fetch repositories where user is a member
+    // 2. Fetch repositories where user is a member
     const repositories = await prisma.repository.findMany({
       where: {
         members: {
-          some: {
-            userId: user.id,
-          },
+          some: { userId: user.id },
         },
       },
       select: {
@@ -27,34 +26,17 @@ export async function GET() {
         name: true,
         defaultBranch: true,
         installationId: true,
+        isPrivate: true,
         createdAt: true,
-				isPrivate: true,
-        members: {
-          select: {
-            userId: true,
-            role: true,
-          },
-        },
-        _count: {
-          select: {
-            pullRequests: true,
-          },
-        },
-        pullRequests: {
-          select: {
-            status: true,
-          },
-        },
+        members: { select: { userId: true, role: true } },
+        _count: { select: { pullRequests: true } },
+        pullRequests: { select: { status: true }, where: { createdById: user.id } },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    // 2. Map repositories to include PR counts and user role
     const result = repositories.map((repo) => {
       const userRole = repo.members.find((m) => m.userId === user.id)?.role ?? null;
-
       const draftPrCount = repo.pullRequests.filter((pr) => pr.status === "draft").length;
       const sentPrCount = repo.pullRequests.filter((pr) => pr.status === "sent").length;
 
@@ -65,15 +47,44 @@ export async function GET() {
         owner: repo.owner,
         defaultBranch: repo.defaultBranch,
         installationId: repo.installationId,
+        isPrivate: repo.isPrivate,
         createdAt: repo.createdAt,
-				isPrivate: repo.isPrivate,
         userRole,
         draftPrCount,
         sentPrCount,
       };
     });
 
-    return NextResponse.json({ repositories: result });
+    // 3. Fetch invitations for this user
+    const invitations = await prisma.invitation.findMany({
+      where: { email: user.email, status: "pending" },
+      select: {
+        id: true,
+        token: true,
+        repository: { select: { id: true, name: true, provider: true } },
+        createdAt: true,
+        expiresAt: true,
+        invitedBy: { select: { username: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // 4. Map invitations to include repository name directly
+    const mappedInvitations = invitations.map((inv) => ({
+      id: inv.id,
+      token: inv.token,
+      repositoryId: inv.repository.id,
+      repositoryName: inv.repository.name,
+      repositoryProvider: inv.repository.provider,
+      invitedBy: inv.invitedBy.username,
+      createdAt: inv.createdAt,
+      expiresAt: inv.expiresAt,
+    }));
+
+    return NextResponse.json({
+      repositories: result,
+      invitations: mappedInvitations,
+    });
   } catch (error) {
     return handleError(error);
   }

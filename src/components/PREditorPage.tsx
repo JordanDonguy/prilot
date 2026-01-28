@@ -214,7 +214,12 @@ export default function PREditorPageContent({
 				</section>
 
 				{/* PR Editor */}
-				<div ref={editorRef} className="scroll-mt-2">
+				<AnimatedSlide
+					y={20}
+					triggerOnView={false}
+					ref={editorRef}
+					className="scroll-mt-2"
+				>
 					<PREditor
 						title={title}
 						description={description}
@@ -231,7 +236,7 @@ export default function PREditorPageContent({
 						onSend={sendPR}
 						isSendingPr={isSendingPr}
 					/>
-				</div>
+				</AnimatedSlide>
 			</div>
 		</div>
 	);

@@ -3,6 +3,8 @@
 import { Github, Gitlab, Lock } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import AnimatedScale from "@/components/animations/AnimatedScale";
+import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import {
 	Card,
 	CardContent,
@@ -33,87 +35,90 @@ export default function UserSettingsPage() {
 	return (
 		<div className="p-6 space-y-6 fade-in-fast">
 			{/* Header */}
-			<div>
+			<AnimatedSlide x={-20} triggerOnView={false}>
 				<h1 className="text-3xl text-gray-900 dark:text-white mb-2">
 					User settings
 				</h1>
 				<p className="text-gray-600 dark:text-gray-400">
 					Manage your account and connected services.
 				</p>
-			</div>
+			</AnimatedSlide>
 
 			{/* Account info */}
-			<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
-				<CardHeader>
-					<CardTitle>Account</CardTitle>
-					<CardDescription>Your personal information</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="flex justify-between items-center">
-						<span className="text-sm text-gray-600 dark:text-gray-400">
-							Email
-						</span>
-						<span>{user.email}</span>
-					</div>
-
-					<div className="flex justify-between items-center">
-						<span className="text-sm text-gray-600 dark:text-gray-400">
-							Username
-						</span>
-						<span>{user.username}</span>
-					</div>
-
-					<div className="flex justify-between items-center">
-						<span className="text-sm text-gray-600 dark:text-gray-400">
-							Member since
-						</span>
-						<span>{new Date(user.createdAt).toLocaleDateString()}</span>
-					</div>
-				</CardContent>
-			</Card>
+			<AnimatedScale scale={0.96} triggerOnView={false}>
+				<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+					<CardHeader>
+						<CardTitle>Account</CardTitle>
+						<CardDescription>Your personal information</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="flex justify-between items-center">
+							<span className="text-sm text-gray-600 dark:text-gray-400">
+								Email
+							</span>
+							<span>{user.email}</span>
+						</div>
+						<div className="flex justify-between items-center">
+							<span className="text-sm text-gray-600 dark:text-gray-400">
+								Username
+							</span>
+							<span>{user.username}</span>
+						</div>
+						<div className="flex justify-between items-center">
+							<span className="text-sm text-gray-600 dark:text-gray-400">
+								Member since
+							</span>
+							<span>{new Date(user.createdAt).toLocaleDateString()}</span>
+						</div>
+					</CardContent>
+				</Card>
+			</AnimatedScale>
 
 			{/* Security */}
-			<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
-				<CardHeader className="pb-2">
-					<CardTitle>Security</CardTitle>
-					<CardDescription>Password & authentication</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<button
-						type="button"
-						onClick={() => setIsPasswordModalOpen(true)}
-						className="flex justify-center items-center gap-2 w-full lg:w-[calc(50%-1rem)] h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-100 dark:text-black hover:cursor-pointer hover:opacity-90"
-					>
-						<Lock size={16} />
-						Change password
-					</button>
-				</CardContent>
-			</Card>
+			<AnimatedScale scale={0.96} triggerOnView={false}>
+				<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+					<CardHeader className="pb-2">
+						<CardTitle>Security</CardTitle>
+						<CardDescription>Password & authentication</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<button
+							type="button"
+							onClick={() => setIsPasswordModalOpen(true)}
+							className="flex justify-center items-center gap-2 w-full lg:w-[calc(50%-1rem)] h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-100 dark:text-black hover:cursor-pointer hover:opacity-90"
+						>
+							<Lock size={16} />
+							Change password
+						</button>
+					</CardContent>
+				</Card>
+			</AnimatedScale>
 
 			{/* Connected accounts */}
-			<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
-				<CardHeader className="pb-2">
-					<CardTitle>Connected accounts</CardTitle>
-					<CardDescription>Link external providers</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-3 grid lg:grid-cols-2 gap-4 lg:gap-0 mt-4">
-					<ConnectButton
-						providerName="GitHub"
-						connected={githubConnected}
-						onConnect={() => handleConnect("github")}
-						icon={<Github />}
-						className="lg:pr-8 lg:border-r border-gray-500"
-					/>
-
-					<ConnectButton
-						providerName="GitLab"
-						connected={gitlabConnected}
-						onConnect={() => handleConnect("gitlab")}
-						icon={<Gitlab />}
-						className="lg:ml-8"
-					/>
-				</CardContent>
-			</Card>
+			<AnimatedScale scale={0.96} triggerOnView={false}>
+				<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+					<CardHeader className="pb-2">
+						<CardTitle>Connected accounts</CardTitle>
+						<CardDescription>Link external providers</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-3 grid lg:grid-cols-2 gap-4 lg:gap-0 mt-4">
+						<ConnectButton
+							providerName="GitHub"
+							connected={githubConnected}
+							onConnect={() => handleConnect("github")}
+							icon={<Github />}
+							className="lg:pr-8 lg:border-r border-gray-500"
+						/>
+						<ConnectButton
+							providerName="GitLab"
+							connected={gitlabConnected}
+							onConnect={() => handleConnect("gitlab")}
+							icon={<Gitlab />}
+							className="lg:ml-8"
+						/>
+					</CardContent>
+				</Card>
+			</AnimatedScale>
 
 			{/* Change password modal */}
 			<ChangePasswordModal

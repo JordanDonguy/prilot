@@ -21,6 +21,18 @@ const envSchema = z.object({
 	// Groq
 	GROQ_API_KEY: z.string().min(1, "GROQ_API_KEY is requried"),
 
+	// Resend
+	RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
+
+	// Domain Name
+	DOMAIN_NAME: z.string().min(1, "DOMAIN_NAME is required"),
+
+	// App Name
+	APP_NAME: z.string().min(1, "APP_NAME is required"),
+
+	// Logo Url
+	LOGO_URL: z.string().min(1, "LOGO_URL is required"),
+
 	// Node environment
 	NODE_ENV: z
 		.enum(["development", "production", "test"])
@@ -47,6 +59,12 @@ export const config = {
 	groq: {
 		apiKey: parsedEnv.GROQ_API_KEY
 	},
+	resend: {
+		apiKey: parsedEnv.RESEND_API_KEY
+	},
+	domainName: parsedEnv.DOMAIN_NAME,
+	appName: parsedEnv.APP_NAME,
+	logoUrl: parsedEnv.LOGO_URL,
 	frontendUrl: parsedEnv.FRONTEND_URL,
 	nodeEnv: parsedEnv.NODE_ENV,
 };

@@ -32,6 +32,7 @@ import RepoSkeleton from "@/components/RepoSkeleton";
 import { useFetchPRs } from "@/hooks/useFetchPRs";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
 import { useRepository } from "@/hooks/useRepository";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 
 export default function RepositoryPage() {
 	const params = useParams();
@@ -39,6 +40,7 @@ export default function RepositoryPage() {
 	const repoId = id as string;
 
 	const { repo, loading } = useRepository(repoId);
+
 	const {
 		pullRequests,
 		loading: prLoading,
@@ -76,7 +78,7 @@ export default function RepositoryPage() {
 				<AnimatedSlide x={-20} triggerOnView={false}>
 					<div className="flex items-center gap-3 mb-2">
 						<h1 className="text-3xl text-gray-900 dark:text-white">
-							{repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)}
+							{firstCharUpperCase(repo.name)}
 						</h1>
 						<Badge>{repo.provider}</Badge>
 					</div>
@@ -116,103 +118,102 @@ export default function RepositoryPage() {
 					value={repo.branches.length}
 					icon={GitBranch}
 				/>
-				<StatCard title="Contributors" value="8" icon={Users} />
+				<StatCard title="Members" value={repo.membersCount ?? 1} icon={Users} />
 			</div>
 
 			{/* ---- Pull Requests List ---- */}
-			<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
-				<CardHeader className="flex justify-between">
-					<div>
-						<CardTitle>Recent Pull Requests</CardTitle>
-						<CardDescription>View and manage your PRs</CardDescription>
-					</div>
-
-					{/* ---- Open filter modal button ---- */}
-					<Button
-						size="sm"
-						onClick={() => setIsFilterOpen(true)}
-						className="w-fit px-4 flex flex-col md:flex-row items-center bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-200 hover:dark:bg-gray-800 transition-colors"
-					>
-						<span className="flex gap-2 items-center">
-							<Filter className="w-4 h-4" />
-							Filter
-						</span>
-						<span className="hidden md:block mx-1">•</span>
-						<span className="hidden md:block">
-							{filter.slice(0, 1).toUpperCase() + filter.slice(1)} PRs
-						</span>
-					</Button>
-				</CardHeader>
-
-				{/* ---- Pull Requests items ---- */}
-				<CardContent>
-					<div className="space-y-3">
-						{prLoading ? (
-							<AnimatedOpacity className="space-y-3">
-								{skeletonKeys.map((key) => (
-									<div
-										key={key}
-										className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-gray-800 animate-pulse"
-									></div>
-								))}
-							</AnimatedOpacity>
-						) : pullRequests.length > 0 ? (
-							pullRequests.map((pr) => (
-								<PRListItem
-									key={pr.id}
-									href={pr.providerPrUrl ?? `/dashboard/repo/${id}/pr/edit/${pr.id}`}
-									title={pr.title}
-									status={pr.status}
-									compareBranch={pr.compareBranch}
-									baseBranch={pr.baseBranch}
-									updatedAt={pr.updatedAt}
-									onDelete={() => setPrToDelete(pr.id)}
-									provider={repo.provider}
-								/>
-							))
-						) : (
-							<div className="flex flex-col pl-4 text-lg pt-4 gap-2">
-								{/* -- PNo Prs found fallback -- */}
-								<span className="text-gray-600 dark:text-gray-400">
-									No PRs available yet...
-								</span>
-								<Link
-									className="text-blue-600 dark:text-blue-400 group w-fit"
-									href={`/dashboard/repo/${id}/pr/new`}
-								>
-									👉{" "}
-									<span className="group-hover:underline underline-offset-2 pl-1">
-										Create one
+			<AnimatedSlide y={20} triggerOnView={false}>
+				<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
+					<CardHeader className="flex justify-between">
+						<div>
+							<CardTitle>Recent Pull Requests</CardTitle>
+							<CardDescription>View and manage your PRs</CardDescription>
+						</div>
+						{/* ---- Open filter modal button ---- */}
+						<Button
+							size="sm"
+							onClick={() => setIsFilterOpen(true)}
+							className="w-fit px-4 flex flex-col md:flex-row items-center bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 shadow-sm hover:bg-gray-200 hover:dark:bg-gray-800 transition-colors"
+						>
+							<span className="flex gap-2 items-center">
+								<Filter className="w-4 h-4" />
+								Filter
+							</span>
+							<span className="hidden md:block mx-1">•</span>
+							<span className="hidden md:block">
+								{firstCharUpperCase(filter)} PRs
+							</span>
+						</Button>
+					</CardHeader>
+					{/* ---- Pull Requests items ---- */}
+					<CardContent>
+						<div className="space-y-3">
+							{prLoading ? (
+								<AnimatedOpacity className="space-y-3">
+									{skeletonKeys.map((key) => (
+										<div
+											key={key}
+											className="block h-22 p-4 rounded-lg bg-gray-200 dark:bg-gray-800 animate-pulse"
+										></div>
+									))}
+								</AnimatedOpacity>
+							) : pullRequests.length > 0 ? (
+								pullRequests.map((pr) => (
+									<PRListItem
+										key={pr.id}
+										href={pr.providerPrUrl ?? `/dashboard/repo/${id}/pr/edit/${pr.id}`}
+										title={pr.title}
+										status={pr.status}
+										compareBranch={pr.compareBranch}
+										baseBranch={pr.baseBranch}
+										updatedAt={pr.updatedAt}
+										onDelete={() => setPrToDelete(pr.id)}
+										provider={repo.provider}
+									/>
+								))
+							) : (
+								<div className="flex flex-col pl-4 text-lg pt-4 gap-2">
+									{/* -- PNo Prs found fallback -- */}
+									<span className="text-gray-600 dark:text-gray-400">
+										No PRs available yet...
 									</span>
-								</Link>
+									<Link
+										className="text-blue-600 dark:text-blue-400 group w-fit"
+										href={`/dashboard/repo/${id}/pr/new`}
+									>
+										👉{" "}
+										<span className="group-hover:underline underline-offset-2 pl-1">
+											Create one
+										</span>
+									</Link>
+								</div>
+							)}
+						</div>
+						{/* ---- Pagination Controls ---- */}
+						{pagination.totalPages > 1 && (
+							<div className="flex justify-center gap-2 mt-4">
+								<Button
+									disabled={pagination.page === 1}
+									onClick={loadPrevPage}
+									className="hover:bg-gray-200 hover:dark:bg-gray-600 w-fit px-2"
+								>
+									<ChevronLeft />
+								</Button>
+								<span className="flex items-center px-2 text-gray-700 dark:text-gray-300">
+									Page {pagination.page} / {pagination.totalPages}
+								</span>
+								<Button
+									disabled={pagination.page === pagination.totalPages}
+									onClick={loadNextPage}
+									className="hover:bg-gray-200 hover:dark:bg-gray-600 w-fit px-2"
+								>
+									<ChevronRight />
+								</Button>
 							</div>
 						)}
-					</div>
-
-					{/* ---- Pagination Controls ---- */}
-					{pagination.totalPages > 1 && (
-						<div className="flex justify-center gap-2 mt-4">
-							<Button
-								disabled={pagination.page === 1}
-								onClick={loadPrevPage}
-								className="hover:bg-gray-200 hover:dark:bg-gray-600 w-fit px-2"
-							>
-								<ChevronLeft />
-							</Button>
-							<span className="flex items-center px-2 text-gray-700 dark:text-gray-300">
-								Page {pagination.page} / {pagination.totalPages}
-							</span>
-							<Button
-								disabled={pagination.page === pagination.totalPages}
-								onClick={loadNextPage}
-								className="hover:bg-gray-200 hover:dark:bg-gray-600 w-fit px-2"
-							>
-								<ChevronRight />
-							</Button>
-						</div>
-					)}
-				</CardContent>
-			</Card>
+					</CardContent>
+				</Card>
+			</AnimatedSlide>
 
 			{/* ---- PR filter modal ---- */}
 			<PRFilterModal

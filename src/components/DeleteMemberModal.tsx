@@ -2,14 +2,16 @@
 
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import type { Member } from "@/types/members";
 
 type DeleteMemberModalProps = {
-  member: { first_name: string; last_name: string } | null;
+  member: Member | null;
   onClose: () => void;
   onConfirm: () => void;
+  disabled?: boolean;
 };
 
-export function DeleteMemberModal({ member, onClose, onConfirm }: DeleteMemberModalProps) {
+export function DeleteMemberModal({ member, onClose, onConfirm, disabled }: DeleteMemberModalProps) {
   if (!member) return null;
 
   return (
@@ -18,7 +20,7 @@ export function DeleteMemberModal({ member, onClose, onConfirm }: DeleteMemberMo
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.5 }}
-        className="w-full max-w-md rounded-xl bg-white dark:bg-gray-800/90 p-6"
+        className="pointer-events-auto w-full max-w-sm rounded-xl bg-white dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-800 p-6 shadow-lg"
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-red-600">Remove member</h2>
@@ -32,7 +34,7 @@ export function DeleteMemberModal({ member, onClose, onConfirm }: DeleteMemberMo
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-          Are you sure you want to remove <strong>{member.first_name} {member.last_name}</strong>?
+          Are you sure you want to remove <strong>{member.username}</strong>?
           <br />
           This action cannot be undone.
         </p>
@@ -47,9 +49,10 @@ export function DeleteMemberModal({ member, onClose, onConfirm }: DeleteMemberMo
           </button>
 
           <button
+            disabled={disabled}
             type="button"
             onClick={onConfirm}
-            className="px-4 h-9 rounded-lg bg-red-600 text-white hover:cursor-pointer hover:opacity-90"
+            className="px-4 h-9 rounded-lg bg-red-600 text-white hover:cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Remove
           </button>

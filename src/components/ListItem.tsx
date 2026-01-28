@@ -3,9 +3,10 @@
 import { Edit, GitPullRequest, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/Badge";
-import { MemberRoleSelect } from "@/components/Select";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
-import AnimatedSlide from "./animations/AnimatedSlide";
+import type { Member } from "@/types/members";
+import AnimatedScale from "./animations/AnimatedScale";
 
 // ------------------------------
 // ------ Simple List item ------
@@ -32,8 +33,8 @@ export function DashboardListItem({
 	prId,
 }: DashboardListItemProps) {
 	return (
-		<AnimatedSlide
-			y={20}
+		<AnimatedScale
+			scale={0.9}
 			triggerOnView={false}
 			className={`flex items-center justify-between gap-6 h-18 p-3 rounded-lg
         border border-gray-200 dark:border-gray-700/70
@@ -57,7 +58,7 @@ export function DashboardListItem({
 			<div className="flex flex-col justify-between items-end h-full">
 				{status && (
 					<span className="flex items-center text-sm text-gray-700 dark:text-gray-400">
-						{status.slice(0, 1).toUpperCase() + status.slice(1)}
+						{firstCharUpperCase(status)}
 						{status === "draft" ? (
 							<Edit size={16} className="inline-block ml-1" />
 						) : (
@@ -83,7 +84,7 @@ export function DashboardListItem({
 					</Link>
 				)}
 			</div>
-		</AnimatedSlide>
+		</AnimatedScale>
 	);
 }
 
@@ -133,11 +134,11 @@ export function PRListItem({
 	provider,
 }: PRListItemProps) {
 	return (
-		<AnimatedSlide
-			y={20}
+		<AnimatedScale
+			scale={0.94}
 			triggerOnView={false}
 			className="flex flex-col lg:h-22 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90
-        border border-gray-200 dark:border-gray-700/70"
+        border border-gray-200 dark:border-gray-700/70 fade-in"
 		>
 			<div className="flex flex-col lg:flex-row items-start justify-between h-full">
 				<div className="h-full flex flex-col justify-between w-full lg:w-fit">
@@ -179,56 +180,51 @@ export function PRListItem({
 							target={status === "sent" ? "_blank" : "_self"}
 							className="block text-blue-600 dark:text-blue-400 font-medium underline-offset-2 hover:underline"
 						>
-							{status === "draft" ? "Edit" : `View on ${provider === "gitlab" ? "GitLab" : "GitHub"}`}
+							{status === "draft"
+								? "Edit"
+								: `View on ${provider === "gitlab" ? "GitLab" : "GitHub"}`}
 						</Link>
 					</div>
 				</div>
 			</div>
-		</AnimatedSlide>
+		</AnimatedScale>
 	);
 }
 
 // ------------------------------
 // ------ Member List Item ------
 // ------------------------------
-export type Member = {
-	email: string;
-	first_name: string;
-	last_name: string;
-	role: string;
-};
-
 type MemberListItemProps = {
 	member: Member;
-	updateMemberRole: (email: string, role: string) => void;
 	onDelete: (member: Member) => void;
 	className?: string;
+	showDeleteButton: boolean;
 };
 
 export function MemberListItem({
 	member,
-	updateMemberRole,
 	onDelete,
 	className = "",
+	showDeleteButton,
 }: MemberListItemProps) {
 	return (
-		<article
-			className={`flex justify-between p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-700/70 ${className}`}
+		<AnimatedScale
+			scale={0.94}
+			triggerOnView={false}
+			className={`flex flex-col md:flex-row gap-4 justify-between min-h-20 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-700/70 ${className}`}
 		>
 			<div className="flex gap-4 items-center">
 				{/* -------- Avatar -------- */}
 				<div className="flex items-start justify-between">
 					<span className="w-10 h-10 flex justify-center items-center rounded-full bg-blue-200 dark:bg-blue-900 text-sm font-semibold">
-						{member.first_name.slice(0, 1).toUpperCase()}
-						{member.last_name.slice(0, 1).toUpperCase()}
+						{member.username?.slice(0, 1).toUpperCase() ||
+							member.email.slice(0, 1).toUpperCase()}
 					</span>
 				</div>
 
 				{/* -------- Name and email -------- */}
 				<div className="flex flex-col h-full">
-					<span>
-						{member.first_name} {member.last_name}
-					</span>
+					<span>{member.username || member.email.split("@")[0]}</span>
 					<span className="text-sm text-gray-600 dark:text-gray-400">
 						{member.email}
 					</span>
@@ -236,19 +232,22 @@ export function MemberListItem({
 			</div>
 
 			{/* -------- Role select and delete button -------- */}
-			<div className="flex gap-4 items-center">
-				<MemberRoleSelect
-					value={member.role}
-					onChange={(value) => updateMemberRole(member.email, value)}
-				/>
-				<button
-					type="button"
-					onClick={() => onDelete(member)}
-					className="hover:scale-105 hover:cursor-pointer transition-transform"
-				>
-					<Trash2 size={20} className="text-red-500" />
-				</button>
+			<div className="flex gap-4 items-center justify-end md:justify-normal">
+				<Badge>
+					{member.role ? firstCharUpperCase(member.role) : "Invited"}
+				</Badge>
+
+				{/* ---- Delete button (only for member, not for owner) ---- */}
+				{member.role !== "owner" && showDeleteButton && (
+					<button
+						type="button"
+						onClick={() => onDelete(member)}
+						className="hover:scale-105 hover:cursor-pointer transition-transform"
+					>
+						<Trash2 size={20} className="text-red-500" />
+					</button>
+				)}
 			</div>
-		</article>
+		</AnimatedScale>
 	);
 }

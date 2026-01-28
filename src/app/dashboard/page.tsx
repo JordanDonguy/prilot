@@ -3,6 +3,7 @@
 import { AlertCircle, CheckCircle, Clock, GitPullRequest } from "lucide-react";
 import { useEffect, useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
+import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import {
 	Card,
@@ -17,6 +18,7 @@ import {
 	DashboardListItemLink,
 } from "@/components/ListItem";
 import { useRepos } from "@/contexts/ReposContext";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import { getPercentageChange } from "@/lib/utils/stats";
 import type { IPullRequest } from "@/types/pullRequests";
@@ -37,7 +39,7 @@ interface IRecentPRsResponse {
 }
 
 export default function DashboardPage() {
-	const { repositories } = useRepos();
+	const { repositories, invitations } = useRepos();
 	const [recentPRs, setRecentPRs] = useState<IRecentPR[]>([]);
 	const [weeklyStats, setWeeklyStats] = useState<{
 		thisWeek: number;
@@ -45,9 +47,15 @@ export default function DashboardPage() {
 	} | null>(null);
 	const [loading, setLoading] = useState(true);
 
+	// Check for pending invitations
+	const pendingInvitations = invitations ?? [];
+
 	// Fetch recent PRs
+	// biome-ignore lint/correctness/useExhaustiveDependencies: refetch when repos change (e.g. user just accepted an invite)
 	useEffect(() => {
 		const fetchRecentPRs = async () => {
+			if (recentPRs.length > 0) return; // prevent double fetches
+
 			try {
 				const res = await fetch("/api/pull-requests/recent");
 				if (!res.ok) throw new Error("Failed to fetch recent PRs");
@@ -64,7 +72,7 @@ export default function DashboardPage() {
 		};
 
 		fetchRecentPRs();
-	}, []);
+	}, [repositories]);
 
 	// Compute top 3 repositories by total PRs count
 	const topRepos = [...repositories]
@@ -89,18 +97,21 @@ export default function DashboardPage() {
 	const weeklyComparisonLabel = (() => {
 		if (!weeklyStats) return undefined;
 
-		if (weeklyStats.lastWeek === 0 && weeklyStats.thisWeek > 0) {
+		const { thisWeek, lastWeek } = weeklyStats;
+
+		if (lastWeek === 0 && thisWeek > 0) {
 			return "New activity this week";
 		}
 
-		if (weeklyStats.lastWeek === 0 && weeklyStats.thisWeek === 0) {
+		if (lastWeek === 0 && thisWeek === 0) {
 			return "No activity yet";
 		}
 
-		const pct = Math.round(
-			getPercentageChange(weeklyStats.thisWeek, weeklyStats.lastWeek),
-		);
+		if (lastWeek > 0 && thisWeek === 0) {
+			return "No activity this week";
+		}
 
+		const pct = Math.round(getPercentageChange(thisWeek, lastWeek));
 		return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
 	})();
 
@@ -114,6 +125,25 @@ export default function DashboardPage() {
 					Overview of your repositories and recent activity
 				</p>
 			</AnimatedSlide>
+
+			{/* ---- Pending Invitations Warning ---- */}
+			{pendingInvitations.length > 0 && (
+				<AnimatedScale scale={0.97} triggerOnView={false}>
+					<div className="bg-orange-100 dark:bg-yellow-900/15 border border-orange-400/50 dark:border-yellow-800/40 rounded-lg p-4 flex items-start gap-3">
+						<AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+						<div>
+							<h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
+								Pending Invitations
+							</h3>
+							<p className="text-sm text-amber-800 dark:text-amber-200">
+								You have {pendingInvitations.length} pending invitation
+								{pendingInvitations.length === 1 ? "" : "s"}. Check your sidebar
+								to accept or decline them.
+							</p>
+						</div>
+					</div>
+				</AnimatedScale>
+			)}
 
 			{/* ---- Stats Cards ---- */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -146,62 +176,74 @@ export default function DashboardPage() {
 			{/* ---- Recent Activity ---- */}
 			<div className="grid gap-6 xl:grid-cols-2">
 				{/* ---- Recent PRs ---- */}
-				<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
-					<CardHeader>
-						<CardTitle>Recent Pull Requests</CardTitle>
-						<CardDescription>Your latest PR activity</CardDescription>
-					</CardHeader>
-					<CardContent
-						className={`flex flex-col space-y-4 h-full ${recentPRs.length === 0 && !loading && "justify-center"}`}
-					>
-						{loading ? (
-							<AnimatedOpacity>
-								{/* -- PRs loading skeleton */}
-								<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
-								<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
-								<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
-							</AnimatedOpacity>
-						) : recentPRs.length > 0 ? (
-							recentPRs.map((pr) => (
-								<DashboardListItem
-									key={pr.id}
-									title={pr.title}
-									subtitle={`${pr.repoName.slice(0, 1).toUpperCase() + pr.repoName.slice(1)} • ${formatDateTime(pr.updatedAt)}`}
-									badge={pr.provider}
-									status={pr.status}
-									providerUrl={pr.providerPrUrl}
-									repoId={pr.repoId}
-									prId={pr.id}
-								/>
-							))
-						) : (
-							<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
-								No recent PRs found
-							</p>
-						)}
-					</CardContent>
-				</Card>
+				<AnimatedSlide x={20} y={-20} triggerOnView={false}>
+					<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+						<CardHeader>
+							<CardTitle>Recent Pull Requests</CardTitle>
+							<CardDescription>Your latest PR activity</CardDescription>
+						</CardHeader>
+						<CardContent
+							className={`flex flex-col space-y-4 h-full ${recentPRs.length === 0 && !loading && "justify-center pt-8"}`}
+						>
+							{loading ? (
+								<AnimatedOpacity>
+									{/* -- PRs loading skeleton */}
+									<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
+									<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
+									<div className="h-18 w-full bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse" />
+								</AnimatedOpacity>
+							) : recentPRs.length > 0 ? (
+								recentPRs.map((pr) => (
+									<DashboardListItem
+										key={pr.id}
+										title={pr.title}
+										subtitle={`${firstCharUpperCase(pr.repoName)} • ${formatDateTime(pr.updatedAt)}`}
+										badge={pr.provider}
+										status={pr.status}
+										providerUrl={pr.providerPrUrl}
+										repoId={pr.repoId}
+										prId={pr.id}
+									/>
+								))
+							) : (
+								<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
+									No recent PRs found
+								</p>
+							)}
+						</CardContent>
+					</Card>
+				</AnimatedSlide>
 
 				{/* ---- Top repositories ---- */}
-				<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
-					<CardHeader>
-						<CardTitle>Your Repositories</CardTitle>
-						<CardDescription>
-							Quick access to your most active repos
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						{topRepos.map((repo) => (
-							<DashboardListItemLink
-								key={repo.id}
-								href={`/dashboard/repo/${repo.id}`}
-								title={repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)}
-								subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
-								badge={repo.provider}
-							/>
-						))}
-					</CardContent>
-				</Card>
+				<AnimatedSlide x={-20} y={-20} triggerOnView={false}>
+					<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+						<CardHeader>
+							<CardTitle>Your Repositories</CardTitle>
+							<CardDescription>
+								Quick access to your most active repos
+							</CardDescription>
+						</CardHeader>
+						<CardContent
+							className={`flex flex-col space-y-4 h-full ${topRepos.length === 0 && "justify-center pt-8"}`}
+						>
+							{topRepos.length > 0 ? (
+								topRepos.map((repo) => (
+									<DashboardListItemLink
+										key={repo.id}
+										href={`/dashboard/repo/${repo.id}`}
+										title={firstCharUpperCase(repo.name)}
+										subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
+										badge={repo.provider}
+									/>
+								))
+							) : (
+								<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
+									No recent repository found
+								</p>
+							)}
+						</CardContent>
+					</Card>
+				</AnimatedSlide>
 			</div>
 		</div>
 	);
