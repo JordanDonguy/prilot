@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrisma, InvitationStatus } from "@/db";
-import { uuidParam } from "@/lib/schemas/id.schema";
+import { optionalUuidParam, uuidParam } from "@/lib/schemas/id.schema";
 import {
 	BadRequestError,
 	ForbiddenError,
@@ -89,16 +89,18 @@ export async function DELETE(
 	context: { params: Promise<{ repoId: string }> },
 ) {
 	try {
-    // 1. Get current user and validate params/body
+		// 1. Get current user and validate params/body
 		const currentUser = await getCurrentUser();
 		if (!currentUser) throw new ForbiddenError("Unauthorized");
 
 		const { repoId } = await uuidParam("repoId").parseAsync(
 			await context.params,
 		);
-		const { userId: targetUserId } = await uuidParam("userId").parseAsync(
-			await req.json(),
-		);
+
+		// Avoid to throw an error if body is empty (when a member leaves repo)
+		const body = await req.json().catch(() => ({}));
+		const { userId: targetUserId } =
+			await optionalUuidParam("userId").parseAsync(body);
 
 		// 2. Find member record of target user
 		const targetUser = targetUserId || currentUser.id;
@@ -124,31 +126,43 @@ export async function DELETE(
 			throw new BadRequestError("Owners cannot remove themselves");
 		}
 
-		// 6. Delete membership
-		await prisma.repositoryMember.delete({ where: { id: member.id } });
-
-		// 7. Fetch repository name
+		// 6. Fetch repository name and owner info for email
 		const repo = await prisma.repository.findFirst({
 			where: { id: repoId },
-			select: { name: true },
+			select: {
+				name: true,
+				installation: {
+					select: {
+						createdBy: {
+							select: { id: true, email: true, username: true },
+						},
+					},
+				},
+			},
 		});
+		if (!repo) throw new NotFoundError("Repository not found");
 
-		// 8. Send email
-		if (targetUser === currentUser.id) {
-			// Member left voluntarily
-			await sendMemberLeftEmail({
-				to: member.user.email,
-				repoName: repo?.name ?? "",
-				username: currentUser.username,
-			});
-		} else {
-			// Owner removed member
-			await sendMemberRemovedEmail({
-				to: member.user.email,
-				repoName: repo?.name ?? "",
-				removedBy: currentUser.username,
-			});
-		}
+		// 7. Delete membership
+		await prisma.repositoryMember.delete({ where: { id: member.id } });
+
+		// 8. Send email (do not block if sending fails)
+		const owner = repo.installation?.createdBy;
+		await Promise.allSettled([
+			targetUser === currentUser.id && owner
+				? sendMemberLeftEmail({
+						to: owner.email,
+						repoName: repo.name,
+						username: member.user.username,
+					})
+				: null,
+			targetUser !== currentUser.id && member.user.email
+				? sendMemberRemovedEmail({
+						to: member.user.email,
+						repoName: repo.name,
+						removedBy: currentUser.username,
+					})
+				: null,
+		]);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
