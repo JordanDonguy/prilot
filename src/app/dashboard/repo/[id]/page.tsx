@@ -32,6 +32,7 @@ import RepoSkeleton from "@/components/RepoSkeleton";
 import { useFetchPRs } from "@/hooks/useFetchPRs";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
 import { useRepository } from "@/hooks/useRepository";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 
 export default function RepositoryPage() {
 	const params = useParams();
@@ -76,7 +77,7 @@ export default function RepositoryPage() {
 				<AnimatedSlide x={-20} triggerOnView={false}>
 					<div className="flex items-center gap-3 mb-2">
 						<h1 className="text-3xl text-gray-900 dark:text-white">
-							{repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)}
+							{firstCharUpperCase(repo.name)}
 						</h1>
 						<Badge>{repo.provider}</Badge>
 					</div>
@@ -139,7 +140,7 @@ export default function RepositoryPage() {
 							</span>
 							<span className="hidden md:block mx-1">•</span>
 							<span className="hidden md:block">
-								{filter.slice(0, 1).toUpperCase() + filter.slice(1)} PRs
+								{firstCharUpperCase(filter)} PRs
 							</span>
 						</Button>
 					</CardHeader>

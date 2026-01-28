@@ -3,7 +3,7 @@
 import { Edit, GitPullRequest, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/Badge";
-import { MemberRoleSelect } from "@/components/Select";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import type { Member } from "@/types/members";
 import AnimatedScale from "./animations/AnimatedScale";
@@ -58,7 +58,7 @@ export function DashboardListItem({
 			<div className="flex flex-col justify-between items-end h-full">
 				{status && (
 					<span className="flex items-center text-sm text-gray-700 dark:text-gray-400">
-						{status.slice(0, 1).toUpperCase() + status.slice(1)}
+						{firstCharUpperCase(status)}
 						{status === "draft" ? (
 							<Edit size={16} className="inline-block ml-1" />
 						) : (
@@ -138,7 +138,7 @@ export function PRListItem({
 			scale={0.94}
 			triggerOnView={false}
 			className="flex flex-col lg:h-22 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90
-        border border-gray-200 dark:border-gray-700/70"
+        border border-gray-200 dark:border-gray-700/70 fade-in"
 		>
 			<div className="flex flex-col lg:flex-row items-start justify-between h-full">
 				<div className="h-full flex flex-col justify-between w-full lg:w-fit">
@@ -196,7 +196,6 @@ export function PRListItem({
 // ------------------------------
 type MemberListItemProps = {
 	member: Member;
-	updateMemberRole: (email: string, role: string) => void;
 	onDelete: (member: Member) => void;
 	className?: string;
 	showDeleteButton: boolean;
@@ -204,7 +203,6 @@ type MemberListItemProps = {
 
 export function MemberListItem({
 	member,
-	updateMemberRole,
 	onDelete,
 	className = "",
 	showDeleteButton,
@@ -234,11 +232,10 @@ export function MemberListItem({
 			</div>
 
 			{/* -------- Role select and delete button -------- */}
-			<div className="flex gap-4 items-center justify-between md:justify-normal">
-				<MemberRoleSelect
-					value={member.role}
-					onChange={(value) => updateMemberRole(member.email, value)}
-				/>
+			<div className="flex gap-4 items-center justify-end md:justify-normal">
+				<Badge>
+					{member.role ? firstCharUpperCase(member.role) : "Invited"}
+				</Badge>
 
 				{/* ---- Delete button (only for member, not for owner) ---- */}
 				{member.role !== "owner" && showDeleteButton && (

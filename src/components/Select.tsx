@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import type { PRLanguage } from "@/types/languages";
 
 // ---------------------------
@@ -45,49 +46,6 @@ export function BranchSelect({
 	);
 }
 
-// ----------------------------
-// ---- Member Role Select ----
-// ----------------------------
-type MemberRoleSelectProps = {
-	value?: string | null;
-	onChange: (value: "admin" | "member") => void;
-};
-
-export function MemberRoleSelect({
-	value = "member",
-	onChange,
-}: MemberRoleSelectProps) {
-	const isAdmin = value === "admin";
-
-	return (
-		<div className="relative hover:cursor-pointer transition-colors">
-			<select
-				value={value ?? ""}
-				onChange={(e) => onChange(e.target.value as "admin" | "member")}
-				className={`text-sm py-2 pr-10 pl-4 rounded-lg appearance-none
-          shadow-sm hover:cursor-pointer hover:opacity-85 focus:outline-none transition-colors
-          ${
-						isAdmin
-							? "bg-gray-900 text-white dark:bg-gray-200 dark:text-black"
-							: "bg-gray-300 dark:bg-gray-800/70"
-					}`}
-			>
-				<option value="admin">Admin</option>
-				<option value="member">Member</option>
-			</select>
-
-			<ChevronDown
-				className={`pointer-events-none absolute h-full inset-y-0 right-2
-          ${
-						isAdmin
-							? "text-gray-200 dark:text-gray-700"
-							: "text-gray-500 dark:text-gray-400"
-					}`}
-			/>
-		</div>
-	);
-}
-
 // ---------------------------
 // ----- Language Select -----
 // ---------------------------
@@ -125,7 +83,7 @@ export function LanguageSelect({
 				>
 					{languages.map((lang) => (
 						<option key={lang} value={lang}>
-							{lang.charAt(0).toUpperCase() + lang.slice(1)}
+							{firstCharUpperCase(lang)}
 						</option>
 					))}
 				</select>

@@ -17,6 +17,7 @@ import {
 	DashboardListItemLink,
 } from "@/components/ListItem";
 import { useRepos } from "@/contexts/ReposContext";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import { getPercentageChange } from "@/lib/utils/stats";
 import type { IPullRequest } from "@/types/pullRequests";
@@ -167,7 +168,7 @@ export default function DashboardPage() {
 									<DashboardListItem
 										key={pr.id}
 										title={pr.title}
-										subtitle={`${pr.repoName.slice(0, 1).toUpperCase() + pr.repoName.slice(1)} • ${formatDateTime(pr.updatedAt)}`}
+										subtitle={`${firstCharUpperCase(pr.repoName)} • ${formatDateTime(pr.updatedAt)}`}
 										badge={pr.provider}
 										status={pr.status}
 										providerUrl={pr.providerPrUrl}
@@ -200,7 +201,7 @@ export default function DashboardPage() {
 										key={repo.id}
 										href={`/dashboard/repo/${repo.id}`}
 										title={
-											repo.name.slice(0, 1).toUpperCase() + repo.name.slice(1)
+											firstCharUpperCase(repo.name)
 										}
 										subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
 										badge={repo.provider}

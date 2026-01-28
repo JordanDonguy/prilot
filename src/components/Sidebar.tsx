@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { useInstallations } from "@/contexts/InstallationContext";
 import { useRepos } from "@/contexts/ReposContext";
 import { config } from "@/lib/client/config";
+import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import type { IInvitation } from "@/types/repos";
 import GithubAppButton from "./GithubAppButton";
 import { PendingInviteModal } from "./PendingInviteModal";
@@ -180,8 +181,7 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() +
-															repo.name.slice(1)}
+														{firstCharUpperCase(repo.name)}
 													</span>
 												</Link>
 											</li>
@@ -211,8 +211,7 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() +
-															repo.name.slice(1)}
+														{firstCharUpperCase(repo.name)}
 													</span>
 												</Link>
 											</li>
@@ -232,8 +231,7 @@ export default function Sidebar() {
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
 														⚠️{" "}
-														{inv.repositoryName.charAt(0).toUpperCase() +
-															inv.repositoryName.slice(1)}
+														{firstCharUpperCase(inv.repositoryName)}
 													</span>
 												</button>
 											</li>
@@ -306,8 +304,7 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() +
-															repo.name.slice(1)}
+														{firstCharUpperCase(repo.name)}
 													</span>
 												</Link>
 											</li>
@@ -337,8 +334,7 @@ export default function Sidebar() {
 														className={`${pathname.includes(repo.id) && "text-blue-600 dark:text-blue-400 scale-120"}`}
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
-														{repo.name.charAt(0).toUpperCase() +
-															repo.name.slice(1)}
+														{firstCharUpperCase(repo.name)}
 													</span>
 												</Link>
 											</li>
@@ -358,8 +354,7 @@ export default function Sidebar() {
 													/>
 													<span className="text-gray-900 dark:text-white text-sm">
 														⚠️{" "}
-														{inv.repositoryName.charAt(0).toUpperCase() +
-															inv.repositoryName.slice(1)}
+														{firstCharUpperCase(inv.repositoryName)}
 													</span>
 												</button>
 											</li>
