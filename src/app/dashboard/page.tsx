@@ -21,6 +21,7 @@ import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import { getPercentageChange } from "@/lib/utils/stats";
 import type { IPullRequest } from "@/types/pullRequests";
+import AnimatedScale from "@/components/animations/AnimatedScale";
 
 interface IRecentPR extends IPullRequest {
 	repoName: string;
@@ -38,13 +39,16 @@ interface IRecentPRsResponse {
 }
 
 export default function DashboardPage() {
-	const { repositories } = useRepos();
+	const { repositories, invitations } = useRepos();
 	const [recentPRs, setRecentPRs] = useState<IRecentPR[]>([]);
 	const [weeklyStats, setWeeklyStats] = useState<{
 		thisWeek: number;
 		lastWeek: number;
 	} | null>(null);
 	const [loading, setLoading] = useState(true);
+
+	// Check for pending invitations
+	const pendingInvitations = invitations ?? [];
 
 	// Fetch recent PRs
 	useEffect(() => {
@@ -116,6 +120,25 @@ export default function DashboardPage() {
 				</p>
 			</AnimatedSlide>
 
+			{/* ---- Pending Invitations Warning ---- */}
+			{pendingInvitations.length > 0 && (
+				<AnimatedScale scale={0.97} triggerOnView={false}>
+					<div className="bg-orange-100 dark:bg-yellow-900/15 border border-orange-400/50 dark:border-yellow-800/40 rounded-lg p-4 flex items-start gap-3">
+						<AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+						<div>
+							<h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
+								Pending Invitations
+							</h3>
+							<p className="text-sm text-amber-800 dark:text-amber-200">
+								You have {pendingInvitations.length} pending invitation
+								{pendingInvitations.length === 1 ? "" : "s"}. Check your sidebar
+								to accept or decline them.
+							</p>
+						</div>
+					</div>
+				</AnimatedScale>
+			)}
+
 			{/* ---- Stats Cards ---- */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<StatCard
@@ -154,7 +177,7 @@ export default function DashboardPage() {
 							<CardDescription>Your latest PR activity</CardDescription>
 						</CardHeader>
 						<CardContent
-							className={`flex flex-col space-y-4 h-full ${recentPRs.length === 0 && !loading && "justify-center"}`}
+							className={`flex flex-col space-y-4 h-full ${recentPRs.length === 0 && !loading && "justify-center pt-8"}`}
 						>
 							{loading ? (
 								<AnimatedOpacity>
@@ -194,21 +217,19 @@ export default function DashboardPage() {
 								Quick access to your most active repos
 							</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-4 pt-4">
 							{topRepos.length > 0 ? (
 								topRepos.map((repo) => (
 									<DashboardListItemLink
 										key={repo.id}
 										href={`/dashboard/repo/${repo.id}`}
-										title={
-											firstCharUpperCase(repo.name)
-										}
+										title={firstCharUpperCase(repo.name)}
 										subtitle={`${repo.draftPrCount} drafts • ${repo.sentPrCount} PRs sent`}
 										badge={repo.provider}
 									/>
 								))
 							) : (
-								<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
+								<p className="text-gray-500 text-lg text-center self-center my-4 fade-in">
 									No recent repository found
 								</p>
 							)}
