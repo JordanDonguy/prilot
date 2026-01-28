@@ -54,30 +54,33 @@ export async function POST(
 		);
 		if (!isOwner) throw new ForbiddenError("Forbidden");
 
-		// 5. Prevent duplicate pending invitation
-		const existingInvitation = await prisma.invitation.findFirst({
-			where: {
-				repositoryId: repo.id,
-				email,
-				status: "pending",
-			},
-		});
-		if (existingInvitation) throw new ConflictError("Invitation already sent");
-
-		// 6. Create invitation
+		// 5. Create invitation
 		const token = crypto.randomBytes(32).toString("hex");
 
-		await prisma.invitation.create({
-			data: {
+		await prisma.invitation.upsert({
+			where: {
+				repositoryId_email: {
+					repositoryId: repo.id,
+					email,
+				},
+			},
+			update: {
+				token,
+				status: "pending",
+				invitedById: user.id,
+				expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+			},
+			create: {
 				repositoryId: repo.id,
 				email,
 				invitedById: user.id,
 				token,
+				status: "pending",
 				expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 			},
 		});
 
-		// 7. Send email
+		// 6. Send email
 		const inviteUrl = `${config.frontendUrl}/invitations/${token}/accept`;
 		const declineUrl = `${config.frontendUrl}/invitations/${token}/decline`;
 
