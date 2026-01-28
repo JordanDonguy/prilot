@@ -40,6 +40,7 @@ export default function RepositoryPage() {
 	const repoId = id as string;
 
 	const { repo, loading } = useRepository(repoId);
+
 	const {
 		pullRequests,
 		loading: prLoading,
@@ -117,7 +118,7 @@ export default function RepositoryPage() {
 					value={repo.branches.length}
 					icon={GitBranch}
 				/>
-				<StatCard title="Contributors" value="8" icon={Users} />
+				<StatCard title="Members" value={repo.membersCount ?? 1} icon={Users} />
 			</div>
 
 			{/* ---- Pull Requests List ---- */}

@@ -23,6 +23,7 @@ export interface IRepository {
   isPrivate: boolean;
   draftPrCount: number;
   sentPrCount: number; 
+  membersCount?: number;
 }
 
 // ---- Full repo API response ----
