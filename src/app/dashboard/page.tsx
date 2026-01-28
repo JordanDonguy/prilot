@@ -3,6 +3,7 @@
 import { AlertCircle, CheckCircle, Clock, GitPullRequest } from "lucide-react";
 import { useEffect, useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
+import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import {
 	Card,
@@ -21,7 +22,6 @@ import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import { getPercentageChange } from "@/lib/utils/stats";
 import type { IPullRequest } from "@/types/pullRequests";
-import AnimatedScale from "@/components/animations/AnimatedScale";
 
 interface IRecentPR extends IPullRequest {
 	repoName: string;
@@ -51,8 +51,11 @@ export default function DashboardPage() {
 	const pendingInvitations = invitations ?? [];
 
 	// Fetch recent PRs
+	// biome-ignore lint/correctness/useExhaustiveDependencies: refetch when repos change (e.g. user just accepted an invite)
 	useEffect(() => {
 		const fetchRecentPRs = async () => {
+			if (recentPRs.length > 0) return; // prevent double fetches
+
 			try {
 				const res = await fetch("/api/pull-requests/recent");
 				if (!res.ok) throw new Error("Failed to fetch recent PRs");
@@ -69,7 +72,7 @@ export default function DashboardPage() {
 		};
 
 		fetchRecentPRs();
-	}, []);
+	}, [repositories]);
 
 	// Compute top 3 repositories by total PRs count
 	const topRepos = [...repositories]
@@ -210,14 +213,16 @@ export default function DashboardPage() {
 
 				{/* ---- Top repositories ---- */}
 				<AnimatedSlide x={-20} y={-20} triggerOnView={false}>
-					<Card className="bg-white/70 dark:bg-gray-800/25 h-full backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+					<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
 						<CardHeader>
 							<CardTitle>Your Repositories</CardTitle>
 							<CardDescription>
 								Quick access to your most active repos
 							</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-4 pt-4">
+						<CardContent
+							className={`flex flex-col space-y-4 h-full ${topRepos.length === 0 && "justify-center pt-8"}`}
+						>
 							{topRepos.length > 0 ? (
 								topRepos.map((repo) => (
 									<DashboardListItemLink
@@ -229,7 +234,7 @@ export default function DashboardPage() {
 									/>
 								))
 							) : (
-								<p className="text-gray-500 text-lg text-center self-center my-4 fade-in">
+								<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
 									No recent repository found
 								</p>
 							)}
