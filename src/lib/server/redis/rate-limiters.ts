@@ -15,19 +15,19 @@ export const signupLimiter = new Ratelimit({
 // GitHub OAuth start route
 export const githubOAuthStartLimiter = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(10, "1 m"),
+	limiter: Ratelimit.fixedWindow(10, "1 m"),
 });
 
 // Refresh Token
 export const refreshLimiter = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(20, "1 m"),
+	limiter: Ratelimit.fixedWindow(20, "1 m"),
 });
 
 // ---- AI ----
 export const aiLimiterPerMinute = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(5, "1 m"),
+	limiter: Ratelimit.fixedWindow(5, "1 m"),
 });
 
 export const aiLimiterPerWeek = new Ratelimit({
@@ -43,12 +43,12 @@ export const githubRepoLimiter = new Ratelimit({
 
 export const githubInstallLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(5, "1 m"),
+  limiter: Ratelimit.fixedWindow(5, "1 m"),
 });
 
 export const githubCompareCommitsLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(15, "1 m"),
+  limiter: Ratelimit.fixedWindow(15, "1 m"),
 });
 
 // ---- Email ----
