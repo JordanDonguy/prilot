@@ -36,9 +36,19 @@ export const aiLimiterPerDay = new Ratelimit({
 });
 
 // ---- GitHub ----
-export const githubLimiter = new Ratelimit({
+export const githubRepoLimiter = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(60, "1 m"),
+	limiter: Ratelimit.slidingWindow(30, "1 m"),
+});
+
+export const githubInstallLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "1 m"),
+});
+
+export const githubCompareCommitsLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(15, "1 m"),
 });
 
 // ---- Email ----

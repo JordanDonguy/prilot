@@ -10,6 +10,8 @@ import {
 } from "@/lib/server/error";
 import { githubFetch } from "@/lib/server/github/client";
 import { handleError } from "@/lib/server/handleError";
+import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
+import { githubCompareCommitsLimiter } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
 import type { IGitHubCompareResponse } from "@/types/commits";
 
@@ -25,14 +27,24 @@ export async function GET(
 		if (!user) throw new ForbiddenError("Unauthenticated");
 
 		// 2. Get and validate repo id
-		const { repoId } = await uuidParam("repoId").parseAsync(await context.params);
+		const { repoId } = await uuidParam("repoId").parseAsync(
+			await context.params,
+		);
 
-		// 3. Get branch names from searchParams and validate
+		// 3. Rate limit per user
+		const limit = await githubCompareCommitsLimiter.limit(
+			`github:compare:user:${user.id}`,
+		);
+		rateLimitOrThrow(limit);
+
+		// 4. Get branch names from searchParams and validate
 		const { searchParams } = new URL(req.url);
 		const baseBranch = await branchSchema.parseAsync(searchParams.get("base"));
-		const compareBranch = await branchSchema.parseAsync(searchParams.get("compare"));
+		const compareBranch = await branchSchema.parseAsync(
+			searchParams.get("compare"),
+		);
 
-		// 4. Sanitize branch names
+		// 5. Sanitize branch names
 		const safeBaseBranch = sanitizeHtml(baseBranch);
 		const safeCompareBranch = sanitizeHtml(compareBranch);
 
@@ -40,7 +52,7 @@ export async function GET(
 			throw new BadRequestError("Missing base or compare branch");
 		}
 
-		// 5. Get repository + installation + members
+		// 6. Get repository + installation + members
 		const repo = await prisma.repository.findUnique({
 			where: { id: repoId },
 			include: { installation: true, members: true },
@@ -51,19 +63,19 @@ export async function GET(
 			throw new BadRequestError("Repository has no linked installation");
 		}
 
-		// 6. Check membership
+		// 7. Check membership
 		const isMember = repo.members.some((m) => m.userId === user.id);
 		if (!isMember) {
 			throw new ForbiddenError("You are not a member of this repository");
 		}
 
-		// 7. Fetch commits from GitHub
+		// 8. Fetch commits from GitHub
 		const commitList = await githubFetch<IGitHubCompareResponse>(
 			repo.installation.installationId,
 			`/repos/${repo.owner}/${repo.name}/compare/${safeBaseBranch}...${safeCompareBranch}`,
 		);
 
-		// 8. Filter merge commits & map messages
+		// 9. Filter merge commits & map messages
 		const commitMessages = commitList.data.commits
 			.filter((c) => c.parents.length === 1)
 			.map((c) => c.commit.message);
