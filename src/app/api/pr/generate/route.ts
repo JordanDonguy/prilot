@@ -60,7 +60,32 @@ export async function POST(req: Request) {
 		const weekLimit = await aiLimiterPerWeek.limit(
 			`ai:week:user:${owner.userId}`,
 		);
-		rateLimitOrThrow(weekLimit, "Weekly AI generation limit reached");
+		if (!weekLimit.success) {
+			// Only include rateLimit info for owner
+			if (user.id === owner.userId) {
+				return NextResponse.json(
+					{
+						message: `Weekly pull-request generation limit reached. Resets on ${new Date(
+							weekLimit.reset,
+						).toLocaleString()}.`,
+						rateLimit: {
+							weeklyRemaining: weekLimit.remaining,
+							weeklyReset: weekLimit.reset,
+						},
+					},
+					{ status: 429 },
+				);
+			} else {
+				// For non-owners, just return generic 429
+				return NextResponse.json(
+					{
+						message:
+							"Repository owner weekly PR generation limit has been reached. Please contact the repository owner.",
+					},
+					{ status: 429 },
+				);
+			}
+		}
 
 		// 6. Send request to Groq AI
 		const completion = await groq.chat.completions.create({
