@@ -29,7 +29,7 @@ export async function GET() {
 
     // 3. Rate limit per user
     const limit = await refreshLimiter.limit(`refresh:user:${stored.userId}`);
-    rateLimitOrThrow(limit, "Too many refresh attempts. Try again later.");
+    rateLimitOrThrow(limit);
 
     // 4. Generate new access token
     const user = await prisma.user.findUnique({ where: { id: stored.userId } });

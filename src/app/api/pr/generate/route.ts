@@ -41,10 +41,7 @@ export async function POST(req: Request) {
 		const minuteLimit = await aiLimiterPerMinute.limit(
 			`ai:minute:user:${user.id}`,
 		);
-		rateLimitOrThrow(
-			minuteLimit,
-			"Too many requests... Please try again in a few minutes.",
-		);
+		rateLimitOrThrow(minuteLimit);
 
 		// 3. Parse request body
 		const { repoId, commits, compareBranch, language } =

@@ -9,6 +9,7 @@ export function formatDateTime(date: string | Date) {
 	});
 }
 
+// Format date in Month day, time. "e.g. February 5, 01:00 AM"
 export function formatDateTimeForErrors(date: number | string | Date) {
 	const dateToformat = new Date(date);
 
@@ -23,4 +24,15 @@ export function formatDateTimeForErrors(date: number | string | Date) {
 	})}`;
 
 	return formattedDate;
+}
+
+// Format seconds in minutes:seconds
+export function formatMinutesSeconds(seconds: number) {
+	const mins = Math.floor(seconds / 60);
+	const secs = seconds % 60;
+
+	if (mins > 0) {
+		return `${mins}min ${secs}s`;
+	}
+	return `${secs}s`;
 }

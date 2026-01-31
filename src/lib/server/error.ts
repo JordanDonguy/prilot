@@ -50,7 +50,7 @@ export class ConflictError extends HttpError {
 export class TooManyRequestsError extends HttpError {
 	retryAfter?: number;
 
-	constructor(message = "Too many requests", retryAfter?: number) {
+	constructor(message: string, retryAfter?: number) {
 		super(message, 429);
 		this.retryAfter = retryAfter;
 	}
