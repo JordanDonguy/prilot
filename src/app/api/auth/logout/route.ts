@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/db";
-import { handleError } from "@/lib/server/handleError";
 import { UnauthorizedError } from "@/lib/server/error";
+import { handleError } from "@/lib/server/handleError";
 import {
   decodeJWT,
   extractAccessToken,
