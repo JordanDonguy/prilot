@@ -50,7 +50,7 @@ export function useGeneratePR({
 			const aiRes = await fetch("/api/pr/generate", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ commits, language, compareBranch }),
+				body: JSON.stringify({ repoId, commits, language, compareBranch }),
 			});
 			if (!aiRes.ok) throw new Error("Failed to generate PR with AI");
 

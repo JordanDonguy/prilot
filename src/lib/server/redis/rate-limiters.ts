@@ -27,12 +27,12 @@ export const refreshLimiter = new Ratelimit({
 // ---- AI ----
 export const aiLimiterPerMinute = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(10, "1 m"),
+	limiter: Ratelimit.slidingWindow(5, "1 m"),
 });
 
-export const aiLimiterPerDay = new Ratelimit({
+export const aiLimiterPerWeek = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(100, "1 d"),
+	limiter: Ratelimit.slidingWindow(20, "7 d"),
 });
 
 // ---- GitHub ----
