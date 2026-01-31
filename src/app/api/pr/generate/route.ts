@@ -11,6 +11,7 @@ import {
 	aiLimiterPerWeek,
 } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
+import { formatDateTimeForErrors } from "@/lib/utils/formatDateTime";
 
 type PrResponse = {
 	title: string;
@@ -40,7 +41,10 @@ export async function POST(req: Request) {
 		const minuteLimit = await aiLimiterPerMinute.limit(
 			`ai:minute:user:${user.id}`,
 		);
-		rateLimitOrThrow(minuteLimit, "Too many requests per minute");
+		rateLimitOrThrow(
+			minuteLimit,
+			"Too many requests... Please try again in a few minutes.",
+		);
 
 		// 3. Parse request body
 		const { repoId, commits, compareBranch, language } =
@@ -63,11 +67,10 @@ export async function POST(req: Request) {
 		if (!weekLimit.success) {
 			// Only include rateLimit info for owner
 			if (user.id === owner.userId) {
+				const resetDate = formatDateTimeForErrors(weekLimit.reset);
 				return NextResponse.json(
 					{
-						message: `Weekly pull-request generation limit reached. Resets on ${new Date(
-							weekLimit.reset,
-						).toLocaleString()}.`,
+						error: `Weekly pull-request generation limit reached. Resets on ${resetDate}.`,
 						rateLimit: {
 							weeklyRemaining: weekLimit.remaining,
 							weeklyReset: weekLimit.reset,
@@ -79,7 +82,7 @@ export async function POST(req: Request) {
 				// For non-owners, just return generic 429
 				return NextResponse.json(
 					{
-						message:
+						error:
 							"Repository owner weekly PR generation limit has been reached. Please contact the repository owner.",
 					},
 					{ status: 429 },
