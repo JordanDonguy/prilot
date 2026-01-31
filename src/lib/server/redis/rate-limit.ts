@@ -14,6 +14,7 @@ export function rateLimitOrThrow(result: LimitResult, message?: string) {
 		throw new TooManyRequestsError(
 			message ??
 				`Too many requests... Please try again in ${formatMinutesSeconds(retryAfter)}.`,
+			retryAfter,
 		);
 	}
 

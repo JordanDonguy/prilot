@@ -1,10 +1,10 @@
 "use client";
 
 import { Github } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { toast } from "react-toastify";
+import { useUser } from "@/contexts/UserContext";
 
 export default function ConnectGitHubLoading() {
 	const router = useRouter();
