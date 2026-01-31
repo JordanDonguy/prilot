@@ -8,7 +8,7 @@ type LimitResult = {
 
 export function rateLimitOrThrow(
 	result: LimitResult,
-	message = "Too many requests",
+	message = "Too many requests... Please try again later.",
 ) {
 	if (!result.success) {
 		const retryAfter = Math.ceil((result.reset - Date.now()) / 1000);

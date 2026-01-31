@@ -4,12 +4,12 @@ import { redis } from "./client";
 // ---- Auth ----
 export const loginLimiter = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(5, "10 m"),
+	limiter: Ratelimit.fixedWindow(5, "10 m"),
 });
 
 export const signupLimiter = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(10, "1 h"),
+	limiter: Ratelimit.fixedWindow(10, "1 h"),
 });
 
 // GitHub OAuth start route
@@ -32,13 +32,13 @@ export const aiLimiterPerMinute = new Ratelimit({
 
 export const aiLimiterPerWeek = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(20, "7 d"),
+	limiter: Ratelimit.fixedWindow(20, "7 d"),
 });
 
 // ---- GitHub ----
 export const githubRepoLimiter = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(30, "1 m"),
+	limiter: Ratelimit.fixedWindow(30, "1 m"),
 });
 
 export const githubInstallLimiter = new Ratelimit({
@@ -54,5 +54,5 @@ export const githubCompareCommitsLimiter = new Ratelimit({
 // ---- Email ----
 export const inviteEmailLimiter = new Ratelimit({
 	redis,
-	limiter: Ratelimit.slidingWindow(10, "1 h"),
+	limiter: Ratelimit.fixedWindow(10, "1 h"),
 });
