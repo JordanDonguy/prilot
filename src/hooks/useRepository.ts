@@ -24,7 +24,14 @@ export function useRepository(repoId: string) {
 
 			try {
 				const res = await fetch(`/api/repos/${repoId}`);
-				if (!res.ok) throw new Error("Failed to fetch repository");
+
+				if (!res.ok) {
+					const data = await res.json();
+					toast.error(data.error || "Failed to fetch repository");
+					isFetchingRef.current = false;
+					setLoading(false);
+					return router.replace("/dashboard");
+				}
 
 				const data: IRepositoryResponse = await res.json();
 

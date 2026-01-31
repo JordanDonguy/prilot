@@ -80,7 +80,7 @@ export default function SignupPage() {
 			const data = await res.json();
 
 			if (!res.ok) {
-				toast.error(data.error || "Login failed");
+				toast.error(data.error || "Signup failed");
 				setLoading(false);
 				return;
 			}

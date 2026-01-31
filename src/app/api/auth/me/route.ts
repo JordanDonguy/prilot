@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/server/session";
-import { handleError } from "@/lib/server/handleError";
 import { UnauthorizedError } from "@/lib/server/error";
+import { handleError } from "@/lib/server/handleError";
+import { getCurrentUser } from "@/lib/server/session";
 
 export async function GET() {
 	try {

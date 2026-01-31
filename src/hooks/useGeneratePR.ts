@@ -5,6 +5,10 @@ import { usePullRequestActions } from "@/hooks/usePullRequestActions";
 interface GeneratePRResponse {
 	title: string;
 	description: string;
+	rateLimit?: {
+		weeklyRemaining: number;
+		weeklyReset: number;
+	};
 }
 
 interface useGeneratePRProps {
@@ -34,30 +38,47 @@ export function useGeneratePR({
 		setIsGenerating(true);
 
 		try {
-			// Fetch commit differences between branches
+			// 1. Fetch commit differences between branches
 			const compareRes = await fetch(
 				`/api/repos/${repoId}/compare-commits/github?base=${baseBranch}&compare=${compareBranch}`,
 			);
-			if (!compareRes.ok) throw new Error("Failed to fetch commits");
 
-			const { commits }: { commits: string[] } = await compareRes.json();
-			if (!commits.length) {
-				toast.info("No commit differences found");
+			if (!compareRes.ok) {
+				const data = await compareRes.json();
+				toast.error(data.error || "Failed to fetch commits");
 				return { success: false };
 			}
 
-			// Generate PR with AI
+			const { commits }: { commits: string[] } = await compareRes.json();
+			if (!commits.length) {
+				toast.info("No commit differences found between branches.");
+				return { success: false };
+			}
+
+			// 2. Generate PR with AI
 			const aiRes = await fetch("/api/pr/generate", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ commits, language, compareBranch }),
+				body: JSON.stringify({ repoId, commits, language, compareBranch }),
 			});
-			if (!aiRes.ok) throw new Error("Failed to generate PR with AI");
+
+			if (!aiRes.ok) {
+				// Rate limit handling
+				if (aiRes.status === 429) {
+					const data = await aiRes.json();
+					toast.error(
+						data.error || "Weekly pull-request generation limit reached.",
+					);
+					return { success: false };
+				}
+				// Other errors
+				throw new Error("Failed to generate PR with AI");
+			}
 
 			const data = (await aiRes.json()) as GeneratePRResponse;
 			const { title: generatedTitle, description: generatedDescription } = data;
 
-			// If the PR is new, save it in db
+			// 3.a. If the PR is new, save it in db
 			if (!prId) {
 				const newPR = await addDraftPR({
 					prTitle: generatedTitle,
@@ -68,7 +89,7 @@ export function useGeneratePR({
 				});
 				if (newPR) setPrId(newPR.id);
 			} else {
-				// If generating over an existing PR, update it in db
+				// 3.b. If generating over an existing PR, update it in db
 				const updateRes = await fetch(
 					`/api/repos/${repoId}/pull-requests/${prId}`,
 					{

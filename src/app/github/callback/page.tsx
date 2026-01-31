@@ -31,8 +31,8 @@ export default function GitHubCallbackPage() {
 				});
 
 				if (!res.ok) {
-					const text = await res.text();
-					throw new Error(text || "Failed to register GitHub installation");
+					const data = await res.json();
+					throw new Error(data.message || "Failed to register GitHub installation");
 				}
 
 				toast.success("GitHub installation successful! ✨");

@@ -9,23 +9,37 @@ import type {
 } from "@/lib/server/github/types";
 import { handleError } from "@/lib/server/handleError";
 import { getCurrentUser } from "@/lib/server/session";
+import { githubInstallLimiter } from "@/lib/server/redis/rate-limiters";
+import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 
 const prisma = getPrisma();
 
 export async function POST(req: Request) {
 	try {
-		// 1. Parse request
-		const { installationId } = await req.json();
+		// 1. Get current user
 		const user = await getCurrentUser();
 
-		if (!user || !installationId) {
+		if (!user) {
 			throw new UnauthorizedError("You must be logged in to connect GitHub");
 		}
 
-		// 2. Verify installation via GitHub
+		// 2. Rate limit per user
+		const limit = await githubInstallLimiter.limit(
+			`github:install:user:${user.id}`,
+		);
+		rateLimitOrThrow(limit);
+
+		// 3. Parse request
+		const { installationId } = await req.json();
+
+		if (!installationId) {
+			throw new BadRequestError("Installation ID is required");
+		}
+
+		// 4. Verify installation via GitHub
 		const installation = await verifyInstallation(installationId);
 
-		// 3. Upsert installation in DB
+		// 5. Upsert installation in DB
 		const dbInstallation = await prisma.providerInstallation.upsert({
 			where: {
 				provider_createdById: {
@@ -47,7 +61,7 @@ export async function POST(req: Request) {
 			},
 		});
 
-		// 4. Fetch repos from GitHub
+		// 6. Fetch repos from GitHub
 		const reposList = await githubFetch<IGitHubReposResponse>(
 			installationId,
 			"/installation/repositories",
@@ -66,9 +80,8 @@ export async function POST(req: Request) {
 			owner: r.owner.login,
 		}));
 
-		// 5. Upsert repos and repo members in DB
+		// 7. Upsert repos and repo members in DB
 		for (const repo of repos) {
-			// 5.a. Upsert repositories
 			const dbRepo = await prisma.repository.upsert({
 				where: {
 					provider_providerRepoId: {
@@ -80,7 +93,6 @@ export async function POST(req: Request) {
 				create: { ...repo, installationId: dbInstallation.id },
 			});
 
-			// 5.b. Add current user as repo member to each repos with owner role
 			await prisma.repositoryMember.upsert({
 				where: {
 					repositoryId_userId: {
@@ -88,18 +100,12 @@ export async function POST(req: Request) {
 						userId: user.id,
 					},
 				},
-				update: {
-					role: "owner",
-				},
-				create: {
-					repositoryId: dbRepo.id,
-					userId: user.id,
-					role: "owner",
-				},
+				update: { role: "owner" },
+				create: { repositoryId: dbRepo.id, userId: user.id, role: "owner" },
 			});
 		}
 
-		// 6. Respond with installation + repo info
+		// 8. Respond with installation + repo info
 		return NextResponse.json({
 			success: true,
 			installationId: dbInstallation.id,

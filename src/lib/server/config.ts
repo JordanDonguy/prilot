@@ -16,13 +16,23 @@ const envSchema = z.object({
 
 	// GitHub App
 	GITHUB_APP_ID: z.string().min(1, "GITHUB_APP_ID is required"),
-	GITHUB_APP_PRIVATE_KEY: z.string().min(1, "GITHUB_APP_PRIVATE_KEY is required"),
+	GITHUB_APP_PRIVATE_KEY: z
+		.string()
+		.min(1, "GITHUB_APP_PRIVATE_KEY is required"),
 
 	// Groq
 	GROQ_API_KEY: z.string().min(1, "GROQ_API_KEY is requried"),
 
 	// Resend
 	RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
+
+	// Redis (Upstash)
+	UPSTASH_REDIS_REST_URL: z
+		.string()
+		.min(1, "UPSTASH_REDIS_REST_URL is required"),
+	UPSTASH_REDIS_REST_TOKEN: z
+		.string()
+		.min(1, "UPSTASH_REDIS_REST_TOKEN is required"),
 
 	// Domain Name
 	DOMAIN_NAME: z.string().min(1, "DOMAIN_NAME is required"),
@@ -57,10 +67,14 @@ export const config = {
 		redirectUri: `${parsedEnv.FRONTEND_URL}/login/github/callback`,
 	},
 	groq: {
-		apiKey: parsedEnv.GROQ_API_KEY
+		apiKey: parsedEnv.GROQ_API_KEY,
 	},
 	resend: {
-		apiKey: parsedEnv.RESEND_API_KEY
+		apiKey: parsedEnv.RESEND_API_KEY,
+	},
+	redis: {
+		restUrl: parsedEnv.UPSTASH_REDIS_REST_URL,
+		restToken: parsedEnv.UPSTASH_REDIS_REST_TOKEN,
 	},
 	domainName: parsedEnv.DOMAIN_NAME,
 	appName: parsedEnv.APP_NAME,

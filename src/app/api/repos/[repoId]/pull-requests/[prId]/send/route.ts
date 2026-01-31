@@ -17,6 +17,8 @@ interface GitHubCreatePRResponse {
 	state: string;
 }
 
+// Note: This route isn't rate-limited since to send PRs 
+// user needs to generate them first, which is already rate-limited
 export async function POST(
 	_req: NextRequest,
 	context: { params: Promise<{ repoId: string; prId: string }> },
