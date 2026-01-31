@@ -10,10 +10,10 @@ import {
 	NotFoundError,
 } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
-import { sendRepoInviteEmail } from "@/lib/server/resend/emails/repoInvite";
-import { getCurrentUser } from "@/lib/server/session";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import { inviteEmailLimiter } from "@/lib/server/redis/rate-limiters";
+import { sendRepoInviteEmail } from "@/lib/server/resend/emails/repoInvite";
+import { getCurrentUser } from "@/lib/server/session";
 
 const prisma = getPrisma();
 
@@ -62,7 +62,25 @@ export async function POST(
 		);
 		if (!isOwner) throw new ForbiddenError("Forbidden");
 
-		// 6. Create invitation
+		// 6. Check if invited user already exists AND is already a repo member
+		const invitedUser = await prisma.user.findUnique({
+			where: { email },
+			select: {
+				id: true,
+				memberships: {
+					where: { repositoryId: repoId },
+					select: { id: true },
+				},
+			},
+		});
+
+		if (invitedUser && invitedUser.memberships.length > 0) {
+			throw new ConflictError(
+				"This user is already a member of the repository",
+			);
+		}
+
+		// 7. Create invitation
 		const token = crypto.randomBytes(32).toString("hex");
 
 		await prisma.invitation.upsert({
@@ -88,7 +106,7 @@ export async function POST(
 			},
 		});
 
-		// 7. Send email
+		// 8. Send email
 		const inviteUrl = `${config.frontendUrl}/invitations/${token}/accept`;
 		const declineUrl = `${config.frontendUrl}/invitations/${token}/decline`;
 
