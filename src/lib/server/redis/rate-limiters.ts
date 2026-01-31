@@ -12,13 +12,13 @@ export const signupLimiter = new Ratelimit({
 	limiter: Ratelimit.slidingWindow(10, "1 h"),
 });
 
-// ---- GitHub OAuth start route ----
+// GitHub OAuth start route
 export const githubOAuthStartLimiter = new Ratelimit({
 	redis,
 	limiter: Ratelimit.slidingWindow(10, "1 m"),
 });
 
-// ---- Refresh Token ----
+// Refresh Token
 export const refreshLimiter = new Ratelimit({
 	redis,
 	limiter: Ratelimit.slidingWindow(20, "1 m"),

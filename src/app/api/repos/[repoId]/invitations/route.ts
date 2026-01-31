@@ -12,6 +12,8 @@ import {
 import { handleError } from "@/lib/server/handleError";
 import { sendRepoInviteEmail } from "@/lib/server/resend/emails/repoInvite";
 import { getCurrentUser } from "@/lib/server/session";
+import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
+import { inviteEmailLimiter } from "@/lib/server/redis/rate-limiters";
 
 const prisma = getPrisma();
 
@@ -28,17 +30,23 @@ export async function POST(
 			await context.params,
 		);
 
-		// 2. Validate body
+		// 2. Rate limit per user
+		const limit = await inviteEmailLimiter.limit(
+			`invite:email:user:${user.id}`,
+		);
+		rateLimitOrThrow(limit);
+
+		// 3. Validate body
 		const { email } = await emailSchema.parseAsync(await req.json());
 
-		// 3. Prevent inviting self
+		// 4. Prevent inviting self
 		if (email.toLowerCase() === user.email.toLowerCase()) {
 			throw new ConflictError(
 				"You cannot invite yourself to your own repository",
 			);
 		}
 
-		// 4. Fetch repo + permission check
+		// 5. Fetch repo + permission check
 		const repo = await prisma.repository.findUnique({
 			where: { id: repoId },
 			include: {
@@ -54,7 +62,7 @@ export async function POST(
 		);
 		if (!isOwner) throw new ForbiddenError("Forbidden");
 
-		// 5. Create invitation
+		// 6. Create invitation
 		const token = crypto.randomBytes(32).toString("hex");
 
 		await prisma.invitation.upsert({
@@ -80,7 +88,7 @@ export async function POST(
 			},
 		});
 
-		// 6. Send email
+		// 7. Send email
 		const inviteUrl = `${config.frontendUrl}/invitations/${token}/accept`;
 		const declineUrl = `${config.frontendUrl}/invitations/${token}/decline`;
 
