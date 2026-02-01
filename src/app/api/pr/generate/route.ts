@@ -89,18 +89,33 @@ export async function POST(req: Request) {
 
 		// 6. Send request to Groq AI
 		const completion = await groq.chat.completions.create({
-			model: "openai/gpt-oss-120b",
+			model: "meta-llama/llama-4-maverick-17b-128e-instruct",
 			messages: [
 				{
+					role: "system",
+					content: buildPRPrompt(language, compareBranch),
+				},
+				{
 					role: "user",
-					content: buildPRPrompt(commits, language, compareBranch),
+					content: `${commits.map((c, i) => `${i + 1}. ${c}`).join("\n")}`,
 				},
 			],
+			response_format: {
+				type: "json_schema",
+				json_schema: {
+					name: "json",
+					schema: {
+						title: "string",
+						description: "string",
+					},
+				},
+			},
 		});
 
 		// 7. Parse Groq response
 		const content = completion.choices[0].message.content;
 		if (!content) throw new Error("Empty AI response");
+
 		const parsed = JSON.parse(content);
 
 		// 8. Return response
