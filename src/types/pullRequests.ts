@@ -25,3 +25,14 @@ export interface IPaginatedPRsResponse {
   pullRequests: IPullRequest[];
   pagination: IPagination;
 }
+
+// ---- PR response from API ----
+export interface IPRResponse {
+	title: string;
+	body: string;
+	// optionally include rateLimit if owner
+	rateLimit?: {
+		weeklyRemaining: number;
+		weeklyReset: number;
+	};
+};
