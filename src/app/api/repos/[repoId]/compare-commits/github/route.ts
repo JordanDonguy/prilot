@@ -8,12 +8,11 @@ import {
 	ForbiddenError,
 	NotFoundError,
 } from "@/lib/server/error";
-import { githubFetch } from "@/lib/server/github/client";
+import { getCommitMessages } from "@/lib/server/github/commits";
 import { handleError } from "@/lib/server/handleError";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import { githubCompareCommitsLimiter } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
-import type { IGitHubCompareResponse } from "@/types/commits";
 
 const prisma = getPrisma();
 
@@ -70,15 +69,13 @@ export async function GET(
 		}
 
 		// 8. Fetch commits from GitHub
-		const commitList = await githubFetch<IGitHubCompareResponse>(
+		const commitMessages = await getCommitMessages(
 			repo.installation.installationId,
-			`/repos/${repo.owner}/${repo.name}/compare/${safeBaseBranch}...${safeCompareBranch}`,
+			repo.owner,
+			repo.name,
+			safeBaseBranch,
+			safeCompareBranch,
 		);
-
-		// 9. Filter merge commits & map messages
-		const commitMessages = commitList.data.commits
-			.filter((c) => c.parents.length === 1)
-			.map((c) => c.commit.message);
 
 		return NextResponse.json({ commits: commitMessages });
 	} catch (error) {
