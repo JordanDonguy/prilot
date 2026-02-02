@@ -42,4 +42,5 @@ export const aiPrRequestSchema = z.object({
 	language: z
 		.enum(["English", "French", "Spanish", "German", "Portuguese", "Italian"])
 		.default("English"),
+	mode: z.enum(["fast", "deep"]).default("fast"),
 });
