@@ -111,6 +111,10 @@ export default function DashboardPage() {
 			return "No activity this week";
 		}
 
+		if (lastWeek === thisWeek) {
+			return "Same activity as last week";
+		}
+
 		const pct = Math.round(getPercentageChange(thisWeek, lastWeek));
 		return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
 	})();
