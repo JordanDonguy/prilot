@@ -1,46 +1,51 @@
 import type { PRLanguage } from "@/types/languages";
 
-export function buildPRPrompt(
+// ===========================================
+// Map of main PR section headers per language
+// ===========================================
+const sectionHeaders: Record<
+	PRLanguage,
+	{ description: string; changes: string; howToTest: string }
+> = {
+	English: {
+		description: "Description",
+		changes: "Changes",
+		howToTest: "How to Test",
+	},
+	French: {
+		description: "Résumé",
+		changes: "Modifications",
+		howToTest: "Comment tester",
+	},
+	Spanish: {
+		description: "Resumen",
+		changes: "Cambios",
+		howToTest: "Cómo probar",
+	},
+	German: {
+		description: "Zusammenfassung",
+		changes: "Änderungen",
+		howToTest: "Testanleitung",
+	},
+	Portuguese: {
+		description: "Resumo",
+		changes: "Alterações",
+		howToTest: "Como testar",
+	},
+	Italian: {
+		description: "Riepilogo",
+		changes: "Modifiche",
+		howToTest: "Come testare",
+	},
+};
+
+// ==================================================
+// To get PR title + description from commit messages
+// ==================================================
+export function buildPRFromCommits(
 	language: PRLanguage,
 	compareBranch: string,
 ) {
-	// Map of main PR section headers per language
-	const sectionHeaders: Record<
-		PRLanguage,
-		{ description: string; changes: string; howToTest: string }
-	> = {
-		English: {
-			description: "Description",
-			changes: "Changes",
-			howToTest: "How to Test",
-		},
-		French: {
-			description: "Résumé",
-			changes: "Modifications",
-			howToTest: "Comment tester",
-		},
-		Spanish: {
-			description: "Resumen",
-			changes: "Cambios",
-			howToTest: "Cómo probar",
-		},
-		German: {
-			description: "Zusammenfassung",
-			changes: "Änderungen",
-			howToTest: "Testanleitung",
-		},
-		Portuguese: {
-			description: "Resumo",
-			changes: "Alterações",
-			howToTest: "Como testar",
-		},
-		Italian: {
-			description: "Riepilogo",
-			changes: "Modifiche",
-			howToTest: "Come testare",
-		},
-	};
-
 	const headers = sectionHeaders[language];
 
 	return `
@@ -108,5 +113,77 @@ Example format:
 - Do NOT invent anything (variables, files, API endpoints, environment keys, code behavior)
 - Group commits logically, summarize intent clearly
 - Avoid filler, boilerplate, or invented details
+`;
+}
+
+// =============================
+// To get one file diffs summary
+// =============================
+export function buildDiffSummaryPrompt() {
+	return `
+You are a senior software enginner generating a short, factual summary of code changes from file diffs.
+STRICT RULES (MUST FOLLOW):
+- Output ONLY the final summary text
+- DO NOT speculate or infer intent
+- No markdown, no bullet points
+- One single paragraph
+- Maximum 300 characters
+`.trim();
+}
+
+// =====================================================
+// To get PR title + description from file diffs summary
+// =====================================================
+export function buildPRFromDiffs(language: PRLanguage, compareBranch: string) {
+	const headers = sectionHeaders[language];
+
+	return `
+You are a senior software engineer writing a detailled GitHub Pull Request for a production codebase.
+
+Compare branch name: ${compareBranch}
+
+The ENTIRE Pull Request MUST be written in ${language}.
+This includes the PR TITLE and ALL section headers and content.
+
+All main section headers must be exactly as follows in ${language}:
+- Description section: ## ${headers.description}
+- Changes section: ## ${headers.changes}
+- How to Test section: ## ${headers.howToTest}
+
+---
+
+Generate:
+
+1. A concise PR title (max 72 characters, imperative mood)
+2. A structured PR description with the following sections:
+
+## ${headers.description}
+- 1–2 sentences summarizing the overall goal of the PR.
+
+---
+
+## ${headers.changes}
+- Split the changes into 1 to 6 numbered sections
+- Each section must:
+  - Group related file changes by intent, not by filename or inferred detail
+  - Describe **what was done and why**, only using the information in the diff summaries and commits
+- Number the sections from most important to less important
+
+Example format:
+
+### 1. **<Section title based on diff summaries>**
+- Description of changes in this group of files and commits
+- Bulleted explanation summarizing the changes
+
+### 2. **<Section title based on diff summaries>**
+- Description of changes in this group of files and commits
+- Bulleted explanation summarizing the file changes
+
+(continue if relevant)
+
+---
+
+## ${headers.howToTest}
+- Use bullet points for clarity
 `;
 }
