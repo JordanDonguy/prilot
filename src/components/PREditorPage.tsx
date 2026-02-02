@@ -14,6 +14,8 @@ import { useRepository } from "@/hooks/useRepository";
 import { useSendPR } from "@/hooks/useSendPR";
 import type { PRLanguage } from "@/types/languages";
 import AnimatedSlide from "./animations/AnimatedSlide";
+import { PRGenerationModeSelector } from "./PRGenerationModeSelector";
+import { PRModeModal } from "./PRmodeModal";
 
 interface PREditorProps {
 	repoId: string;
@@ -26,9 +28,14 @@ export default function PREditorPageContent({
 }: PREditorProps) {
 	// ----- State -----
 	const [prId, setPrId] = useState<string | null>(initialPrId ?? null);
+
 	const [baseBranch, setBaseBranch] = useState("");
 	const [compareBranch, setCompareBranch] = useState("");
+
 	const [language, setLanguage] = useState<PRLanguage>("English");
+	const [mode, setMode] = useState<"fast" | "deep">("fast");
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
 	const [title, setTitle] = useState<string | undefined>();
 	const [description, setDescription] = useState<string | undefined>();
 	const [showEditOrPreview, setShowEditOrPreview] = useState<
@@ -54,6 +61,7 @@ export default function PREditorPageContent({
 		baseBranch,
 		compareBranch,
 		language,
+		mode,
 		setPrId,
 	});
 
@@ -66,8 +74,11 @@ export default function PREditorPageContent({
 		startAutoSave.current = false; // suspend auto save
 		skipNextFetch.current = true; // prevent fetching PR after prId is modified
 
-		const { success, generatedTitle, generatedDescription } =
-			await generatePR();
+		const {
+			success,
+			title: generatedTitle,
+			description: generatedDescription,
+		} = await generatePR();
 
 		if (success) {
 			setTitle(generatedTitle);
@@ -153,91 +164,114 @@ export default function PREditorPageContent({
 
 	// ----- JSX ------
 	return (
-		<div className="p-2 md:p-6 space-y-6 fade-in-fast">
-			<section className="grid grid-cols-3 mb-8">
-				<AnimatedSlide x={-20} triggerOnView={false} className="col-span-2">
-					<h1 className="text-3xl mb-2 text-gray-900 dark:text-white">
-						Generate Pull Request
-					</h1>
-					<p className="text-gray-600 dark:text-gray-400 hidden md:inline">
-						Select branches and let AI generate a comprehensive PR description
-					</p>
-				</AnimatedSlide>
-				<AnimatedSlide x={20} triggerOnView={false}>
-					<LanguageSelect value={language} onChange={setLanguage} />
-				</AnimatedSlide>
-				<AnimatedSlide x={-20} triggerOnView={false}>
-					<p className="text-gray-600 dark:text-gray-400 mt-2 col-span-3 md:hidden">
-						Select branches and let AI generate a comprehensive PR description
-					</p>
-				</AnimatedSlide>
-			</section>
-
-			<div className="flex flex-col">
-				{/* Configuration */}
-				<section>
-					<div className="relative grid grid-cols-2 gap-20">
-						{/* Branch selectors */}
-						<AnimatedSlide x={-20} triggerOnView={false}>
-							<BranchSelect
-								label="Base Branch"
-								value={baseBranch}
-								onChange={setBaseBranch}
-								options={repo.branches}
-							/>
-						</AnimatedSlide>
-						<div className="absolute inset-0 w-full h-full flex justify-center items-center pt-8 pointer-events-none">
-							<ArrowBigLeftDash size={28} />
-						</div>
-						<AnimatedSlide x={20} triggerOnView={false}>
-							<BranchSelect
-								label="Compare Branch"
-								value={compareBranch}
-								onChange={setCompareBranch}
-								options={repo.branches}
-							/>
-						</AnimatedSlide>
-					</div>
-
-					<AnimatedSlide y={20} triggerOnView={false}>
-						<Button
-							onClick={handleGenerate}
-							disabled={!compareBranch || isGenerating || isSendingPr}
-							className="h-auto w-56 py-2 my-12 mx-auto bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
-						>
-							<span className="flex items-center group-hover:scale-110 transition">
-								<Sparkles className="w-4 h-4 mr-2" />
-								{isGenerating ? "Generating..." : "Generate with AI"}
-							</span>
-						</Button>
+		<>
+			<div className="pb-6 pt-4 p-2 md:p-6 space-y-6 fade-in-fast">
+				<section className="grid sm:grid-cols-3 mb-8 gap-4">
+					<AnimatedSlide
+						x={-20}
+						triggerOnView={false}
+						className="sm:col-span-2"
+					>
+						<h1 className="text-3xl mb-2 text-gray-900 dark:text-white">
+							Generate Pull Request
+						</h1>
+						<p className="text-gray-600 dark:text-gray-400">
+							Select branches and let AI generate a comprehensive PR description
+						</p>
+					</AnimatedSlide>
+					<AnimatedSlide x={20} triggerOnView={false}>
+						<LanguageSelect value={language} onChange={setLanguage} />
 					</AnimatedSlide>
 				</section>
 
-				{/* PR Editor */}
-				<AnimatedSlide
-					y={20}
-					triggerOnView={false}
-					ref={editorRef}
-					className="scroll-mt-2"
-				>
-					<PREditor
-						title={title}
-						description={description}
-						showEditOrPreview={showEditOrPreview}
-						setTitle={(v) => {
-							startAutoSave.current = true;
-							setTitle(v);
-						}}
-						setDescription={(v) => {
-							startAutoSave.current = true;
-							setDescription(v);
-						}}
-						setShowEditOrPreview={setShowEditOrPreview}
-						onSend={sendPR}
-						isSendingPr={isSendingPr}
-					/>
-				</AnimatedSlide>
+				<div className="flex flex-col">
+					{/* Branch selectors */}
+					<section>
+						<div className="relative grid md:grid-cols-2 gap-8 md:gap-20">
+							<AnimatedSlide x={-20} triggerOnView={false}>
+								<BranchSelect
+									label="Base Branch"
+									value={baseBranch}
+									onChange={setBaseBranch}
+									options={repo.branches}
+								/>
+							</AnimatedSlide>
+							<div className="absolute hidden md:flex inset-0 w-full h-full justify-center items-center pt-8 pointer-events-none">
+								<ArrowBigLeftDash size={28} />
+							</div>
+							<AnimatedSlide x={20} triggerOnView={false}>
+								<BranchSelect
+									label="Compare Branch"
+									value={compareBranch}
+									onChange={setCompareBranch}
+									options={repo.branches}
+								/>
+							</AnimatedSlide>
+						</div>
+					</section>
+
+					{/* AI generation mode selector and button */}
+					<section className="my-16">
+						{/* Mode selector */}
+						<AnimatedSlide
+							x={-20}
+							triggerOnView={false}
+							className="sm:w-1/2 mx-auto mb-8"
+						>
+							<PRGenerationModeSelector
+								mode={mode}
+								setMode={setMode}
+								onHelpClick={() => setIsModalOpen(true)}
+							/>
+						</AnimatedSlide>
+						{/* Generate button */}
+						<AnimatedSlide
+							y={20}
+							triggerOnView={false}
+							className="sm:w-1/2 mx-auto"
+						>
+							<Button
+								onClick={handleGenerate}
+								disabled={!compareBranch || isGenerating || isSendingPr}
+								className="h-auto w-full py-2 bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
+							>
+								<span className="flex items-center group-hover:scale-110 transition">
+									<Sparkles className="w-4 h-4 mr-2" />
+									{isGenerating ? "Generating..." : "Generate with AI"}
+								</span>
+							</Button>
+						</AnimatedSlide>
+					</section>
+
+					{/* PR Editor */}
+					<AnimatedSlide
+						y={20}
+						triggerOnView={false}
+						ref={editorRef}
+						className="scroll-mt-2"
+					>
+						<PREditor
+							title={title}
+							description={description}
+							showEditOrPreview={showEditOrPreview}
+							setTitle={(v) => {
+								startAutoSave.current = true;
+								setTitle(v);
+							}}
+							setDescription={(v) => {
+								startAutoSave.current = true;
+								setDescription(v);
+							}}
+							setShowEditOrPreview={setShowEditOrPreview}
+							onSend={sendPR}
+							isSendingPr={isSendingPr}
+						/>
+					</AnimatedSlide>
+				</div>
 			</div>
-		</div>
+
+			{/* Mode Explanation Modal */}
+			<PRModeModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+		</>
 	);
 }
