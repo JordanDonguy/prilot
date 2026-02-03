@@ -120,6 +120,7 @@ export default function PREditorPageContent({
 		setBaseBranch(pullRequest.baseBranch);
 		setCompareBranch(pullRequest.compareBranch);
 		setLanguage(pullRequest.language);
+		setMode(pullRequest.mode);
 		setShowEditOrPreview("preview");
 	}, [pullRequest]);
 

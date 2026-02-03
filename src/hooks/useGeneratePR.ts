@@ -79,6 +79,7 @@ export function useGeneratePR({
 					baseBranch,
 					compareBranch,
 					language,
+					mode,
 				});
 				if (newPR) setPrId(newPR.id);
 			} else {
@@ -91,6 +92,10 @@ export function useGeneratePR({
 						body: JSON.stringify({
 							prTitle: title,
 							prBody: safeDescription,
+							baseBranch,
+							compareBranch,
+							language,
+							mode,
 						}),
 					},
 				);
