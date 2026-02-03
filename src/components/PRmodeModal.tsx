@@ -45,9 +45,9 @@ export function PRModeModal({ isOpen, onClose }: PRModeModalProps) {
 							- Fast Mode
 						</h4>
 						<p className="text-sm text-gray-700 dark:text-gray-300">
-							Uses only commit messages from the commits found between the two
-							branches. Works well when there are many commits and commit
-							messages are properly written.
+							Generates a PR using only the commit messages between the two
+							branches. Works well when there are many well-written commit
+							messages.
 						</p>
 					</div>
 					<div>
@@ -55,9 +55,9 @@ export function PRModeModal({ isOpen, onClose }: PRModeModalProps) {
 							- Deep Mode
 						</h4>
 						<p className="text-sm text-gray-700 dark:text-gray-300">
-							Uses a multi-AI model pipeline to analyze and summarize file diffs
-							found between the two branches, then writes the pull-request from
-							that analysis.
+							Uses a multi-step AI pipeline to analyzes file changes between the
+							branches and then generates a detailed PR based on the analysis.
+							Limited to 30 files changed.
 						</p>
 					</div>
 				</div>
