@@ -9,7 +9,7 @@ import {
 	NotFoundError,
 	UnauthorizedError,
 } from "@/lib/server/error";
-import { getFileDiffsAndCommits } from "@/lib/server/github/fileDiffs";
+import { getFileDiffs } from "@/lib/server/github/fileDiffs";
 import { groq } from "@/lib/server/groq/client";
 import { buildPRFromDiffs } from "@/lib/server/groq/prompt";
 import { summarizeDiffsForPR } from "@/lib/server/groq/summarizeFileDiffs";
@@ -80,7 +80,7 @@ export async function POST(
 		rateLimitOrThrow(ghLimit);
 
 		// 7. Fetch file diffs, throw if more than 30 files are modified
-		const { files, commits } = await getFileDiffsAndCommits(
+		const files = await getFileDiffs(
 			repo.installation.installationId,
 			repo.owner,
 			repo.name,
@@ -140,12 +140,9 @@ export async function POST(
 		// 10. Summarize diffs (stage 1)
 		const diffSummaries = await summarizeDiffsForPR(files);
 
-
-		console.log("COMMITS: ", commits.map((c, i) => `${i + 1}. ${c}`).join("\n"));
-
 		// 11. PR generation (stage 2)
 		const completion = await groq.chat.completions.create({
-			model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+			model: "openai/gpt-oss-120b",
 			messages: [
 				{
 					role: "system",
@@ -153,7 +150,7 @@ export async function POST(
 				},
 				{
 					role: "user",
-					content: `File diffs summary: ${diffSummaries}, commits: ${commits.map((c, i) => `${i + 1}. ${c}`).join("\n")}`,
+					content: `File diffs summary: ${diffSummaries}`,
 				},
 			],
 			response_format: {
