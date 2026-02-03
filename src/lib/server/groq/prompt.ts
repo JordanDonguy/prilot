@@ -113,23 +113,12 @@ Example format:
 - Do NOT invent anything (variables, files, API endpoints, environment keys, code behavior)
 - Group commits logically, summarize intent clearly
 - Avoid filler, boilerplate, or invented details
+
+### Important
+- Return description as ONE text block
 `;
 }
 
-// =============================
-// To get one file diffs summary
-// =============================
-export function buildDiffSummaryPrompt() {
-	return `
-You are a senior software enginner generating a short, factual summary of code changes from file diffs.
-STRICT RULES (MUST FOLLOW):
-- Output ONLY the final summary text
-- DO NOT speculate or infer intent
-- No markdown, no bullet points
-- One single paragraph
-- Maximum 300 characters
-`.trim();
-}
 
 // =====================================================
 // To get PR title + description from file diffs summary
@@ -144,6 +133,7 @@ Compare branch name: ${compareBranch}
 
 The ENTIRE Pull Request MUST be written in ${language}.
 This includes the PR TITLE and ALL section headers and content.
+Do NOT assume or invent filenames, variables, endpoints, or any implementation details.
 
 All main section headers must be exactly as follows in ${language}:
 - Description section: ## ${headers.description}
@@ -164,19 +154,19 @@ Generate:
 
 ## ${headers.changes}
 - Split the changes into 1 to 6 numbered sections
+- Number the sections from most important to less important
 - Each section must:
   - Group related file changes by intent, not by filename or inferred detail
-  - Describe **what was done and why**, only using the information in the diff summaries and commits
-- Number the sections from most important to less important
+  - Describe **what was done and why**, only using the information in the diff summaries
 
 Example format:
 
 ### 1. **<Section title based on diff summaries>**
-- Description of changes in this group of files and commits
+- Description of changes in this group of files
 - Bulleted explanation summarizing the changes
 
 ### 2. **<Section title based on diff summaries>**
-- Description of changes in this group of files and commits
+- Description of changes in this group of files
 - Bulleted explanation summarizing the file changes
 
 (continue if relevant)
@@ -185,5 +175,11 @@ Example format:
 
 ## ${headers.howToTest}
 - Use bullet points for clarity
+
+### Writing rules
+- ONLY use information explicitly present in the file diffs summaries
+- Do NOT invent anything (variables, files, API endpoints, environment keys, code behavior)
+- Group file diffs summaries logically, summarize intent clearly
+- Avoid filler, boilerplate, or invented details
 `;
 }

@@ -1,35 +1,22 @@
 import type { IGitHubCompareResponse, IGitHubFile } from "@/types/commits";
 import { githubFetch } from "./client";
 
-interface Response {
-	files: IGitHubFile[] | undefined,
-	commits: string[],
-}
-
 /**
  * Returns an array of files between two branches, ready for summarization
  */
-export async function getFileDiffsAndCommits(
+export async function getFileDiffs(
 	installationId: string,
 	owner: string,
 	repoName: string,
 	baseBranch: string,
 	compareBranch: string,
-): Promise<Response> {
+): Promise<IGitHubFile[] | undefined> {
 	const compare = await githubFetch<IGitHubCompareResponse>(
 		installationId,
 		`/repos/${owner}/${repoName}/compare/${baseBranch}...${compareBranch}`,
 	);
 
-	// Flatten all files across commits
-	const files = compare.data.files;
-
-	// Only single-parent commits (skip merges)
-	const commits = compare.data.commits
-		.filter((c) => c.parents.length === 1)
-		.map((c) => c.commit.message);
-
-	return { files, commits };
+	return compare.data.files;
 }
 
 /**
@@ -59,30 +46,19 @@ export async function getFileDiffsAndCommits(
  *   Example:
  *     File src/components/OldButton.tsx was deleted.
  */
-export function prepareFileDiffForAI(file: IGitHubFile): {
-	filename: string;
-	status: string;
-	changes: number;
-	patch: string;
-} {
+export function prepareFileDiffForAI(file: IGitHubFile) {
 	let patch = "";
 
 	if (file.status === "deleted") {
-		patch = `File ${file.filename} was deleted.`;
+		patch = `--- a/${file.filename}\n+++ /dev/null\nFile deleted.`;
 	} else if (!file.patch) {
-		// Rare case: new file without a patch
-		patch = `File ${file.filename} was added.`;
-	} else if (file.status === "modified") {
-		patch = file.patch
-			.split("\n")
-			.filter((line) => line.startsWith("+") || line.startsWith("-"))
-			.join("\n");
-	} else if (file.status === "added") {
-		patch = file.patch
-			.split("\n")
-			.filter((line) => line.startsWith("+"))
-			.map((line) => line.slice(1))
-			.join("\n");
+		patch = `File ${file.filename} was ${file.status}, but diff is unavailable (file too large or binary).`;
+	} else {
+		patch = [
+			`diff --git a/${file.filename} b/${file.filename}`,
+			`status: ${file.status}`,
+			file.patch,
+		].join("\n");
 	}
 
 	return {
