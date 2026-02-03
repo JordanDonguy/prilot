@@ -47,6 +47,7 @@ export async function GET(_req: NextRequest) {
 					compareBranch: true,
 					updatedAt: true,
 					providerPrUrl: true,
+					mode: true,
 					repository: {
 						select: {
 							id: true,
