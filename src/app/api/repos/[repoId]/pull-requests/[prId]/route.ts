@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import sanitizeHtml from "sanitize-html";
 import { getPrisma } from "@/db";
 import { uuidParam } from "@/lib/schemas/id.schema";
-import { pullRequestSchema } from "@/lib/schemas/pr.schema";
+import { updatePrSchema } from "@/lib/schemas/pr.schema";
 import {
 	BadRequestError,
 	ForbiddenError,
@@ -88,9 +88,8 @@ export async function PATCH(
 		const { prId } = await uuidParam("prId").parseAsync(await context.params);
 
 		// 3. Validate and sanitize inputs
-		const { prTitle, prBody } = await pullRequestSchema
-			.pick({ prTitle: true, prBody: true })
-			.parseAsync(await req.json());
+		const { prTitle, prBody, baseBranch, compareBranch, language, mode } =
+			await updatePrSchema.parseAsync(await req.json());
 
 		const safePrTitle = sanitizeHtml(prTitle);
 		const safePrBody = sanitizeHtml(prBody);
@@ -137,6 +136,10 @@ export async function PATCH(
 			data: {
 				title: safePrTitle,
 				description: safePrBody,
+				baseBranch: baseBranch,
+				compareBranch: compareBranch,
+				language: language,
+				mode: mode
 			},
 		});
 
