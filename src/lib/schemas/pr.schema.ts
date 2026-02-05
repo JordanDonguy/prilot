@@ -57,8 +57,7 @@ export const updatePrSchema = z.object({
 
 	language: z
 		.enum(["English", "French", "Spanish", "German", "Portuguese", "Italian"])
-		.default("English")
 		.optional(),
 
-	mode: z.enum(["fast", "deep"]).default("fast").optional(),
+	mode: z.enum(["fast", "deep"]).optional(),
 });

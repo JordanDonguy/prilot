@@ -45,6 +45,7 @@ export default function PREditorPageContent({
 	const startAutoSave = useRef(false); // To start auto saving PR in db when editing manually
 	const skipNextFetch = useRef(false); // To prevent fetching PR after generating one
 	const editorRef = useRef<HTMLDivElement | null>(null);
+	const autoSaveFrameRef = useRef<number | null>(null);
 
 	// ----- Hooks -----
 	const { repo, loading } = useRepository(repoId);
@@ -92,7 +93,14 @@ export default function PREditorPageContent({
 			});
 		}
 
-		startAutoSave.current = true; // restore auto save
+		// Delay re-enabling auto-save to prevent immediate PATCH after PR creation
+		// Double rAF ensures React has flushed all state updates and effects
+		if (autoSaveFrameRef.current) cancelAnimationFrame(autoSaveFrameRef.current);
+		autoSaveFrameRef.current = requestAnimationFrame(() => {
+			autoSaveFrameRef.current = requestAnimationFrame(() => {
+				startAutoSave.current = true;
+			});
+		});
 	}, [generatePR]);
 
 	// ----- Effects -----
@@ -123,6 +131,13 @@ export default function PREditorPageContent({
 		setMode(pullRequest.mode);
 		setShowEditOrPreview("preview");
 	}, [pullRequest]);
+
+	// Cleanup animation frame on unmount
+	useEffect(() => {
+		return () => {
+			if (autoSaveFrameRef.current) cancelAnimationFrame(autoSaveFrameRef.current);
+		};
+	}, []);
 
 	// ----- JSX fallbacks ------
 	// Loading fallback

@@ -61,6 +61,7 @@ export async function POST(
 				status: pr.status,
 				baseBranch: pr.baseBranch,
 				compareBranch: pr.compareBranch,
+				mode: mode,
 				createdAt: pr.createdAt,
 			},
 			{ status: 201 },
