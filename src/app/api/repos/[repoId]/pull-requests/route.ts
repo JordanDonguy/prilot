@@ -58,7 +58,8 @@ export async function GET(
 				baseBranch: true,
 				compareBranch: true,
 				updatedAt: true,
-				providerPrUrl: true
+				providerPrUrl: true,
+				mode: true,
 			},
 			orderBy: { updatedAt: "desc" },
 			skip,

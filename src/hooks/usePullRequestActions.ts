@@ -8,6 +8,7 @@ interface CreatePRPayload {
 	baseBranch: string;
 	compareBranch: string;
 	language: string;
+	mode: "fast" | "deep";
 }
 
 export function usePullRequestActions(repoId: string) {

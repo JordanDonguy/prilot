@@ -17,6 +17,7 @@ interface useGeneratePRProps {
 	baseBranch: string;
 	compareBranch: string;
 	language: string;
+	mode: "fast" | "deep";
 	setPrId: (id: string) => void;
 }
 
@@ -26,6 +27,7 @@ export function useGeneratePR({
 	baseBranch,
 	compareBranch,
 	language,
+	mode,
 	setPrId,
 }: useGeneratePRProps) {
 	const { addDraftPR } = usePullRequestActions(repoId ?? "");
@@ -38,54 +40,46 @@ export function useGeneratePR({
 		setIsGenerating(true);
 
 		try {
-			// 1. Fetch commit differences between branches
-			const compareRes = await fetch(
-				`/api/repos/${repoId}/compare-commits/github?base=${baseBranch}&compare=${compareBranch}`,
+			// 1. Generate PR with AI
+			const aiRes = await fetch(
+				`/api/repos/${repoId}/pull-requests/generate/${mode}`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ language, baseBranch, compareBranch }),
+				},
 			);
 
-			if (!compareRes.ok) {
-				const data = await compareRes.json();
-				toast.error(data.error || "Failed to fetch commits");
-				return { success: false };
-			}
-
-			const { commits }: { commits: string[] } = await compareRes.json();
-			if (!commits.length) {
-				toast.info("No commit differences found between branches.");
-				return { success: false };
-			}
-
-			// 2. Generate PR with AI
-			const aiRes = await fetch("/api/pr/generate", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ repoId, commits, language, compareBranch }),
-			});
-
 			if (!aiRes.ok) {
-				// Rate limit handling
-				if (aiRes.status === 429) {
-					const data = await aiRes.json();
-					toast.error(
-						data.error || "Weekly pull-request generation limit reached.",
-					);
-					return { success: false };
-				}
-				// Other errors
-				throw new Error("Failed to generate PR with AI");
+				const data = await aiRes.json();
+				toast.error(data.error || "Failed to generate PR");
+				return { success: false };
 			}
 
 			const data = (await aiRes.json()) as GeneratePRResponse;
-			const { title: generatedTitle, description: generatedDescription } = data;
+			const { title, description } = data;
+
+			// 2. Ensure description is always a string (handle inconsistent AI res format)
+			function normalizeDescription(
+				desc: string | { description: string },
+			): string {
+				if (typeof desc === "string") return desc;
+				if (desc && typeof desc.description === "string")
+					return desc.description;
+				return "";
+			}
+
+			const safeDescription = normalizeDescription(description);
 
 			// 3.a. If the PR is new, save it in db
 			if (!prId) {
 				const newPR = await addDraftPR({
-					prTitle: generatedTitle,
-					prBody: generatedDescription,
+					prTitle: title,
+					prBody: safeDescription,
 					baseBranch,
 					compareBranch,
 					language,
+					mode,
 				});
 				if (newPR) setPrId(newPR.id);
 			} else {
@@ -96,15 +90,19 @@ export function useGeneratePR({
 						method: "PATCH",
 						headers: { "Content-Type": "application/json" },
 						body: JSON.stringify({
-							prTitle: generatedTitle,
-							prBody: generatedDescription,
+							prTitle: title,
+							prBody: safeDescription,
+							baseBranch,
+							compareBranch,
+							language,
+							mode,
 						}),
 					},
 				);
 				if (!updateRes.ok) throw new Error("Failed to update PR");
 			}
 
-			return { success: true, generatedTitle, generatedDescription };
+			return { success: true, title, description: safeDescription };
 		} catch (err) {
 			console.error(err);
 			toast.error("Failed to generate PR");
@@ -112,7 +110,16 @@ export function useGeneratePR({
 		} finally {
 			setIsGenerating(false);
 		}
-	}, [repoId, addDraftPR, baseBranch, compareBranch, language, prId, setPrId]);
+	}, [
+		repoId,
+		addDraftPR,
+		baseBranch,
+		compareBranch,
+		mode,
+		language,
+		prId,
+		setPrId,
+	]);
 
 	return { isGenerating, generatePR };
 }

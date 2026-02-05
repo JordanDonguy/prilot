@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, CheckCircle, Clock, GitPullRequest } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
@@ -46,16 +46,17 @@ export default function DashboardPage() {
 		lastWeek: number;
 	} | null>(null);
 	const [loading, setLoading] = useState(true);
+	const hasFetchedRef = useRef(false);
 
 	// Check for pending invitations
 	const pendingInvitations = invitations ?? [];
 
-	// Fetch recent PRs
-	// biome-ignore lint/correctness/useExhaustiveDependencies: refetch when repos change (e.g. user just accepted an invite)
+	// Fetch recent PRs (only once on mount)
 	useEffect(() => {
-		const fetchRecentPRs = async () => {
-			if (recentPRs.length > 0) return; // prevent double fetches
+		if (hasFetchedRef.current) return;
+		hasFetchedRef.current = true;
 
+		const fetchRecentPRs = async () => {
 			try {
 				const res = await fetch("/api/pull-requests/recent");
 				if (!res.ok) throw new Error("Failed to fetch recent PRs");
@@ -72,7 +73,7 @@ export default function DashboardPage() {
 		};
 
 		fetchRecentPRs();
-	}, [repositories]);
+	}, []);
 
 	// Compute top 3 repositories by total PRs count
 	const topRepos = [...repositories]
@@ -109,6 +110,10 @@ export default function DashboardPage() {
 
 		if (lastWeek > 0 && thisWeek === 0) {
 			return "No activity this week";
+		}
+
+		if (lastWeek === thisWeek) {
+			return "Same activity as last week";
 		}
 
 		const pct = Math.round(getPercentageChange(thisWeek, lastWeek));

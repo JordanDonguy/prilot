@@ -7,6 +7,7 @@ import type { IPullRequest } from "@/types/pullRequests";
 interface IDraftPR extends IPullRequest {
 	description: string;
 	language: PRLanguage;
+	mode: "fast" | "deep";
 }
 
 export function useFetchPR({

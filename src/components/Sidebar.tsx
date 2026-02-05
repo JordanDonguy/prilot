@@ -82,7 +82,7 @@ export default function Sidebar() {
 
 			<aside
 				className={`
-					fixed md:relative z-30 top-14 md:top-0 left-0 h-screen w-64 border-r border-gray-400 dark:border-gray-700 p-2 pt-6
+					fixed md:relative z-30 top-14 md:top-0 left-0 h-screen w-full sm:w-48 lg:w-64 border-r border-gray-400 dark:border-gray-700 p-2 pt-6
 					backdrop-blur-md bg-gray-50/40 dark:bg-zinc-950/80 md:bg-transparent md:dark:bg-transparent
 					transform transition-transform duration-300 ease-in-out overflow-y-scroll hide-scrollbar
 					${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
@@ -130,7 +130,7 @@ export default function Sidebar() {
 					<button
 						type="button"
 						onClick={() => setShowGithub(!showGithub)}
-						className="flex justify-between items-center w-full pt-2 px-2 rounded-xl hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+						className="flex justify-between items-center w-fit sm:w-full gap-4 sm:gap-0 pt-2 px-2 rounded-xl hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
 					>
 						<h2 className="flex items-center gap-4 text-lg font-semibold mb-2">
 							<Github />
@@ -248,7 +248,7 @@ export default function Sidebar() {
 					<button
 						type="button"
 						onClick={() => setShowGitlab(!showGitlab)}
-						className="flex justify-between items-center w-full pt-2 px-2 rounded-xl hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+						className="flex justify-between items-center w-fit sm:w-full gap-4 sm:gap-0 pt-2 px-2 rounded-xl hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
 					>
 						<h2 className="flex items-center gap-4 text-lg font-semibold mb-2">
 							<Gitlab />

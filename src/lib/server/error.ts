@@ -46,6 +46,13 @@ export class ConflictError extends HttpError {
 	}
 }
 
+// Unprocessable entity (validation failed after processing)
+export class UnprocessableEntityError extends HttpError {
+	constructor(message: string) {
+		super(message, 422);
+	}
+}
+
 // Too many requests
 export class TooManyRequestsError extends HttpError {
 	retryAfter?: number;

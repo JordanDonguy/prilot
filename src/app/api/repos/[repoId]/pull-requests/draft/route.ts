@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import sanitizeHtml from "sanitize-html";
 import { getPrisma } from "@/db";
 import { uuidParam } from "@/lib/schemas/id.schema";
-import { pullRequestSchema } from "@/lib/schemas/pr.schema";
+import { createPrSchema } from "@/lib/schemas/pr.schema";
 import { ForbiddenError, NotFoundError } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { getCurrentUser } from "@/lib/server/session";
@@ -37,8 +37,8 @@ export async function POST(
 		}
 
 		// 4. Validate inputs
-		const { prTitle, prBody, baseBranch, compareBranch, language } =
-			await pullRequestSchema.parseAsync(await req.json());
+		const { prTitle, prBody, baseBranch, compareBranch, language, mode } =
+			await createPrSchema.parseAsync(await req.json());
 
 		// 5. Insert new PR
 		const pr = await prisma.pullRequest.create({
@@ -50,6 +50,7 @@ export async function POST(
 				compareBranch,
 				createdById: user.id,
 				language: language,
+				mode: mode
 			},
 		});
 
@@ -60,6 +61,7 @@ export async function POST(
 				status: pr.status,
 				baseBranch: pr.baseBranch,
 				compareBranch: pr.compareBranch,
+				mode: mode,
 				createdAt: pr.createdAt,
 			},
 			{ status: 201 },
