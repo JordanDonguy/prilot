@@ -3,6 +3,7 @@ import {
 	type ReactNode,
 	useContext,
 	useEffect,
+	useRef,
 	useState,
 } from "react";
 import type { IInvitation, IRepository } from "@/types/repos";
@@ -22,6 +23,7 @@ export function ReposProvider({ children }: { children: ReactNode }) {
 	const [repositories, setRepositories] = useState<IRepository[]>([]);
 	const [invitations, setInvitations] = useState<IInvitation[]>([]);
 	const [loading, setLoading] = useState(true);
+	const hasFetchedRef = useRef(false);
 
 	const refreshData = async () => {
 		try {
@@ -70,8 +72,11 @@ export function ReposProvider({ children }: { children: ReactNode }) {
 		);
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: fetch on mount only
+	// Fetch on mount only (ref prevents StrictMode double-fetch)
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only fetch
 	useEffect(() => {
+		if (hasFetchedRef.current) return;
+		hasFetchedRef.current = true;
 		refreshData();
 	}, []);
 

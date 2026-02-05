@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 type Installation = {
   id: string;
@@ -17,6 +17,7 @@ const InstallationsContext = createContext<InstallationsContextType | undefined>
 
 export function InstallationsProvider({ children }: { children: ReactNode }) {
   const [installations, setInstallations] = useState<Installation[]>([]);
+  const hasFetchedRef = useRef(false);
 
   const refreshInstallations = async () => {
     try {
@@ -33,8 +34,11 @@ export function InstallationsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: we only fetch on mount
+  // Fetch on mount only (ref prevents StrictMode double-fetch)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only fetch
   useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
     refreshInstallations();
   }, []);
 
