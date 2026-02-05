@@ -4,6 +4,7 @@ import { ArrowBigLeftDash, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
+import { GeneratingText } from "@/components/GeneratingText";
 import { PREditor } from "@/components/PREditor";
 import PREditorSkeleton from "@/components/PREditorSkeleton";
 import { BranchSelect, LanguageSelect } from "@/components/Select";
@@ -252,8 +253,14 @@ export default function PREditorPageContent({
 								className="h-auto w-full py-2 bg-gray-900 text-white dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-300 shadow-lg group disabled:animate-pulse"
 							>
 								<span className="flex items-center group-hover:scale-110 transition">
-									<Sparkles className="w-4 h-4 mr-2" />
-									{isGenerating ? "Generating..." : "Generate with AI"}
+									{isGenerating ? (
+										<GeneratingText mode={mode} />
+									) : (
+										<>
+											<Sparkles className="w-4 h-4 mr-2" />
+											Generate with AI
+										</>
+									)}
 								</span>
 							</Button>
 						</AnimatedSlide>
