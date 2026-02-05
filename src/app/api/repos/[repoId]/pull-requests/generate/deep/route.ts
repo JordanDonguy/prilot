@@ -8,12 +8,14 @@ import {
 	ForbiddenError,
 	NotFoundError,
 	UnauthorizedError,
+	UnprocessableEntityError,
 } from "@/lib/server/error";
 import { getFileDiffs } from "@/lib/server/github/fileDiffs";
 import { groq } from "@/lib/server/groq/client";
 import { buildPRFromDiffs } from "@/lib/server/groq/prompt";
 import { summarizeDiffsForPR } from "@/lib/server/groq/summarizeFileDiffs";
 import { handleError } from "@/lib/server/handleError";
+import { redis } from "@/lib/server/redis/client";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import {
 	aiLimiterPerMinute,
@@ -25,6 +27,7 @@ import { formatDateTimeForErrors } from "@/lib/utils/formatDateTime";
 import type { IPRResponse } from "@/types/pullRequests";
 
 const prisma = getPrisma();
+const MIN_DESCRIPTION_LENGTH = 500;
 
 export async function POST(
 	req: NextRequest,
@@ -140,34 +143,55 @@ export async function POST(
 		// 10. Summarize diffs (stage 1)
 		const diffSummaries = await summarizeDiffsForPR(files);
 
-		// 11. PR generation (stage 2)
-		const completion = await groq.chat.completions.create({
-			model: "openai/gpt-oss-120b",
-			messages: [
-				{
-					role: "system",
-					content: buildPRFromDiffs(language, safeCompare),
+		// 11. PR generation (stage 2) with retry if returned description is too short
+		const generatePRContent = async () => {
+			const completion = await groq.chat.completions.create({
+				model: "openai/gpt-oss-120b",
+				messages: [
+					{
+						role: "system",
+						content: buildPRFromDiffs(language, safeCompare),
+					},
+					{
+						role: "user",
+						content: `File diffs summary: ${diffSummaries}`,
+					},
+				],
+				response_format: {
+					type: "json_schema",
+					json_schema: {
+						name: "json",
+						schema: {
+							title: "",
+							description: "",
+						},
+					},
 				},
-				{
-					role: "user",
-					content: `File diffs summary: ${diffSummaries}`,
-				},
-			],
-			response_format: {
-				type: "json_schema",
-				json_schema: {
-					name: "json",
-					schema: {
-						title: "",
-						description: "",
-					}
-				},
-			},
-		});
+			});
 
-		const content = completion.choices[0].message.content;
-		if (!content) throw new Error("Empty AI response");
-		const parsed = JSON.parse(content);
+			const content = completion.choices[0].message.content;
+			if (!content) throw new Error("Empty AI response");
+			return JSON.parse(content) as IPRResponse;
+		};
+
+		// First attempt
+		let parsed = await generatePRContent();
+
+		// Retry if description is too short
+		if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
+			parsed = await generatePRContent();
+
+			// If still too short after retry, refund weekly rate limit and throw error
+			if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
+				// Refund the weekly rate limit credit (decrement the used count)
+				const weeklyKey = `ai:week:user:${owner.userId}`;
+				await redis.decr(weeklyKey);
+
+				throw new UnprocessableEntityError(
+					"AI generated a description that was too short. Please try again.",
+				);
+			}
+		}
 
 		// 12. Response
 		const response: IPRResponse = { ...parsed };

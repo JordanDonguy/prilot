@@ -29,10 +29,9 @@ export interface IPaginatedPRsResponse {
 // ---- PR response from API ----
 export interface IPRResponse {
 	title: string;
-	body: string;
-	// optionally include rateLimit if owner
+	description: string;
 	rateLimit?: {
 		weeklyRemaining: number;
 		weeklyReset: number;
 	};
-};
+}
