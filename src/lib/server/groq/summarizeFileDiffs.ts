@@ -18,14 +18,14 @@ async function summarizeFileDiff(patch: string): Promise<string> {
 			{
 				role: "system",
 				content:
-					"You are a senior software enginner generating a detailled summary of code changes from file diffs",
+					"You are a senior software enginner generating a detailled summary of code changes from file diffs in 150 tokens or fewer.",
 			},
 			{
 				role: "user",
 				content: `${patch}`,
 			},
 		],
-		max_completion_tokens: 250,
+		max_completion_tokens: 150,
 	});
 
 	const content = completion.choices[0].message.content;
