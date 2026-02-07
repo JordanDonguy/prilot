@@ -12,8 +12,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/Card";
-import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { ConnectButton } from "@/components/ConnectButton";
+import { PasswordModal } from "@/components/PasswordModal";
 import { useUser } from "@/contexts/UserContext";
 import type { IOAuthProvider } from "@/types/user";
 
@@ -29,102 +29,117 @@ export default function UserSettingsPage() {
 	if (!user) return null;
 
 	// Check connected accounts
-	const githubConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account === "github") : false;
-	const gitlabConnected = user.oauthProviders ? !!user.oauthProviders.find((account: IOAuthProvider) => account === "gitlab") : false;
+	const githubConnected = user.oauthProviders
+		? !!user.oauthProviders.find(
+				(account: IOAuthProvider) => account === "github",
+			)
+		: false;
+	const gitlabConnected = user.oauthProviders
+		? !!user.oauthProviders.find(
+				(account: IOAuthProvider) => account === "gitlab",
+			)
+		: false;
 
 	return (
-		<div className="p-6 space-y-6 fade-in-fast">
-			{/* Header */}
-			<AnimatedSlide x={-20} triggerOnView={false}>
-				<h1 className="text-3xl text-gray-900 dark:text-white mb-2">
-					User settings
-				</h1>
-				<p className="text-gray-600 dark:text-gray-400">
-					Manage your account and connected services.
-				</p>
-			</AnimatedSlide>
+		<>
+			<div className="p-6 space-y-6 fade-in-fast">
+				{/* Header */}
+				<AnimatedSlide x={-20} triggerOnView={false}>
+					<h1 className="text-3xl text-gray-900 dark:text-white mb-2">
+						User settings
+					</h1>
+					<p className="text-gray-600 dark:text-gray-400">
+						Manage your account and connected services.
+					</p>
+				</AnimatedSlide>
 
-			{/* Account info */}
-			<AnimatedScale scale={0.96} triggerOnView={false}>
-				<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
-					<CardHeader>
-						<CardTitle>Account</CardTitle>
-						<CardDescription>Your personal information</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="flex justify-between items-center">
-							<span className="text-sm text-gray-600 dark:text-gray-400">
-								Email
-							</span>
-							<span>{user.email}</span>
-						</div>
-						<div className="flex justify-between items-center">
-							<span className="text-sm text-gray-600 dark:text-gray-400">
-								Username
-							</span>
-							<span>{user.username}</span>
-						</div>
-						<div className="flex justify-between items-center">
-							<span className="text-sm text-gray-600 dark:text-gray-400">
-								Member since
-							</span>
-							<span>{new Date(user.createdAt).toLocaleDateString()}</span>
-						</div>
-					</CardContent>
-				</Card>
-			</AnimatedScale>
+				{/* Account info */}
+				<AnimatedScale scale={0.96} triggerOnView={false}>
+					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+						<CardHeader>
+							<CardTitle>Account</CardTitle>
+							<CardDescription>Your personal information</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="flex justify-between items-center">
+								<span className="text-sm text-gray-600 dark:text-gray-400">
+									Email
+								</span>
+								<span>{user.email}</span>
+							</div>
+							<div className="flex justify-between items-center">
+								<span className="text-sm text-gray-600 dark:text-gray-400">
+									Username
+								</span>
+								<span>{user.username}</span>
+							</div>
+							<div className="flex justify-between items-center">
+								<span className="text-sm text-gray-600 dark:text-gray-400">
+									Member since
+								</span>
+								<span>{new Date(user.createdAt).toLocaleDateString()}</span>
+							</div>
+						</CardContent>
+					</Card>
+				</AnimatedScale>
 
-			{/* Security */}
-			<AnimatedScale scale={0.96} triggerOnView={false}>
-				<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
-					<CardHeader className="pb-2">
-						<CardTitle>Security</CardTitle>
-						<CardDescription>Password & authentication</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<button
-							type="button"
-							onClick={() => setIsPasswordModalOpen(true)}
-							className="flex justify-center items-center gap-2 w-full lg:w-[calc(50%-1rem)] h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-100 dark:text-black hover:cursor-pointer hover:opacity-90"
-						>
-							<Lock size={16} />
-							Change password
-						</button>
-					</CardContent>
-				</Card>
-			</AnimatedScale>
+				{/* Security */}
+				<AnimatedScale scale={0.96} triggerOnView={false}>
+					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+						<CardHeader className="pb-2">
+							<CardTitle>Security</CardTitle>
+							<CardDescription>
+								{user.hasPassword
+									? "Password & authentication"
+									: "Add a password to enable credentials-based login alongside your linked account"}
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<button
+								type="button"
+								onClick={() => setIsPasswordModalOpen(true)}
+								className="flex justify-center items-center gap-2 w-full lg:w-[calc(50%-1rem)] h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-100 dark:text-black hover:cursor-pointer hover:opacity-90"
+							>
+								<Lock size={16} />
+								{user.hasPassword ? "Change password" : "Create password"}
+							</button>
+						</CardContent>
+					</Card>
+				</AnimatedScale>
 
-			{/* Connected accounts */}
-			<AnimatedScale scale={0.96} triggerOnView={false}>
-				<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
-					<CardHeader className="pb-2">
-						<CardTitle>Connected accounts</CardTitle>
-						<CardDescription>Link external providers</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-3 grid lg:grid-cols-2 gap-4 lg:gap-0 mt-4">
-						<ConnectButton
-							providerName="GitHub"
-							connected={githubConnected}
-							onConnect={() => handleConnect("github")}
-							icon={<Github />}
-							className="lg:pr-8 lg:border-r border-gray-500"
-						/>
-						<ConnectButton
-							providerName="GitLab"
-							connected={gitlabConnected}
-							onConnect={() => handleConnect("gitlab")}
-							icon={<Gitlab />}
-							className="lg:ml-8"
-						/>
-					</CardContent>
-				</Card>
-			</AnimatedScale>
+				{/* Connected accounts */}
+				<AnimatedScale scale={0.96} triggerOnView={false}>
+					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+						<CardHeader className="pb-2">
+							<CardTitle>Connected accounts</CardTitle>
+							<CardDescription>Link external providers</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-3 grid lg:grid-cols-2 gap-4 lg:gap-0 mt-4">
+							<ConnectButton
+								providerName="GitHub"
+								connected={githubConnected}
+								onConnect={() => handleConnect("github")}
+								icon={<Github />}
+								className="lg:pr-8 lg:border-r border-gray-500"
+							/>
+							<ConnectButton
+								providerName="GitLab"
+								connected={gitlabConnected}
+								onConnect={() => handleConnect("gitlab")}
+								icon={<Gitlab />}
+								className="lg:ml-8"
+							/>
+						</CardContent>
+					</Card>
+				</AnimatedScale>
+			</div>
 
-			{/* Change password modal */}
-			<ChangePasswordModal
+			{/* Password modal */}
+			<PasswordModal
 				isOpen={isPasswordModalOpen}
+				hasPassword={user.hasPassword}
 				onClose={() => setIsPasswordModalOpen(false)}
 			/>
-		</div>
+		</>
 	);
 }
