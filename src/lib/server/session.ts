@@ -24,6 +24,7 @@ export async function getCurrentUser() {
 
 		return {
 			...safeUser,
+			hasPassword: !!password,
 			oauthProviders,
 		};
 	} catch {
