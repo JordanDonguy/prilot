@@ -18,6 +18,11 @@ export const githubOAuthStartLimiter = new Ratelimit({
 	limiter: Ratelimit.fixedWindow(10, "1 m"),
 });
 
+export const changePasswordLimiter = new Ratelimit({
+	redis,
+	limiter: Ratelimit.fixedWindow(5, "10 m"),
+});
+
 // Refresh Token
 export const refreshLimiter = new Ratelimit({
 	redis,
