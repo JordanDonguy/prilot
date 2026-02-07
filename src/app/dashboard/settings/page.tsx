@@ -137,7 +137,6 @@ export default function UserSettingsPage() {
 			{/* Password modal */}
 			<PasswordModal
 				isOpen={isPasswordModalOpen}
-				hasPassword={user.hasPassword}
 				onClose={() => setIsPasswordModalOpen(false)}
 			/>
 		</>
