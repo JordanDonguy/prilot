@@ -80,7 +80,33 @@ export async function POST(
 			);
 		}
 
-		// 7. Create invitation
+		// 7. Enforce max 4 members (members + pending invitations)
+		const [membersCount, pendingInvitesCount, existingInvite] =
+			await Promise.all([
+				prisma.repositoryMember.count({
+					where: { repositoryId: repoId },
+				}),
+				prisma.invitation.count({
+					where: { repositoryId: repoId, status: "pending" },
+				}),
+				prisma.invitation.findUnique({
+					where: {
+						repositoryId_email: { repositoryId: repoId, email },
+					},
+					select: { status: true },
+				}),
+			]);
+
+		const isResend = existingInvite?.status === "pending";
+		const total = membersCount + pendingInvitesCount + (isResend ? 0 : 1);
+
+		if (total > 4) {
+			throw new ConflictError(
+				"A repository can have a maximum of 4 members (including pending invitations)",
+			);
+		}
+
+		// 8. Create/update invitation
 		const token = crypto.randomBytes(32).toString("hex");
 
 		await prisma.invitation.upsert({
@@ -106,7 +132,7 @@ export async function POST(
 			},
 		});
 
-		// 8. Send email
+		// 9. Send email
 		const inviteUrl = `${config.frontendUrl}/invitations/${token}/accept`;
 		const declineUrl = `${config.frontendUrl}/invitations/${token}/decline`;
 

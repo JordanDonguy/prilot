@@ -108,6 +108,32 @@ export async function DELETE(
 			where: { repositoryId: repoId, userId: targetUser },
 			include: { user: true },
 		});
+
+		// 2b. If no member found, check for a pending invitation to cancel
+		if (!member && targetUserId) {
+			const invitation = await prisma.invitation.findFirst({
+				where: {
+					id: targetUserId,
+					repositoryId: repoId,
+					status: "pending",
+				},
+			});
+			if (!invitation) throw new NotFoundError("Member not found");
+
+			// Only owners can cancel invitations
+			const currentUserMembership =
+				await prisma.repositoryMember.findFirst({
+					where: { repositoryId: repoId, userId: currentUser.id },
+				});
+			if (currentUserMembership?.role !== "owner") {
+				throw new ForbiddenError("Only owners can cancel invitations");
+			}
+
+			await prisma.invitation.delete({ where: { id: invitation.id } });
+
+			return NextResponse.json({ success: true });
+		}
+
 		if (!member) throw new NotFoundError("Member not found");
 
 		// 3. Determine if currentUser is owner
