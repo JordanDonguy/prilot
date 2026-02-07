@@ -45,7 +45,7 @@ export async function PATCH(req: Request) {
 		}
 
 		// 5. Verify current password
-		await verifyPassword(dbUser.password, currentPassword);
+		await verifyPassword(dbUser.password, currentPassword, "Incorrect current password");
 
 		// 6. Check new passwords match
 		if (newPassword !== confirmPassword) {
