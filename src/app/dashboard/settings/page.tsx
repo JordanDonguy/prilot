@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Gitlab, Lock } from "lucide-react";
+import { CircleCheck, Github, Gitlab, Lock, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import AnimatedScale from "@/components/animations/AnimatedScale";
@@ -13,32 +13,30 @@ import {
 	CardTitle,
 } from "@/components/Card";
 import { ConnectButton } from "@/components/ConnectButton";
+import GithubAppButton from "@/components/GithubAppButton";
 import { PasswordModal } from "@/components/PasswordModal";
+import { useInstallations } from "@/contexts/InstallationContext";
 import { useUser } from "@/contexts/UserContext";
+import { config } from "@/lib/client/config";
 import type { IOAuthProvider } from "@/types/user";
 
 export default function UserSettingsPage() {
 	const { user } = useUser();
+	const { installations } = useInstallations();
 	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-
-	function handleConnect(provider: "github" | "gitlab") {
-		toast.success(`${provider} account connected`);
-	}
 
 	// User object is guaranteed to be present due to route guard in layout.tsx
 	if (!user) return null;
 
-	// Check connected accounts
-	const githubConnected = user.oauthProviders
-		? !!user.oauthProviders.find(
-				(account: IOAuthProvider) => account === "github",
-			)
-		: false;
-	const gitlabConnected = user.oauthProviders
-		? !!user.oauthProviders.find(
-				(account: IOAuthProvider) => account === "gitlab",
-			)
-		: false;
+	// Check OAuth providers
+	const githubOAuth =
+		user.oauthProviders?.includes("github" as IOAuthProvider) ?? false;
+	const gitlabOAuth =
+		user.oauthProviders?.includes("gitlab" as IOAuthProvider) ?? false;
+
+	// Check installations
+	const githubInstalled = installations.some((i) => i.provider === "github");
+	const gitlabInstalled = installations.some((i) => i.provider === "gitlab");
 
 	return (
 		<>
@@ -86,46 +84,80 @@ export default function UserSettingsPage() {
 				{/* Security */}
 				<AnimatedScale scale={0.96} triggerOnView={false}>
 					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
-						<CardHeader className="pb-2">
+						<CardHeader>
 							<CardTitle>Security</CardTitle>
-							<CardDescription>
-								{user.hasPassword
-									? "Password & authentication"
-									: "Add a password to enable credentials-based login alongside your linked account"}
-							</CardDescription>
 						</CardHeader>
-						<CardContent>
-							<button
-								type="button"
-								onClick={() => setIsPasswordModalOpen(true)}
-								className="flex justify-center items-center gap-2 w-full lg:w-[calc(50%-1rem)] h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-100 dark:text-black hover:cursor-pointer hover:opacity-90"
-							>
-								<Lock size={16} />
-								{user.hasPassword ? "Change password" : "Create password"}
-							</button>
+						<CardContent className="grid lg:grid-cols-2">
+							<div className="space-y-2 lg:pr-8 lg:border-r border-gray-500">
+								<CardDescription className="text-lg font-bold">
+									{user.hasPassword
+										? "Manage your password"
+										: "Add a password to enable credentials-based login alongside your linked account"}
+								</CardDescription>
+								<button
+									type="button"
+									onClick={() => setIsPasswordModalOpen(true)}
+									className="flex justify-center items-center gap-2 w-full h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-100 dark:text-black hover:cursor-pointer hover:opacity-90"
+								>
+									<Lock size={16} />
+									{user.hasPassword ? "Change password" : "Create password"}
+								</button>
+							</div>
+
+							<div className="lg:ml-8 border-t border-gray-400 dark:border-gray-500 pt-6 mt-6 lg:pt-0 lg:mt-0 lg:border-none">
+								<CardDescription className="text-lg font-bold mb-2">
+									External authentication providers linked to your account
+								</CardDescription>
+								<div className="flex gap-3">
+									<span
+										className={`inline-flex items-center gap-2 px-3 h-10 rounded-lg shadow-sm border text-sm ${githubOAuth ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400"}`}
+									>
+										<Github size={16} />
+										GitHub
+										{githubOAuth ? (
+											<CircleCheck size={14} />
+										) : (
+											<XCircle size={14} />
+										)}
+									</span>
+									<span
+										className={`inline-flex items-center gap-2 px-3 h-10 rounded-lg shadow-sm border text-sm ${gitlabOAuth ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400"}`}
+									>
+										<Gitlab size={16} />
+										GitLab
+										{gitlabOAuth ? (
+											<CircleCheck size={14} />
+										) : (
+											<XCircle size={14} />
+										)}
+									</span>
+								</div>
+							</div>
 						</CardContent>
 					</Card>
 				</AnimatedScale>
 
-				{/* Connected accounts */}
+				{/* Connected installations */}
 				<AnimatedScale scale={0.96} triggerOnView={false}>
 					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
 						<CardHeader className="pb-2">
-							<CardTitle>Connected accounts</CardTitle>
-							<CardDescription>Link external providers</CardDescription>
+							<CardTitle>Connected installations</CardTitle>
+							<CardDescription>
+								Providers currently connected to your account
+							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-3 grid lg:grid-cols-2 gap-4 lg:gap-0 mt-4">
-							<ConnectButton
-								providerName="GitHub"
-								connected={githubConnected}
-								onConnect={() => handleConnect("github")}
-								icon={<Github />}
+							<GithubAppButton
+								appName={config.github.appName}
+								redirectUri={`${config.frontendUrl}/github/callback`}
+								variant="settings"
+								connected={githubInstalled}
 								className="lg:pr-8 lg:border-r border-gray-500"
 							/>
 							<ConnectButton
 								providerName="GitLab"
-								connected={gitlabConnected}
-								onConnect={() => handleConnect("gitlab")}
+								connected={gitlabInstalled}
+								onConnect={() => toast.info("GitLab integration isn't available yet.")}
 								icon={<Gitlab />}
 								className="lg:ml-8"
 							/>
