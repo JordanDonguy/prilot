@@ -6,5 +6,6 @@ export interface IUser {
   username: string;
   createdAt: Date;
   updatedAt: Date;
+  hasPassword: boolean;
   oauthProviders?: IOAuthProvider[];
 }
