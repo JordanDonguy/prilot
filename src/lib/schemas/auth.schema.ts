@@ -37,3 +37,9 @@ export const setPasswordSchema = z.object({
 	password: passwordValidationSchema,
 	confirmPassword: z.string(),
 });
+
+export const resetPasswordSchema = z.object({
+	token: z.string().min(64).max(64),
+	password: passwordValidationSchema,
+	confirmPassword: z.string(),
+});
