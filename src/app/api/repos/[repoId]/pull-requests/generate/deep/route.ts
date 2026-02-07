@@ -15,7 +15,6 @@ import { groq } from "@/lib/server/groq/client";
 import { buildPRFromDiffs } from "@/lib/server/groq/prompt";
 import { summarizeDiffsForPR } from "@/lib/server/groq/summarizeFileDiffs";
 import { handleError } from "@/lib/server/handleError";
-import { redis } from "@/lib/server/redis/client";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import {
 	aiLimiterPerMinute,
@@ -23,8 +22,8 @@ import {
 	githubCompareCommitsLimiter,
 } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
-import { formatDateTimeForErrors } from "@/lib/utils/formatDateTime";
 import type { IPRResponse } from "@/types/pullRequests";
+import { formatDateTimeForErrors } from "@/lib/utils/formatDateTime";
 
 const prisma = getPrisma();
 const MIN_DESCRIPTION_LENGTH = 500;
@@ -96,7 +95,7 @@ export async function POST(
 		}
 
 		const changedFiles = files.filter((f) => f.status !== "deleted");
-		if (changedFiles.length > 30) {
+		if (changedFiles.length > 35) {
 			throw new BadRequestError(
 				"Too many files have changes, maximum is 30 for deep mode. Please us fast mode instead.",
 			);
@@ -108,23 +107,21 @@ export async function POST(
 		);
 		rateLimitOrThrow(minuteLimit);
 
-		// 9. Owner-based weekly limit
+		// 9. Owner-based weekly limit (check only, increment on success)
 		const owner = repo.members.find((m) => m.role === "owner");
 		if (!owner) throw new Error("No owner found for repository");
 
-		const weekLimit = await aiLimiterPerWeek.limit(
-			`ai:week:user:${owner.userId}`,
-		);
+		const weeklyLimitKey = `ai:week:user:${owner.userId}`;
+		const weeklyCheck = await aiLimiterPerWeek.getRemaining(weeklyLimitKey);
 
-		if (!weekLimit.success) {
+		if (weeklyCheck.remaining <= 0) {
 			if (user.id === owner.userId) {
-				const resetDate = formatDateTimeForErrors(weekLimit.reset);
 				return NextResponse.json(
 					{
-						error: `Weekly PR generation limit reached. Resets on ${resetDate}.`,
+						error: `Weekly PR generation limit reached. Resets on ${formatDateTimeForErrors(weeklyCheck.reset)}`,
 						rateLimit: {
-							weeklyRemaining: weekLimit.remaining,
-							weeklyReset: weekLimit.reset,
+							weeklyRemaining: 0,
+							weeklyReset: weeklyCheck.reset,
 						},
 					},
 					{ status: 429 },
@@ -181,25 +178,24 @@ export async function POST(
 		if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
 			parsed = await generatePRContent();
 
-			// If still too short after retry, refund weekly rate limit and throw error
+			// If still too short after retry, throw error (no credit consumed yet)
 			if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
-				// Refund the weekly rate limit credit (decrement the used count)
-				const weeklyKey = `ai:week:user:${owner.userId}`;
-				await redis.decr(weeklyKey);
-
 				throw new UnprocessableEntityError(
 					"AI generated a description that was too short. Please try again.",
 				);
 			}
 		}
 
-		// 12. Response
+		// 12. Success - now consume weekly rate limit credit
+		const weeklyLimit = await aiLimiterPerWeek.limit(weeklyLimitKey);
+
+		// 13. Response
 		const response: IPRResponse = { ...parsed };
 
 		if (user.id === owner.userId) {
 			response.rateLimit = {
-				weeklyRemaining: weekLimit.remaining,
-				weeklyReset: weekLimit.reset,
+				weeklyRemaining: weeklyLimit.remaining,
+				weeklyReset: weeklyLimit.reset,
 			};
 		}
 
