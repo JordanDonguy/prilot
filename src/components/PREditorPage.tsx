@@ -2,7 +2,9 @@
 
 import { ArrowBigLeftDash, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { Button } from "@/components/Button";
 import { GeneratingText } from "@/components/GeneratingText";
 import { PREditor } from "@/components/PREditor";
@@ -27,6 +29,8 @@ export default function PREditorPageContent({
 	repoId,
 	prId: initialPrId,
 }: PREditorProps) {
+	const router = useRouter();
+
 	// ----- State -----
 	const [prId, setPrId] = useState<string | null>(initialPrId ?? null);
 
@@ -45,6 +49,8 @@ export default function PREditorPageContent({
 
 	const startAutoSave = useRef(false); // To start auto saving PR in db when editing manually
 	const skipNextFetch = useRef(false); // To prevent fetching PR after generating one
+	const didRedirectRef = useRef(false); // To prevent duplicate branch-deleted redirects
+
 	const editorRef = useRef<HTMLDivElement | null>(null);
 	const autoSaveFrameRef = useRef<number | null>(null);
 
@@ -132,6 +138,28 @@ export default function PREditorPageContent({
 		setMode(pullRequest.mode);
 		setShowEditOrPreview("preview");
 	}, [pullRequest]);
+
+	// Redirect if draft PR references a deleted branch
+	useEffect(() => {
+		if (!repo || !pullRequest || didRedirectRef.current) return;
+
+		const branches = repo.branches;
+		if (!branches.includes(pullRequest.baseBranch)) {
+			didRedirectRef.current = true;
+			toast.error(
+				`The base branch "${pullRequest.baseBranch}" doesn't exist anymore on your GitHub repo`,
+			);
+			router.replace(`/dashboard/repo/${repoId}`);
+			return;
+		}
+		if (!branches.includes(pullRequest.compareBranch)) {
+			didRedirectRef.current = true;
+			toast.error(
+				`The compare branch "${pullRequest.compareBranch}" doesn't exist anymore on your GitHub repo`,
+			);
+			router.replace(`/dashboard/repo/${repoId}`);
+		}
+	}, [repo, pullRequest, repoId, router]);
 
 	// Cleanup animation frame on unmount
 	useEffect(() => {
