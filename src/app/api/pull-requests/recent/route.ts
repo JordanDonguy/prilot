@@ -32,6 +32,7 @@ export async function GET(_req: NextRequest) {
 				where: {
 					createdById: user.id,
 					repository: {
+						status: "active",
 						members: {
 							some: { userId: user.id }, // user must still be a member or the repo
 						},

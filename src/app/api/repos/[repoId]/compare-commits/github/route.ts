@@ -57,7 +57,8 @@ export async function GET(
 			include: { installation: true, members: true },
 		});
 
-		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo || repo.status === "deleted")
+			throw new NotFoundError("Repository not found");
 		if (!repo.installation?.installationId) {
 			throw new BadRequestError("Repository has no linked installation");
 		}

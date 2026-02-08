@@ -166,7 +166,8 @@ export async function DELETE(
 				},
 			},
 		});
-		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo || repo.status === "deleted")
+			throw new NotFoundError("Repository not found");
 
 		// 7. Delete membership
 		await prisma.repositoryMember.delete({ where: { id: member.id } });

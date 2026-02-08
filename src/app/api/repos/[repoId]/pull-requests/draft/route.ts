@@ -29,7 +29,8 @@ export async function POST(
 			include: { members: true },
 		});
 
-		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo || repo.status === "deleted")
+			throw new NotFoundError("Repository not found");
 
 		const isMember = repo.members.some((m) => m.userId === user.id);
 		if (!isMember) {

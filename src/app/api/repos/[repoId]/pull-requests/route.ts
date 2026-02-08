@@ -33,7 +33,8 @@ export async function GET(
 		where: { id: repoId },
 		include: { members: true },
 	});
-	if (!repo) throw new NotFoundError("Repository not found");
+	if (!repo || repo.status === "deleted")
+		throw new NotFoundError("Repository not found");
 
 	const membership = repo.members.find((m) => m.userId === user.id);
 	if (!membership)

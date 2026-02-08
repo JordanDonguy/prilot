@@ -39,7 +39,8 @@ export async function GET(
 			where: { id: repoId },
 			include: { installation: true, members: true },
 		});
-		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo || repo.status === "deleted")
+			throw new NotFoundError("Repository not found");
 
 		// 4. Check membership
 		const membership = repo.members.find((m) => m.userId === user.id);
@@ -140,7 +141,8 @@ export async function DELETE(
 			where: { id: repoId },
 			include: { members: true },
 		});
-		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo || repo.status === "deleted")
+			throw new NotFoundError("Repository not found");
 
 		// 3. Check user is the owner
 		const membership = repo.members.find((m) => m.userId === user.id);
@@ -149,8 +151,19 @@ export async function DELETE(
 		if (membership.role !== "owner")
 			throw new ForbiddenError("Only the owner can delete a repository");
 
-		// 4. Delete repository (cascade handles members, invitations, PRs)
-		await prisma.repository.delete({ where: { id: repoId } });
+		// 4. Soft delete: set status to deleted, remove members and pending invitations
+		await prisma.$transaction([
+			prisma.repository.update({
+				where: { id: repoId },
+				data: { status: "deleted" },
+			}),
+			prisma.repositoryMember.deleteMany({
+				where: { repositoryId: repoId },
+			}),
+			prisma.invitation.deleteMany({
+				where: { repositoryId: repoId, status: "pending" },
+			}),
+		]);
 
 		return NextResponse.json({ success: true });
 	} catch (error) {

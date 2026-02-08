@@ -89,7 +89,7 @@ export async function POST(req: Request) {
 						providerRepoId: repo.providerRepoId,
 					},
 				},
-				update: { ...repo, installationId: dbInstallation.id },
+				update: { ...repo, installationId: dbInstallation.id, status: "active" },
 				create: { ...repo, installationId: dbInstallation.id },
 			});
 
