@@ -49,6 +49,8 @@ export default function PREditorPageContent({
 
 	const startAutoSave = useRef(false); // To start auto saving PR in db when editing manually
 	const skipNextFetch = useRef(false); // To prevent fetching PR after generating one
+	const didRedirectRef = useRef(false); // To prevent duplicate branch-deleted redirects
+
 	const editorRef = useRef<HTMLDivElement | null>(null);
 	const autoSaveFrameRef = useRef<number | null>(null);
 
@@ -139,10 +141,11 @@ export default function PREditorPageContent({
 
 	// Redirect if draft PR references a deleted branch
 	useEffect(() => {
-		if (!repo || !pullRequest) return;
+		if (!repo || !pullRequest || didRedirectRef.current) return;
 
 		const branches = repo.branches;
 		if (!branches.includes(pullRequest.baseBranch)) {
+			didRedirectRef.current = true;
 			toast.error(
 				`The base branch "${pullRequest.baseBranch}" doesn't exist anymore on your GitHub repo`,
 			);
@@ -150,6 +153,7 @@ export default function PREditorPageContent({
 			return;
 		}
 		if (!branches.includes(pullRequest.compareBranch)) {
+			didRedirectRef.current = true;
 			toast.error(
 				`The compare branch "${pullRequest.compareBranch}" doesn't exist anymore on your GitHub repo`,
 			);
