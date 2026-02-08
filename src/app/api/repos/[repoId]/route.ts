@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/db";
 import { uuidParam } from "@/lib/schemas/id.schema";
-import { NotFoundError, UnauthorizedError } from "@/lib/server/error";
+import {
+	BadRequestError,
+	ForbiddenError,
+	GitHubApiError,
+	NotFoundError,
+	UnauthorizedError,
+} from "@/lib/server/error";
 import { githubFetch } from "@/lib/server/github/client";
 import type { IGitHubBranch } from "@/lib/server/github/types";
+import { handleError } from "@/lib/server/handleError";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import { githubRepoLimiter } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
-import { handleError } from "@/lib/server/handleError";
 
 const prisma = getPrisma();
 
@@ -41,22 +47,33 @@ export async function GET(
 			throw new NotFoundError("Repository not found or unauthorized");
 		const userRole = membership.role;
 
-		// 5. GitHub branches
-		const brancheList = await githubFetch<IGitHubBranch[]>(
-			repo.installation.installationId,
-			`/repos/${repo.owner}/${repo.name}/branches`,
-		);
-		const brancheNames = brancheList.data.map((b) => b.name);
+		// 5. GitHub branches + commits (may fail if installation was revoked)
+		let brancheNames: string[] = [];
+		let commitsCount = 0;
+		let isAccessible = true;
 
-		// 6. Commits count
-		const { linkHeader } = await githubFetch<string[]>(
-			repo.installation.installationId,
-			`/repos/${repo.owner}/${repo.name}/commits?sha=${repo.defaultBranch}&per_page=1&page=1`,
-			{ returnLinkHeader: true },
-		);
-		const commitsCount = linkHeader
-			? parseInt(linkHeader.match(/&page=(\d+)>; rel="last"/)?.[1] ?? "1", 10)
-			: 1;
+		try {
+			const brancheList = await githubFetch<IGitHubBranch[]>(
+				repo.installation.installationId,
+				`/repos/${repo.owner}/${repo.name}/branches`,
+			);
+			brancheNames = brancheList.data.map((b) => b.name);
+
+			const { linkHeader } = await githubFetch<string[]>(
+				repo.installation.installationId,
+				`/repos/${repo.owner}/${repo.name}/commits?sha=${repo.defaultBranch}&per_page=1&page=1`,
+				{ returnLinkHeader: true },
+			);
+			commitsCount = linkHeader
+				? parseInt(linkHeader.match(/&page=(\d+)>; rel="last"/)?.[1] ?? "1", 10)
+				: 1;
+		} catch (err) {
+			if (err instanceof GitHubApiError || err instanceof BadRequestError) {
+				isAccessible = false;
+			} else {
+				throw err;
+			}
+		}
 
 		// 7. Global PR counts
 		const prFilter =
@@ -95,7 +112,47 @@ export async function GET(
 			},
 			branches: brancheNames,
 			commitsCount,
+			isAccessible,
 		});
+	} catch (error) {
+		return handleError(error);
+	}
+}
+
+// ===================================
+// DELETE a repository (owner only)
+// ===================================
+export async function DELETE(
+	_req: Request,
+	context: { params: Promise<{ repoId: string }> },
+) {
+	try {
+		// 1. Get current user
+		const user = await getCurrentUser();
+		if (!user) throw new UnauthorizedError("Unauthenticated");
+
+		const { repoId } = await uuidParam("repoId").parseAsync(
+			await context.params,
+		);
+
+		// 2. Fetch repo with members
+		const repo = await prisma.repository.findUnique({
+			where: { id: repoId },
+			include: { members: true },
+		});
+		if (!repo) throw new NotFoundError("Repository not found");
+
+		// 3. Check user is the owner
+		const membership = repo.members.find((m) => m.userId === user.id);
+		if (!membership)
+			throw new NotFoundError("Repository not found or unauthorized");
+		if (membership.role !== "owner")
+			throw new ForbiddenError("Only the owner can delete a repository");
+
+		// 4. Delete repository (cascade handles members, invitations, PRs)
+		await prisma.repository.delete({ where: { id: repoId } });
+
+		return NextResponse.json({ success: true });
 	} catch (error) {
 		return handleError(error);
 	}
