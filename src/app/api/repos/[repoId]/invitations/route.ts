@@ -55,7 +55,8 @@ export async function POST(
 				},
 			},
 		});
-		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo || repo.status === "deleted")
+			throw new NotFoundError("Repository not found");
 
 		const isOwner = repo.members.some(
 			(m) => m.userId === user.id && m.role === "owner",

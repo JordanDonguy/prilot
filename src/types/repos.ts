@@ -31,4 +31,5 @@ export interface IRepositoryResponse {
   repository: IRepository;
   branches: string[];
   commitsCount: number;
+  isAccessible: boolean;
 }

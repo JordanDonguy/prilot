@@ -61,7 +61,8 @@ export async function POST(
 			},
 		});
 
-		if (!repo) throw new NotFoundError("Repository not found");
+		if (!repo || repo.status === "deleted")
+			throw new NotFoundError("Repository not found");
 		if (!repo.installation?.installationId) {
 			throw new BadRequestError("Repository has no linked installation");
 		}

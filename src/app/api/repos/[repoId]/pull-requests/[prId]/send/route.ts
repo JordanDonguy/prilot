@@ -4,6 +4,7 @@ import { uuidParam } from "@/lib/schemas/id.schema";
 import {
 	BadRequestError,
 	ForbiddenError,
+	GitHubApiError,
 	NotFoundError,
 } from "@/lib/server/error";
 import { githubFetch } from "@/lib/server/github/client";
@@ -74,19 +75,36 @@ export async function POST(
 		}
 
 		// 6. Post PR to GitHub
-		const ghPr = await githubFetch<GitHubCreatePRResponse>(
-			repo.installation.installationId,
-			`/repos/${repo.owner}/${repo.name}/pulls`,
-			{
-				method: "POST",
-				body: {
-					title: prDraft.title,
-					body: prDraft.description,
-					base: prDraft.baseBranch,
-					head: prDraft.compareBranch,
+		let ghPr: { data: GitHubCreatePRResponse };
+		try {
+			ghPr = await githubFetch<GitHubCreatePRResponse>(
+				repo.installation.installationId,
+				`/repos/${repo.owner}/${repo.name}/pulls`,
+				{
+					method: "POST",
+					body: {
+						title: prDraft.title,
+						body: prDraft.description,
+						base: prDraft.baseBranch,
+						head: prDraft.compareBranch,
+					},
 				},
-			},
-		);
+			);
+		} catch (err) {
+			// If GitHub returns 401/403/404, the installation was likely revoked
+			if (err instanceof GitHubApiError && [401, 403, 404].includes(err.status)) {
+				await prisma.repository.update({
+					where: { id: repo.id },
+					data: { status: "disconnected" },
+				});
+
+				return NextResponse.json(
+					{ error: "Repository access has been revoked", code: "REPO_ACCESS_REVOKED" },
+					{ status: 422 },
+				);
+			}
+			throw err;
+		}
 
 		// 7. Update PR status in DB
 		await prisma.pullRequest.update({
