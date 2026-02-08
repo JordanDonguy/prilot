@@ -48,31 +48,33 @@ export async function GET(
 			throw new NotFoundError("Repository not found or unauthorized");
 		const userRole = membership.role;
 
-		// 5. GitHub branches + commits (may fail if installation was revoked)
+		// 5. GitHub branches + commits (skip if repo is disconnected)
 		let brancheNames: string[] = [];
 		let commitsCount = 0;
-		let isAccessible = true;
+		let isAccessible = repo.status !== "disconnected";
 
-		try {
-			const brancheList = await githubFetch<IGitHubBranch[]>(
-				repo.installation.installationId,
-				`/repos/${repo.owner}/${repo.name}/branches`,
-			);
-			brancheNames = brancheList.data.map((b) => b.name);
+		if (isAccessible) {
+			try {
+				const brancheList = await githubFetch<IGitHubBranch[]>(
+					repo.installation.installationId,
+					`/repos/${repo.owner}/${repo.name}/branches`,
+				);
+				brancheNames = brancheList.data.map((b) => b.name);
 
-			const { linkHeader } = await githubFetch<string[]>(
-				repo.installation.installationId,
-				`/repos/${repo.owner}/${repo.name}/commits?sha=${repo.defaultBranch}&per_page=1&page=1`,
-				{ returnLinkHeader: true },
-			);
-			commitsCount = linkHeader
-				? parseInt(linkHeader.match(/&page=(\d+)>; rel="last"/)?.[1] ?? "1", 10)
-				: 1;
-		} catch (err) {
-			if (err instanceof GitHubApiError || err instanceof BadRequestError) {
-				isAccessible = false;
-			} else {
-				throw err;
+				const { linkHeader } = await githubFetch<string[]>(
+					repo.installation.installationId,
+					`/repos/${repo.owner}/${repo.name}/commits?sha=${repo.defaultBranch}&per_page=1&page=1`,
+					{ returnLinkHeader: true },
+				);
+				commitsCount = linkHeader
+					? parseInt(linkHeader.match(/&page=(\d+)>; rel="last"/)?.[1] ?? "1", 10)
+					: 1;
+			} catch (err) {
+				if (err instanceof GitHubApiError || err instanceof BadRequestError) {
+					isAccessible = false;
+				} else {
+					throw err;
+				}
 			}
 		}
 

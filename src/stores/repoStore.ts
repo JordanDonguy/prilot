@@ -13,9 +13,10 @@ interface RepoStore {
 	repos: Record<string, RepoSnapshot>;
 	setRepo: (repo: RepoSnapshot) => void;
 	removeRepo: (repoId: string) => void;
+	setRepoDisconnected: (repoId: string) => void;
 
 	updateDraftPrCount: (repoId: string, delta: number) => void;
-  updateSentPrCount: (repoId: string, delta: number) => void;
+	updateSentPrCount: (repoId: string, delta: number) => void;
 }
 
 export const useRepoStore = create<RepoStore>((set) => ({
@@ -33,6 +34,21 @@ export const useRepoStore = create<RepoStore>((set) => ({
 		set((state) => {
 			const { [repoId]: _, ...rest } = state.repos;
 			return { repos: rest };
+		}),
+
+	setRepoDisconnected: (repoId) =>
+		set((state) => {
+			const repo = state.repos[repoId];
+			if (!repo) return state;
+			return {
+				repos: {
+					...state.repos,
+					[repoId]: {
+						...repo,
+						isAccessible: false,
+					},
+				},
+			};
 		}),
 
 	updateDraftPrCount: (repoId, delta) =>

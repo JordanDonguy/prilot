@@ -15,7 +15,7 @@ export async function GET() {
     // 2. Fetch repositories where user is a member
     const repositories = await prisma.repository.findMany({
       where: {
-        status: "active",
+        status: { not: "deleted" },
         members: {
           some: { userId: user.id },
         },
