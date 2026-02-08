@@ -29,6 +29,11 @@ enum InvitationStatus {
   declined
 }
 
+enum RepositoryStatus {
+  active
+  deleted
+}
+
 enum PullRequestStatus {
   draft
   sent
@@ -118,9 +123,10 @@ model ProviderInstallation {
 }
 
 model Repository {
-  id              String   @id @default(uuid()) @db.Uuid
+  id              String           @id @default(uuid()) @db.Uuid
   provider        Provider
   providerRepoId  String
+  status          RepositoryStatus @default(active)
 
   owner           String
   name            String
