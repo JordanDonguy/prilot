@@ -31,6 +31,7 @@ enum InvitationStatus {
 
 enum RepositoryStatus {
   active
+  disconnected
   deleted
 }
 
