@@ -6,11 +6,13 @@ export interface RepoSnapshot extends IRepository {
 	branches: string[];
 	pullRequests?: IPullRequest[];
 	commitsCount: number;
+	isAccessible: boolean;
 }
 
 interface RepoStore {
 	repos: Record<string, RepoSnapshot>;
 	setRepo: (repo: RepoSnapshot) => void;
+	removeRepo: (repoId: string) => void;
 
 	updateDraftPrCount: (repoId: string, delta: number) => void;
   updateSentPrCount: (repoId: string, delta: number) => void;
@@ -26,6 +28,12 @@ export const useRepoStore = create<RepoStore>((set) => ({
 				[repo.id]: repo,
 			},
 		})),
+
+	removeRepo: (repoId) =>
+		set((state) => {
+			const { [repoId]: _, ...rest } = state.repos;
+			return { repos: rest };
+		}),
 
 	updateDraftPrCount: (repoId, delta) =>
 		set((state) => {

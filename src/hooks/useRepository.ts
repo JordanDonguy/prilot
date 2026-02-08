@@ -39,6 +39,7 @@ export function useRepository(repoId: string) {
 					...data.repository,
 					branches: data.branches,
 					commitsCount: data.commitsCount,
+					isAccessible: data.isAccessible,
 				});
 			} catch (err) {
 				console.error(err);
