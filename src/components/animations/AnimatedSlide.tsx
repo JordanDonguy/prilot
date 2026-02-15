@@ -34,12 +34,21 @@ export default function AnimatedSlide({
 }: AnimatedSlideProps) {
 	const variants: Variants = {
 		hidden: {
-			x: x,
+			x,
 			y,
 		},
 		visible: {
 			x: 0,
 			y: 0,
+			transition: {
+				type: "spring",
+				damping,
+				mass,
+			},
+		},
+		exit: {
+			x,
+			y,
 			transition: {
 				type: "spring",
 				damping,
@@ -58,6 +67,7 @@ export default function AnimatedSlide({
 			className={className}
 			variants={variants}
 			initial="hidden"
+			exit="exit"
 			{...motionProps}
 		>
 			{children}
