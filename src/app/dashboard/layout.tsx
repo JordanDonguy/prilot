@@ -2,9 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect } from "react";
+import AppNavbar from "@/components/AppNavbar";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
 import { InstallationsProvider } from "@/contexts/InstallationContext";
 import { ReposProvider } from "@/contexts/ReposContext";
 import { useUser } from "@/contexts/UserContext";
@@ -30,11 +29,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 	return (
 		<InstallationsProvider>
 			<ReposProvider>
-				<div className="flex h-screen bg-linear-to-b from-blue-50 to-white dark:from-zinc-950 dark:to-[#13131d]">
-					<Sidebar />
-					<div className="flex-1 flex flex-col overflow-y-auto">
-						<Header />
-						<main className="flex-1 pt-14 md:pt-0">{children}</main>
+				<div className="flex flex-col h-screen bg-linear-to-b from-white to-blue-50 dark:from-zinc-950 dark:to-[#13131d]">
+					<AppNavbar />
+					<div className="flex-1 overflow-y-auto">
+						<main className="pt-20 mx-auto max-w-7xl w-full">
+							{children}
+						</main>
 					</div>
 				</div>
 			</ReposProvider>
