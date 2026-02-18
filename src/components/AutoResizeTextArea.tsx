@@ -13,6 +13,7 @@ export function AutoResizeTextarea({
   useEffect(() => {
     if (!ref.current) return;
 
+    ref.current.style.overflow = "hidden";
     ref.current.style.height = "auto";
     ref.current.style.height = `${ref.current.scrollHeight + 2}px`;
   }, [value]);
