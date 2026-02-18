@@ -38,7 +38,7 @@ export function DashboardListItem({
 			triggerOnView={false}
 			className={`flex items-center justify-between gap-6 h-18 p-3 rounded-lg
         border border-gray-200 dark:border-gray-700/70
-        bg-gray-100 dark:bg-zinc-950/90
+        bg-gray-100/60 dark:bg-zinc-950/90
         ${className}`}
 		>
 			<div className="flex flex-col justify-between h-full w-0 flex-1">
@@ -137,7 +137,7 @@ export function PRListItem({
 		<AnimatedScale
 			scale={0.94}
 			triggerOnView={false}
-			className="flex flex-col lg:h-22 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90
+			className="flex flex-col lg:h-22 p-4 rounded-lg bg-gray-100/60 dark:bg-zinc-950/90
         border border-gray-200 dark:border-gray-700/70 fade-in"
 		>
 			<div className="flex flex-col lg:flex-row items-start justify-between h-full">
@@ -211,7 +211,7 @@ export function MemberListItem({
 		<AnimatedScale
 			scale={0.94}
 			triggerOnView={false}
-			className={`flex flex-col md:flex-row gap-4 justify-between min-h-20 p-4 rounded-lg bg-gray-50 dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-700/70 ${className}`}
+			className={`flex flex-col md:flex-row gap-4 justify-between min-h-20 p-4 rounded-lg bg-gray-100/60 dark:bg-zinc-950/90 border border-gray-200 dark:border-gray-700/70 ${className}`}
 		>
 			<div className="flex gap-4 items-center">
 				{/* -------- Avatar -------- */}

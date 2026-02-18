@@ -61,7 +61,7 @@ export default function RepositoryPage() {
 	} = useFetchPRs({
 		repoId: id as string,
 		initialPage: 1,
-		perPage: 5,
+		perPage: 10,
 	});
 	const { deleteDraftPR } = usePullRequestActions(repoId);
 
@@ -206,7 +206,7 @@ export default function RepositoryPage() {
 
 						{/* ---- Pull Requests List ---- */}
 						<AnimatedSlide y={20} triggerOnView={false}>
-							<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
+							<Card>
 								<CardHeader className="flex justify-between">
 									<div>
 										<CardTitle>Recent Pull Requests</CardTitle>

@@ -26,7 +26,10 @@ export default function LandingNavbar() {
 		return () => window.removeEventListener("scroll", onScroll);
 	}, []);
 
-	const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+	const handleSmoothScroll = (
+		e: React.MouseEvent<HTMLAnchorElement>,
+		href: string,
+	) => {
 		e.preventDefault();
 		const targetId = href.replace("#", "");
 		const element = document.getElementById(targetId);
@@ -96,26 +99,32 @@ export default function LandingNavbar() {
 			{/* Mobile menu - full screen slide from right */}
 			<AnimatePresence>
 				{mobileOpen && (
-					<AnimatedSlide key="mobile-menu" x={400} damping={14} mass={0.7} className="md:hidden fixed right-0 top-16 bottom-0 w-full bg-white dark:bg-zinc-950 z-40 overflow-y-auto">
+					<AnimatedSlide
+						key="mobile-menu"
+						x={400}
+						damping={14}
+						mass={0.7}
+						className="md:hidden fixed right-0 top-16 bottom-0 w-full bg-white dark:bg-zinc-950 z-40 overflow-y-auto"
+					>
 						<div className="flex flex-col gap-6 p-8 min-h-full">
-						{navLinks.map((link) => (
-							<a
-								key={link.href}
-								href={link.href}
-								onClick={(e) => {
-									handleSmoothScroll(e, link.href);
-									setMobileOpen(false);
-								}}
-								className="px-4 py-4 text-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 hover:dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors cursor-pointer"
-							>
-								{link.label}
-							</a>
-						))}
-						<div className="pt-4 mt-2 px-4">
-							<LandingCTA animated={false} />
+							{navLinks.map((link) => (
+								<a
+									key={link.href}
+									href={link.href}
+									onClick={(e) => {
+										handleSmoothScroll(e, link.href);
+										setMobileOpen(false);
+									}}
+									className="px-4 py-4 text-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 hover:dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors cursor-pointer"
+								>
+									{link.label}
+								</a>
+							))}
+							<div className="pt-4 mt-2 px-4">
+								<LandingCTA animated={false} />
+							</div>
 						</div>
-						</div>
-				</AnimatedSlide>
+					</AnimatedSlide>
 				)}
 			</AnimatePresence>
 		</>

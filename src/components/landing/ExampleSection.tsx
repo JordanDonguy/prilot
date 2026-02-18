@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, FileText, GitBranch, Sparkles, Eye, Code } from "lucide-react";
+import { ArrowDown, Code, Eye, FileText, GitBranch, Sparkles } from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
@@ -72,7 +72,7 @@ export default function ExampleSection() {
 				<div className="flex flex-col gap-6 max-w-5xl mx-auto">
 					{/* Input panel */}
 					<AnimatedSlide x={-30} triggerOnView amount={0.3}>
-						<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 p-6 shadow-lg">
+						<Card className="p-6 shadow-lg!">
 							<p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
 								Input
 							</p>
@@ -121,7 +121,7 @@ export default function ExampleSection() {
 
 					{/* Output panel */}
 					<AnimatedSlide x={30} triggerOnView amount={0.2}>
-						<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 p-6 shadow-lg">
+						<Card className="p-6 shadow-lg!">
 							<div className="flex items-center justify-between mb-4">
 								<p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
 									Generated PR

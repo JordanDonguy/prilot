@@ -79,7 +79,7 @@ export default function FeaturesSection() {
 								triggerOnView
 								amount={0.3}
 							>
-								<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 p-6 h-full hover:scale-[1.02] transition-transform shadow-lg">
+								<Card className="p-6 h-full hover:scale-[1.02] transition-transform shadow-lg!">
 									<div
 										className={`w-12 h-12 mb-4 rounded-xl ${colors.bg} flex items-center justify-center`}
 									>
