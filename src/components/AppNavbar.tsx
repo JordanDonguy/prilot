@@ -145,7 +145,7 @@ export default function AppNavbar() {
 							key={repo.id}
 							href={`/dashboard/repo/${repo.id}`}
 							onClick={() => setGithubOpen(false)}
-							className={`flex items-center gap-2 pl-6 pr-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+							className={`flex items-center gap-2 pl-6 pr-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors ${
 								pathname.includes(repo.id)
 									? "text-blue-600 dark:text-blue-400"
 									: "text-gray-800 dark:text-gray-200"
@@ -169,7 +169,7 @@ export default function AppNavbar() {
 							key={repo.id}
 							href={`/dashboard/repo/${repo.id}`}
 							onClick={() => setGithubOpen(false)}
-							className={`flex items-center gap-2 pl-6 pr-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+							className={`flex items-center gap-2 pl-6 pr-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-md ${
 								pathname.includes(repo.id)
 									? "text-blue-600 dark:text-blue-400"
 									: "text-gray-800 dark:text-gray-200"
@@ -200,7 +200,7 @@ export default function AppNavbar() {
 
 	return (
 		<>
-			<nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 dark:border-gray-800 backdrop-blur-md bg-white/80 dark:bg-zinc-950/80 shadow-sm">
+			<nav className="fixed top-0 left-0 right-0 z-50 border-b  border-gray-300/70 dark:border-gray-800 backdrop-blur-md bg-white/80 dark:bg-zinc-950/80 shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex items-center justify-between h-16">
 						{/* Left: Logo */}
@@ -265,7 +265,7 @@ export default function AppNavbar() {
 								</button>
 
 								{githubOpen && (
-									<div className="absolute top-full left-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+									<div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#09090B] border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg">
 										{renderRepoList(
 											"github",
 											!!githubInstall,
@@ -305,7 +305,7 @@ export default function AppNavbar() {
 								</button>
 
 								{gitlabOpen && (
-									<div className="absolute top-full left-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+									<div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#09090B] border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg">
 										{renderRepoList(
 											"gitlab",
 											!!gitlabInstall,

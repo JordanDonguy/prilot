@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 	return (
 		<InstallationsProvider>
 			<ReposProvider>
-				<div className="flex flex-col h-screen bg-linear-to-b from-white to-blue-50 dark:from-zinc-950 dark:to-[#13131d]">
+				<div className="flex flex-col h-screen bg-linear-to-b from-gray-50 to-blue-100/50 dark:from-zinc-950 dark:to-[#13131d]">
 					<AppNavbar />
 					<div className="flex-1 overflow-y-auto">
 						<main className="pt-20 mx-auto max-w-7xl w-full">
