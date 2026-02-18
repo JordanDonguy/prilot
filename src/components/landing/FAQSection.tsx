@@ -185,7 +185,7 @@ export default function FAQSection() {
 									triggerOnView
 									amount={0.3}
 								>
-									<Card className="bg-white/70 dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+									<Card className="overflow-hidden">
 										<button
 											type="button"
 											onClick={() => toggleFAQ(index)}

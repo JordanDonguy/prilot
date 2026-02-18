@@ -65,7 +65,7 @@ export default function WorkflowSection() {
 								{fileChanges.map((file) => (
 									<Card
 										key={file.name}
-										className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-700 p-3 hover:scale-105 transition-transform shadow-sm"
+										className="p-3 hover:scale-105 transition-transform shadow-sm"
 									>
 										<div className="flex items-start gap-2">
 											<FileCode className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0 mt-0.5" />

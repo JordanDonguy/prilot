@@ -40,7 +40,7 @@ export default function HeroSection() {
 				{/* Hero Mockup — mirrors the real PR generation page */}
 				<AnimatedSlide y={40} triggerOnView={false}>
 					<div className="mt-16 max-w-5xl mx-auto">
-						<Card className="bg-white/70 dark:bg-gray-800/20 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-2xl rounded-2xl px-2! py-6 md:p-8! space-y-8">
+						<Card className="shadow-2xl! rounded-2xl! px-2! py-6 md:p-8! space-y-8">
 							{/* Page title row */}
 							<div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
 								<div>

@@ -169,7 +169,7 @@ export default function RepositoryPage() {
 
 			{/* Members List */}
 			<AnimatedSlide y={20} triggerOnView={false}>
-				<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
+				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle>Current Members ({members.length})</CardTitle>
 						<CardDescription>

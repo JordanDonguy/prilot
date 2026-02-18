@@ -206,7 +206,7 @@ export default function RepositoryPage() {
 
 						{/* ---- Pull Requests List ---- */}
 						<AnimatedSlide y={20} triggerOnView={false}>
-							<Card className="bg-white/60 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-lg">
+							<Card>
 								<CardHeader className="flex justify-between">
 									<div>
 										<CardTitle>Recent Pull Requests</CardTitle>

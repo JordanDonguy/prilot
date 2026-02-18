@@ -9,7 +9,15 @@ interface CardProps {
 }
 
 export function Card({ children, className = "" }: CardProps) {
-	return <div className={`rounded-xl p-4 ${className}`}>{children}</div>;
+	return (
+		<div
+			className={`rounded-xl p-4 bg-white dark:bg-gray-800/25 
+		border border-gray-200 dark:border-gray-800 shadow-md ${className}
+		`}
+		>
+			{children}
+		</div>
+	);
 }
 
 export function CardHeader({ children, className = "" }: CardProps) {
@@ -54,7 +62,7 @@ type StatCardProps = {
 export function StatCard({ title, value, icon: Icon, comment }: StatCardProps) {
 	return (
 		<AnimatedScale scale={0.9} triggerOnView={false}>
-			<Card className="bg-white/70 dark:bg-gray-800/25 border backdrop-blur-sm border-gray-200 dark:border-gray-800 shadow-lg">
+			<Card>
 				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 					<CardTitle className="text-sm">{title}</CardTitle>
 					<Icon className="h-4 w-4 text-gray-500 dark:text-gray-400" />

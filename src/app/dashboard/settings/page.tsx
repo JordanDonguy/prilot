@@ -53,7 +53,7 @@ export default function UserSettingsPage() {
 
 				{/* Account info */}
 				<AnimatedScale scale={0.96} triggerOnView={false}>
-					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+					<Card>
 						<CardHeader>
 							<CardTitle>Account</CardTitle>
 							<CardDescription>Your personal information</CardDescription>
@@ -83,7 +83,7 @@ export default function UserSettingsPage() {
 
 				{/* Security */}
 				<AnimatedScale scale={0.96} triggerOnView={false}>
-					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+					<Card>
 						<CardHeader>
 							<CardTitle>Security</CardTitle>
 						</CardHeader>
@@ -110,7 +110,7 @@ export default function UserSettingsPage() {
 								</CardDescription>
 								<div className="flex gap-3">
 									<span
-										className={`inline-flex items-center gap-2 px-3 h-10 rounded-lg shadow-sm border text-sm ${githubOAuth ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400"}`}
+										className={`inline-flex items-center gap-2 px-3 h-10 rounded-lg border text-sm ${githubOAuth ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400"}`}
 									>
 										<Github size={16} />
 										GitHub
@@ -121,7 +121,7 @@ export default function UserSettingsPage() {
 										)}
 									</span>
 									<span
-										className={`inline-flex items-center gap-2 px-3 h-10 rounded-lg shadow-sm border text-sm ${gitlabOAuth ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400"}`}
+										className={`inline-flex items-center gap-2 px-3 h-10 rounded-lg border text-sm ${gitlabOAuth ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400"}`}
 									>
 										<Gitlab size={16} />
 										GitLab
@@ -139,7 +139,7 @@ export default function UserSettingsPage() {
 
 				{/* Connected installations */}
 				<AnimatedScale scale={0.96} triggerOnView={false}>
-					<Card className="bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-md">
+					<Card>
 						<CardHeader className="pb-2">
 							<CardTitle>Connected installations</CardTitle>
 							<CardDescription>

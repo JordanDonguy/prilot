@@ -80,19 +80,18 @@ export default function BenefitsSection() {
 
 				{/* Stats Cards */}
 				<AnimatedSlide x={30} triggerOnView amount={0.3}>
-					<div className="bg-white/50 dark:bg-gray-800/50 rounded-3xl flex flex-col justify-center gap-6 p-4 py-8 md:p-8 shadow-lg border border-gray-300/40 dark:border-gray-800/50">
+					<div className="bg-white/30 dark:bg-gray-800/50 rounded-3xl flex flex-col justify-center gap-6 p-4 py-8 md:p-8 shadow-lg border border-gray-300/40 dark:border-gray-800/50">
 						{stats.map((stat) => {
 							const Icon = stat.icon;
 							const isBlue = stat.color === "blue";
-							const isGreen = stat.color === "green";
 
 							return (
 								<Card
 									key={stat.value}
 									className={`flex items-center p-4 gap-4 hover:scale-105 transition group ${
 										isBlue
-											? "bg-blue-200/40 dark:bg-blue-900/25"
-											: "bg-green-200/40 dark:bg-green-800/20"
+											? "bg-blue-200/40! dark:bg-blue-900/25!"
+											: "bg-green-200/40! dark:bg-green-800/20!"
 									}`}
 								>
 									<Icon
