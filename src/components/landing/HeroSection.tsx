@@ -1,11 +1,51 @@
-import { ArrowRight, ChevronDown, HelpCircle, Send, Sparkles } from "lucide-react";
+"use client";
+
+import { ArrowRight, ChevronDown, Code, Eye, HelpCircle, Send, Sparkles } from "lucide-react";
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import { Card } from "@/components/Card";
 import LandingCTA from "@/components/landing/LandingCTA";
 
+const PR_DESCRIPTION = `## Description
+
+Migrates authentication system from JWT-based sessions to OAuth2 with PKCE flow. Implements refresh token rotation for enhanced security and adds social login providers (GitHub, Google) with proper state management.
+
+## Changes
+
+### 1. **OAuth2 authentication flow**
+
+* Implemented PKCE authorization code flow with state validation
+* Added refresh token rotation with automatic expiry handling
+* Created OAuth provider configurations for GitHub and Google
+
+### 2. **Login interface updates**
+
+* Added social login buttons with provider branding
+* Implemented loading states and error handling
+* Created unified callback handler for all providers
+
+### 3. **Session management**
+
+* Replaced JWT token storage with secure HTTP-only cookies
+* Added automatic session refresh on token expiry
+* Implemented graceful logout with token revocation
+
+---
+
+## How to Test
+
+* Set up OAuth credentials for GitHub and Google in \`.env\`.
+* Run database migration for new auth tables.
+* Test login flow with each provider.
+* Verify token refresh by waiting for expiry.
+* Check logout properly revokes all sessions.`;
+
 export default function HeroSection() {
+	const [showPreview, setShowPreview] = useState(true);
+
 	return (
 		<section className="relative overflow-hidden bg-linear-to-b from-[#e5f0ff] to-white dark:from-zinc-950 dark:to-[#13131d] pt-16">
 			<div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 pt-16 md:pt-20 pb-16">
@@ -133,93 +173,73 @@ export default function HeroSection() {
 								</div>
 							</div>
 
-							{/* PR Editor preview — mirrors PREditor component */}
-							<div className="rounded-xl bg-white/70 dark:bg-gray-800/20 border border-gray-200/70 dark:border-gray-800 shadow-lg overflow-hidden">
-								{/* Card header */}
-								<div className="px-2 md:px-4 pt-4 pb-2">
-									<p className="text-lg font-semibold text-gray-900 dark:text-white">
-										Pull Request Details
+							{/* PR Title Card */}
+							<div className="rounded-xl bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-lg p-4 md:p-6">
+								<p className="text-sm font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
+									Title
+								</p>
+								<p className="font-semibold text-gray-900 dark:text-gray-100 pb-3 border-b border-gray-200 dark:border-gray-700">
+									Refactor authentication flow and add OAuth2 support
+								</p>
+							</div>
+
+							{/* PR Description Card */}
+							<div className="rounded-xl bg-white/70 dark:bg-gray-800/25 border border-gray-200 dark:border-gray-800 shadow-lg p-4 md:p-6">
+								<div className="flex items-center justify-between mb-4">
+									<p className="text-sm font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+										Description
 									</p>
-									<p className="text-sm text-gray-500 dark:text-gray-400">
-										Edit title and description
-									</p>
+									<div className="flex gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-md p-1">
+										<button
+											type="button"
+											onClick={() => setShowPreview(false)}
+											className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+												!showPreview
+													? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+													: "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+											}`}
+										>
+											<Code size={14} />
+											Edit
+										</button>
+										<button
+											type="button"
+											onClick={() => setShowPreview(true)}
+											className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+												showPreview
+													? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+													: "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+											}`}
+										>
+											<Eye size={14} />
+											Preview
+										</button>
+									</div>
 								</div>
 
-								<div className="px-2 md:px-4 pb-4 space-y-4">
-									{/* Title input */}
-									<div className="flex flex-col gap-1.5">
-										<span className="text-sm text-gray-700 dark:text-gray-300">
-											Title
-										</span>
-										<div className="w-full md:w-1/2 py-2 px-3 rounded-md border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 text-sm text-gray-800 dark:text-gray-200">
-											Refactor authentication flow and add OAuth2 support
+								<div className="text-sm relative overflow-hidden max-h-80">
+									{showPreview ? (
+										<div className="markdown">
+											<ReactMarkdown>
+												{PR_DESCRIPTION}
+											</ReactMarkdown>
 										</div>
-									</div>
+									) : (
+										<pre className="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900/50 p-4 rounded-md overflow-x-auto">
+											{PR_DESCRIPTION}
+										</pre>
+									)}
 
-									{/* Description with Edit/Preview tabs */}
-									<div className="flex flex-col gap-1.5">
-										<span className="text-sm text-gray-700 dark:text-gray-300">
-											Description
-										</span>
-										<div className="rounded-xl overflow-hidden">
-											{/* Tabs */}
-											<div className="grid grid-cols-2 border-t border-x border-gray-300 dark:border-gray-800 rounded-t-lg text-sm">
-												<div className="py-2 text-center border-r border-gray-300 dark:border-gray-800 text-gray-500 dark:text-gray-400 bg-gray-200/70 dark:bg-zinc-950/30">
-													Edit
-												</div>
-												<div className="py-2 text-center text-gray-900 dark:text-white dark:bg-zinc-950">
-													Preview
-												</div>
-											</div>
+									{/* Fade-out gradient */}
+									<div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white dark:from-[#1a1a2e] to-transparent pointer-events-none" />
+								</div>
+							</div>
 
-											{/* Preview content */}
-											<div className="border border-gray-300 dark:border-gray-800 bg-white dark:bg-zinc-950 p-4 text-sm relative overflow-hidden min-h-44">
-												<div className="space-y-3 text-gray-700 dark:text-gray-300">
-													<div>
-														<p className="font-bold text-lg pb-2 border-b border-gray-200 dark:border-gray-700">Description</p>
-														<p className="text-gray-600 dark:text-gray-400 mt-2">
-															Migrates authentication system from JWT-based sessions to OAuth2 with PKCE flow. Implements refresh token rotation for enhanced security and adds social login providers (GitHub, Google) with proper state management.
-														</p>
-													</div>
-													<div>
-														<p className="font-bold text-lg pb-2 border-b border-gray-200 dark:border-gray-700">Changes</p>
-														<div className="mt-2 space-y-2.5 text-gray-600 dark:text-gray-400">
-															<div>
-																<p className="font-semibold text-gray-700 dark:text-gray-300 text-[15px] mb-1">
-																	1. OAuth2 authentication flow
-																</p>
-																<ul className="ml-4 space-y-0.5 text-[13px]">
-																	<li>• Implemented PKCE authorization code flow with state validation</li>
-																	<li>• Added refresh token rotation with automatic expiry handling</li>
-																	<li>• Created OAuth provider configurations for GitHub and Google</li>
-																</ul>
-															</div>
-															<div>
-																<p className="font-semibold text-gray-700 dark:text-gray-300 text-[15px] mb-1">
-																	2. Login interface updates
-																</p>
-																<ul className="ml-4 space-y-0.5 text-[13px]">
-																	<li>• Added social login buttons with provider branding</li>
-																	<li>• Implemented loading states and error hand...</li>
-																</ul>
-															</div>
-														</div>
-													</div>
-												</div>
-
-												{/* Fade-out gradient */}
-												<div className="absolute bottom-0 left-0 right-0 h-10 bg-linear-to-t from-white dark:from-zinc-950 to-transparent" />
-											</div>
-										</div>
-									</div>
-
-									{/* Send button */}
-									<div className="flex justify-center pt-2">
-										<div className="w-56 h-10 flex items-center justify-center gap-2 rounded-lg bg-gray-100 dark:bg-zinc-950/60 border border-gray-300 dark:border-gray-800 text-sm shadow-sm">
-											<Send className="w-4 h-4" />
-											Send Pull Request
-										</div>
-									</div>
+							{/* Send button */}
+							<div className="flex justify-center">
+								<div className="w-1/2 h-10 flex items-center justify-center gap-2 rounded-lg bg-gray-100 dark:bg-zinc-950/60 border border-gray-300 dark:border-gray-800 text-sm shadow-sm">
+									<Send className="w-4 h-4" />
+									Send Pull Request
 								</div>
 							</div>
 						</Card>
