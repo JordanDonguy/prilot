@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useUser } from "@/contexts/UserContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 type PasswordModalProps = {
   isOpen: boolean;
@@ -31,10 +32,9 @@ export function PasswordModal({ isOpen, onClose }: PasswordModalProps) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/password", {
+      const res = await fetchWithAuth("/api/auth/password", {
         method: user.hasPassword ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(
           user.hasPassword
             ? { currentPassword, newPassword: password, confirmPassword }

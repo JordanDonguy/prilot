@@ -38,6 +38,7 @@ import { useFetchPRs } from "@/hooks/useFetchPRs";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
 import { useRepository } from "@/hooks/useRepository";
 import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRepoStore } from "@/stores/repoStore";
 
 export default function RepositoryPage() {
@@ -83,7 +84,7 @@ export default function RepositoryPage() {
 	const handleDeleteRepo = async () => {
 		try {
 			setRepoActionLoading(true);
-			const res = await fetch(`/api/repos/${repoId}`, { method: "DELETE" });
+			const res = await fetchWithAuth(`/api/repos/${repoId}`, { method: "DELETE" });
 			if (!res.ok) {
 				const data = await res.json();
 				throw new Error(data.error || "Failed to delete repository");
@@ -104,7 +105,7 @@ export default function RepositoryPage() {
 	const handleLeaveRepo = async () => {
 		try {
 			setRepoActionLoading(true);
-			const res = await fetch(`/api/repos/${repoId}/members`, {
+			const res = await fetchWithAuth(`/api/repos/${repoId}/members`, {
 				method: "DELETE",
 			});
 			if (!res.ok) throw new Error("Failed to leave repository");

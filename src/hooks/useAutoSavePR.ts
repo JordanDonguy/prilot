@@ -1,5 +1,6 @@
 import debounce from "lodash.debounce";
 import { useEffect, useMemo } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export function useAutoSavePR({
 	prId,
@@ -20,7 +21,7 @@ export function useAutoSavePR({
 			debounce(async (title: string, description: string) => {
 				if (!prId || !startAutoSave.current) return;
 				try {
-					await fetch(`/api/repos/${repoId}/pull-requests/${prId}`, {
+					await fetchWithAuth(`/api/repos/${repoId}/pull-requests/${prId}`, {
 						method: "PATCH",
 						headers: { "Content-Type": "application/json" },
 						body: JSON.stringify({ prTitle: title, prBody: description }),

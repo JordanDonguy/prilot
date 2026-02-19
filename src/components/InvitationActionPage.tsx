@@ -9,6 +9,7 @@ import AnimatedScale from "@/components/animations/AnimatedScale";
 import { Button } from "@/components/Button";
 import { Card, CardContent, CardHeader } from "@/components/Card";
 import { useUser } from "@/contexts/UserContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 type InvitationActionPageProps = {
 	title: string;
@@ -46,7 +47,7 @@ export function InvitationActionPage({
 			setSubmitting(true);
 
 			try {
-				const res = await fetch(apiEndpoint, {
+				const res = await fetchWithAuth(apiEndpoint, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ token }),

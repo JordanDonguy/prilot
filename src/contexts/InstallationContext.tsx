@@ -1,4 +1,5 @@
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 type Installation = {
   id: string;
@@ -21,9 +22,8 @@ export function InstallationsProvider({ children }: { children: ReactNode }) {
 
   const refreshInstallations = async () => {
     try {
-      const res = await fetch("/api/installations", {
+      const res = await fetchWithAuth("/api/installations", {
         method: "GET",
-        credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch installations");
       const data = await res.json();

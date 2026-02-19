@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface GeneratePRResponse {
 	title: string;
@@ -41,7 +42,7 @@ export function useGeneratePR({
 
 		try {
 			// 1. Generate PR with AI
-			const aiRes = await fetch(
+			const aiRes = await fetchWithAuth(
 				`/api/repos/${repoId}/pull-requests/generate/${mode}`,
 				{
 					method: "POST",
@@ -84,7 +85,7 @@ export function useGeneratePR({
 				if (newPR) setPrId(newPR.id);
 			} else {
 				// 3.b. If generating over an existing PR, update it in db
-				const updateRes = await fetch(
+				const updateRes = await fetchWithAuth(
 					`/api/repos/${repoId}/pull-requests/${prId}`,
 					{
 						method: "PATCH",

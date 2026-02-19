@@ -6,6 +6,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import type { IInvitation, IRepository } from "@/types/repos";
 
 type ReposContextType = {
@@ -29,10 +30,9 @@ export function ReposProvider({ children }: { children: ReactNode }) {
 		try {
 			setLoading(true);
 
-			// Fetch repos and invitations
-			const res = await fetch("/api/repos", {
+			// Fetch repos and invitations with automatic token refresh
+			const res = await fetchWithAuth("/api/repos", {
 				method: "GET",
-				credentials: "include",
 			});
 
 			if (!res.ok) throw new Error("Failed to fetch repositories");
