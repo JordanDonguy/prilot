@@ -3,6 +3,8 @@ import sanitizeHtml from "sanitize-html";
 import { getPrisma } from "@/db";
 import { branchSchema } from "@/lib/schemas/branch.schema";
 import { uuidParam } from "@/lib/schemas/id.schema";
+import { cerebras } from "@/lib/server/ai/client";
+import { buildPRFromCommits } from "@/lib/server/ai/prompt";
 import {
 	BadRequestError,
 	ForbiddenError,
@@ -10,8 +12,6 @@ import {
 	UnauthorizedError,
 } from "@/lib/server/error";
 import { getCommitMessages } from "@/lib/server/github/commits";
-import { cerebras } from "@/lib/server/groq/client";
-import { buildPRFromCommits } from "@/lib/server/groq/prompt";
 import { handleError } from "@/lib/server/handleError";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import {

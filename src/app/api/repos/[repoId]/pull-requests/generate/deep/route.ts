@@ -3,6 +3,9 @@ import sanitizeHtml from "sanitize-html";
 import { getPrisma } from "@/db";
 import { branchSchema } from "@/lib/schemas/branch.schema";
 import { uuidParam } from "@/lib/schemas/id.schema";
+import { cerebras } from "@/lib/server/ai/client";
+import { buildPRFromDiffs } from "@/lib/server/ai/prompt";
+import { summarizeDiffsForPR } from "@/lib/server/ai/summarizeFileDiffs";
 import {
 	BadRequestError,
 	ForbiddenError,
@@ -11,10 +14,9 @@ import {
 	UnprocessableEntityError,
 } from "@/lib/server/error";
 import { getFileDiffs } from "@/lib/server/github/fileDiffs";
-import { cerebras } from "@/lib/server/groq/client";
-import { buildPRFromDiffs } from "@/lib/server/groq/prompt";
-import { summarizeDiffsForPR } from "@/lib/server/groq/summarizeFileDiffs";
 import { handleError } from "@/lib/server/handleError";
+import { redis } from "@/lib/server/redis/client";
+import { buildDiffsCacheKey } from "@/lib/server/redis/diffsCacheKey";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import {
 	aiLimiterPerMinute,
@@ -76,23 +78,41 @@ export async function POST(
 			throw new ForbiddenError("You are not a member of this repository");
 		}
 
-		// 6. GitHub rate limit
-		const ghLimit = await githubCompareCommitsLimiter.limit(
-			`github:compare:user:${user.id}`,
-		);
-		rateLimitOrThrow(ghLimit);
-
-		// 7. Fetch file diffs, throw if more than 30 files are modified
+		// 6. Fetch file diffs (try prefetch cache first, fall back to GitHub)
 		const t0 = performance.now();
-		const files = await getFileDiffs(
-			repo.installation.installationId,
-			repo.owner,
-			repo.name,
-			safeBase,
-			safeCompare,
-		);
+		const cacheKey = buildDiffsCacheKey(repoId, safeBase, safeCompare);
+
+		let files: Awaited<ReturnType<typeof getFileDiffs>>;
+		let cacheHit = false;
+
+		try {
+			const cached = await redis.get<string>(cacheKey);
+			if (cached) {
+				files = JSON.parse(typeof cached === "string" ? cached : JSON.stringify(cached));
+				cacheHit = true;
+				await redis.del(cacheKey);
+			}
+		} catch {
+			// Cache read failed — fall through to GitHub
+		}
+
+		if (!files) {
+			const ghLimit = await githubCompareCommitsLimiter.limit(
+				`github:compare:user:${user.id}`,
+			);
+			rateLimitOrThrow(ghLimit);
+
+			files = await getFileDiffs(
+				repo.installation.installationId,
+				repo.owner,
+				repo.name,
+				safeBase,
+				safeCompare,
+			);
+		}
+
 		const t1 = performance.now();
-		console.log(`[DEEP] GitHub file diffs: ${(t1 - t0).toFixed(0)}ms (${files?.length ?? 0} files)`);
+		console.log(`[DEEP] File diffs: ${(t1 - t0).toFixed(0)}ms (${cacheHit ? "cache hit" : "GitHub fetch"}, ${files?.length ?? 0} files)`);
 
 		if (!files || files.length === 0) {
 			throw new BadRequestError("No file changes found between branches");
@@ -105,13 +125,13 @@ export async function POST(
 			);
 		}
 
-		// 8. AI per-minute limit
+		// 7. AI per-minute limit
 		const minuteLimit = await aiLimiterPerMinute.limit(
 			`ai:minute:user:${user.id}`,
 		);
 		rateLimitOrThrow(minuteLimit);
 
-		// 9. Owner-based weekly limit (check only, increment on success)
+		// 8. Owner-based weekly limit (check only, increment on success)
 		const owner = repo.members.find((m) => m.role === "owner");
 		if (!owner) throw new Error("No owner found for repository");
 
@@ -141,13 +161,13 @@ export async function POST(
 			);
 		}
 
-		// 10. Summarize diffs (stage 1)
+		// 9. Summarize diffs (stage 1)
 		const t2 = performance.now();
 		const diffSummaries = await summarizeDiffsForPR(files);
 		const t3 = performance.now();
 		console.log(`[DEEP] Summarize diffs (Cerebras): ${(t3 - t2).toFixed(0)}ms`);
 
-		// 11. PR generation (stage 2) with retry if returned description is too short
+		// 10. PR generation (stage 2) with retry if returned description is too short
 		const generatePRContent = async () => {
 			const completion = await cerebras.chat.completions.create({
 				model: "gpt-oss-120b",
@@ -199,10 +219,10 @@ export async function POST(
 			}
 		}
 
-		// 12. Success - now consume weekly rate limit credit
+		// 11. Success - now consume weekly rate limit credit
 		const weeklyLimit = await aiLimiterPerWeek.limit(weeklyLimitKey);
 
-		// 13. Response
+		// 12. Response
 		const response: IPRResponse = { ...parsed };
 
 		if (user.id === owner.userId) {
