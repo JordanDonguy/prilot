@@ -1,6 +1,6 @@
-import { prepareFileDiffForAI } from "@/lib/server/github/fileDiffs";
 import type { ChatCompletion } from "@cerebras/cerebras_cloud_sdk/resources/chat/completions";
-import { cerebras } from "@/lib/server/groq/client";
+import { cerebras } from "@/lib/server/ai/client";
+import { prepareFileDiffForAI } from "@/lib/server/github/fileDiffs";
 import type { IGitHubFile } from "@/types/commits";
 import { TooManyRequestsError } from "../error";
 

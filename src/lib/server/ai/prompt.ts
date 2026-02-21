@@ -127,59 +127,41 @@ export function buildPRFromDiffs(language: PRLanguage, compareBranch: string) {
 	const headers = sectionHeaders[language];
 
 	return `
-You are a senior software engineer writing a detailled GitHub Pull Request for a production codebase.
+You are a senior software engineer writing a high-level GitHub Pull Request.
+Compare branch: ${compareBranch}
 
-Compare branch name: ${compareBranch}
-
-The ENTIRE Pull Request MUST be written in ${language}.
-This includes the PR TITLE and ALL section headers and content.
-Do NOT assume or invent filenames, variables, endpoints, or any implementation details.
-
-All main section headers must be exactly as follows in ${language}:
-- Description section: ## ${headers.description}
-- Changes section: ## ${headers.changes}
-- How to Test section: ## ${headers.howToTest}
-
----
+Write ENTIRELY in ${language}, including title and all section headers.
+Use these exact section headers:
+- ## ${headers.description}
+- ## ${headers.changes}
+- ## ${headers.howToTest}
 
 Generate:
 
 1. A concise PR title (max 72 characters, imperative mood)
-2. A structured PR description with the following sections:
+2. A structured PR description:
 
 ## ${headers.description}
-- 1–2 sentences summarizing the overall goal of the PR.
-
----
+1–2 sentences on the overall goal of the PR.
 
 ## ${headers.changes}
-- Split the changes into 1 to 6 numbered sections
-- Number the sections from most important to less important
-- Each section must:
-  - Group related file changes by intent, not by filename or inferred detail
-  - Describe **what was done and why**, only using the information in the diff summaries
+- 1 to 4 numbered sections, grouped by intent (not by file). Fewer is better — fold small changes into broader sections.
+- Order from most to least important.
+- 1–3 concise bullet points per section. Be direct and factual — no value judgments ("improving X", "better Y", "cleaner Z", "smoothly").
 
-Example format:
+### 1. **<Section title>**
+- What changed, in plain language
 
-### 1. **<Section title based on diff summaries>**
-- Description of changes in this group of files
-- Bulleted explanation summarizing the changes
-
-### 2. **<Section title based on diff summaries>**
-- Description of changes in this group of files
-- Bulleted explanation summarizing the file changes
-
-(continue if relevant)
-
----
+### 2. **<Section title>**
+- What changed
 
 ## ${headers.howToTest}
-- Use bullet points for clarity
+STRICTLY 3–5 bullet points, never more. User-perspective only — do not test cosmetic or styling details.
 
-### Writing rules
-- ONLY use information explicitly present in the file diffs summaries
-- Do NOT invent anything (variables, files, API endpoints, environment keys, code behavior)
-- Group file diffs summaries logically, summarize intent clearly
-- Avoid filler, boilerplate, or invented details
+### Rules
+- Project overview level, NOT code review level
+- No file paths, class names, CSS properties (opacity, background, border, shadow), variable names, or code-level details
+- No invented details — only use information from the diff summaries
+- Readable in 30 seconds
 `;
 }
