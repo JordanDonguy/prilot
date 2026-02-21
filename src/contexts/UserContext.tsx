@@ -7,6 +7,7 @@ import {
 	useEffect,
 	useState,
 } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import type { IUser } from "@/types/user";
 
 interface UserContextType {
@@ -27,26 +28,10 @@ export function UserProvider({ children }: UserProviderProps) {
 	const [loading, setLoading] = useState(true);
 
 	const fetchUser = async () => {
-    // Initial fetch
-		let res = await fetch("/api/auth/me", { credentials: "include" });
+		// Fetch user with automatic token refresh on 401
+		const res = await fetchWithAuth("/api/auth/me");
 
-    // If unauthorized, try refreshing token
-		if (res.status === 401) {
-			const refreshRes = await fetch("/api/auth/refresh", {
-				credentials: "include",
-			});
-
-      // If refresh fails, set user to null
-			if (!refreshRes.ok) {
-				setUser(null);
-				return;
-			}
-
-      // Retry fetching user
-			res = await fetch("/api/auth/me", { credentials: "include" });
-		}
-
-    // Set user if fetch successful
+		// Set user if fetch successful
 		if (res.ok) {
 			const data = await res.json();
 			setUser(data);

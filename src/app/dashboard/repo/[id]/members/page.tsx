@@ -22,6 +22,7 @@ import MemberPageSkeleton from "@/components/MemberPageSkeleton";
 import { useRepos } from "@/contexts/ReposContext";
 import { useUser } from "@/contexts/UserContext";
 import { useRepository } from "@/hooks/useRepository";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import type { Member } from "@/types/members";
 
@@ -49,7 +50,7 @@ export default function RepositoryPage() {
 		async function fetchMembers() {
 			setLoading(true);
 			try {
-				const res = await fetch(`/api/repos/${repoId}/members`);
+				const res = await fetchWithAuth(`/api/repos/${repoId}/members`);
 
 				if (!res.ok) throw new Error("Failed to fetch members");
 				const data = await res.json();
@@ -75,7 +76,7 @@ export default function RepositoryPage() {
 		try {
 			setMemberDeleteLoading(true);
 
-			const res = await fetch(`/api/repos/${repoId}/members`, {
+			const res = await fetchWithAuth(`/api/repos/${repoId}/members`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",

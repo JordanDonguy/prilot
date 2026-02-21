@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/db";
-import { ForbiddenError } from "@/lib/server/error";
+import { UnauthorizedError } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { getCurrentUser } from "@/lib/server/session";
 
@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest) {
 	try {
 		// 1. Auth
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthenticated");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Calculate start dates for this week and previous week
 		const now = new Date();

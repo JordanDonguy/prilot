@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import { useRepos } from "@/contexts/ReposContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRepoStore } from "@/stores/repoStore";
 
 interface CreatePRPayload {
@@ -20,7 +21,7 @@ export function usePullRequestActions(repoId: string) {
 	const addDraftPR = async (payload: CreatePRPayload) => {
 		if (!repo) return null;
 
-		const res = await fetch(`/api/repos/${repo.id}/pull-requests/draft`, {
+		const res = await fetchWithAuth(`/api/repos/${repo.id}/pull-requests/draft`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(payload),
@@ -43,7 +44,7 @@ export function usePullRequestActions(repoId: string) {
 	const deleteDraftPR = async (prId: string) => {
 		if (!repo) return;
 
-		const res = await fetch(`/api/repos/${repo.id}/pull-requests/${prId}`, {
+		const res = await fetchWithAuth(`/api/repos/${repo.id}/pull-requests/${prId}`, {
 			method: "DELETE",
 		});
 

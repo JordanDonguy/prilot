@@ -18,6 +18,7 @@ import {
 	DashboardListItemLink,
 } from "@/components/ListItem";
 import { useRepos } from "@/contexts/ReposContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import { getPercentageChange } from "@/lib/utils/stats";
@@ -58,7 +59,7 @@ export default function DashboardPage() {
 
 		const fetchRecentPRs = async () => {
 			try {
-				const res = await fetch("/api/pull-requests/recent");
+				const res = await fetchWithAuth("/api/pull-requests/recent");
 				if (!res.ok) throw new Error("Failed to fetch recent PRs");
 
 				const data: IRecentPRsResponse = await res.json();
@@ -122,11 +123,11 @@ export default function DashboardPage() {
 
 	return (
 		<div className="p-6 space-y-6 fade-in-fast">
-			<AnimatedSlide x={-20} triggerOnView={false}>
-				<h1 className="text-3xl mb-2 text-gray-900 dark:text-white">
+			<AnimatedSlide x={-20} triggerOnView={false} className="mb-10">
+				<h1 className="text-4xl mb-2 text-gray-900 dark:text-white">
 					Dashboard
 				</h1>
-				<p className="text-gray-600 dark:text-gray-400">
+				<p className="text-xl text-gray-600 dark:text-gray-400">
 					Overview of your repositories and recent activity
 				</p>
 			</AnimatedSlide>
@@ -142,7 +143,7 @@ export default function DashboardPage() {
 							</h3>
 							<p className="text-sm text-amber-800 dark:text-amber-200">
 								You have {pendingInvitations.length} pending invitation
-								{pendingInvitations.length === 1 ? "" : "s"}. Check your sidebar
+								{pendingInvitations.length === 1 ? "" : "s"}. Check your navbar
 								to accept or decline them.
 							</p>
 						</div>
@@ -182,7 +183,7 @@ export default function DashboardPage() {
 			<div className="grid gap-6 xl:grid-cols-2">
 				{/* ---- Recent PRs ---- */}
 				<AnimatedSlide x={20} y={-20} triggerOnView={false}>
-					<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+					<Card className="flex flex-col h-full">
 						<CardHeader>
 							<CardTitle>Recent Pull Requests</CardTitle>
 							<CardDescription>Your latest PR activity</CardDescription>
@@ -221,7 +222,7 @@ export default function DashboardPage() {
 
 				{/* ---- Top repositories ---- */}
 				<AnimatedSlide x={-20} y={-20} triggerOnView={false}>
-					<Card className="bg-white/70 flex flex-col h-full dark:bg-gray-800/25 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-lg">
+					<Card className="flex flex-col h-full">
 						<CardHeader>
 							<CardTitle>Your Repositories</CardTitle>
 							<CardDescription>

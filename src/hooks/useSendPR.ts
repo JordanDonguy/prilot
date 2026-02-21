@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRepoStore } from "@/stores/repoStore";
 
 export function useSendPR(repoId: string, prId: string | null) {
@@ -17,7 +18,7 @@ export function useSendPR(repoId: string, prId: string | null) {
 		setIsSendingPr(true);
 
 		try {
-			const res = await fetch(
+			const res = await fetchWithAuth(
 				`/api/repos/${repoId}/pull-requests/${prId}/send`,
 				{
 					method: "POST",

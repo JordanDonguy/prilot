@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { Button } from "./Button";
 
 type AddMemberModalProps = {
@@ -25,7 +26,7 @@ export function AddMemberModal({
 		setLoading(true);
 
 		try {
-			const res = await fetch(`/api/repos/${repoId}/invitations`, {
+			const res = await fetchWithAuth(`/api/repos/${repoId}/invitations`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email }),
