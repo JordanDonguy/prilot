@@ -11,7 +11,7 @@ import {
 	UnprocessableEntityError,
 } from "@/lib/server/error";
 import { getFileDiffs } from "@/lib/server/github/fileDiffs";
-import { groq } from "@/lib/server/groq/client";
+import { cerebras } from "@/lib/server/groq/client";
 import { buildPRFromDiffs } from "@/lib/server/groq/prompt";
 import { summarizeDiffsForPR } from "@/lib/server/groq/summarizeFileDiffs";
 import { handleError } from "@/lib/server/handleError";
@@ -22,8 +22,8 @@ import {
 	githubCompareCommitsLimiter,
 } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
-import type { IPRResponse } from "@/types/pullRequests";
 import { formatDateTimeForErrors } from "@/lib/utils/formatDateTime";
+import type { IPRResponse } from "@/types/pullRequests";
 
 const prisma = getPrisma();
 const MIN_DESCRIPTION_LENGTH = 500;
@@ -83,6 +83,7 @@ export async function POST(
 		rateLimitOrThrow(ghLimit);
 
 		// 7. Fetch file diffs, throw if more than 30 files are modified
+		const t0 = performance.now();
 		const files = await getFileDiffs(
 			repo.installation.installationId,
 			repo.owner,
@@ -90,6 +91,8 @@ export async function POST(
 			safeBase,
 			safeCompare,
 		);
+		const t1 = performance.now();
+		console.log(`[DEEP] GitHub file diffs: ${(t1 - t0).toFixed(0)}ms (${files?.length ?? 0} files)`);
 
 		if (!files || files.length === 0) {
 			throw new BadRequestError("No file changes found between branches");
@@ -139,12 +142,15 @@ export async function POST(
 		}
 
 		// 10. Summarize diffs (stage 1)
+		const t2 = performance.now();
 		const diffSummaries = await summarizeDiffsForPR(files);
+		const t3 = performance.now();
+		console.log(`[DEEP] Summarize diffs (Cerebras): ${(t3 - t2).toFixed(0)}ms`);
 
 		// 11. PR generation (stage 2) with retry if returned description is too short
 		const generatePRContent = async () => {
-			const completion = await groq.chat.completions.create({
-				model: "openai/gpt-oss-120b",
+			const completion = await cerebras.chat.completions.create({
+				model: "gpt-oss-120b",
 				messages: [
 					{
 						role: "system",
@@ -167,17 +173,23 @@ export async function POST(
 				},
 			});
 
-			const content = completion.choices[0].message.content;
+			const content = (completion as { choices: { message: { content: string | null } }[] }).choices[0].message.content;
 			if (!content) throw new Error("Empty AI response");
 			return JSON.parse(content) as IPRResponse;
 		};
 
 		// First attempt
+		const t4 = performance.now();
 		let parsed = await generatePRContent();
+		const t5 = performance.now();
+		console.log(`[DEEP] PR generation (Cerebras): ${(t5 - t4).toFixed(0)}ms`);
 
 		// Retry if description is too short
 		if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
+			console.log(`[DEEP] Description too short (${parsed.description.length} chars), retrying...`);
+			const t6 = performance.now();
 			parsed = await generatePRContent();
+			console.log(`[DEEP] PR generation retry (Cerebras): ${(performance.now() - t6).toFixed(0)}ms`);
 
 			// If still too short after retry, throw error (no credit consumed yet)
 			if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
@@ -200,6 +212,7 @@ export async function POST(
 			};
 		}
 
+		console.log(`[DEEP] Total: ${(performance.now() - t0).toFixed(0)}ms`);
 		return NextResponse.json(response);
 	} catch (error) {
 		return handleError(error);

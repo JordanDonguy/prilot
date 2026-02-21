@@ -10,7 +10,7 @@ import {
 	UnauthorizedError,
 } from "@/lib/server/error";
 import { getCommitMessages } from "@/lib/server/github/commits";
-import { groq } from "@/lib/server/groq/client";
+import { cerebras } from "@/lib/server/groq/client";
 import { buildPRFromCommits } from "@/lib/server/groq/prompt";
 import { handleError } from "@/lib/server/handleError";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
@@ -20,8 +20,8 @@ import {
 	githubCompareCommitsLimiter,
 } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
-import type { IPRResponse } from "@/types/pullRequests";
 import { formatDateTimeForErrors } from "@/lib/utils/formatDateTime";
+import type { IPRResponse } from "@/types/pullRequests";
 
 const prisma = getPrisma();
 
@@ -129,8 +129,8 @@ export async function POST(
 		}
 
 		// 10. AI call
-		const completion = await groq.chat.completions.create({
-			model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+		const completion = await cerebras.chat.completions.create({
+			model: "gpt-oss-120b",
 			messages: [
 				{
 					role: "system",
@@ -153,7 +153,7 @@ export async function POST(
 			},
 		});
 
-		const content = completion.choices[0].message.content;
+		const content = (completion as { choices: { message: { content: string | null } }[] }).choices[0].message.content;
 		if (!content) throw new Error("Empty AI response");
 
 		const parsed = JSON.parse(content);

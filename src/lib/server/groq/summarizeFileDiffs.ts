@@ -1,5 +1,6 @@
 import { prepareFileDiffForAI } from "@/lib/server/github/fileDiffs";
-import { groq } from "@/lib/server/groq/client";
+import type { ChatCompletion } from "@cerebras/cerebras_cloud_sdk/resources/chat/completions";
+import { cerebras } from "@/lib/server/groq/client";
 import type { IGitHubFile } from "@/types/commits";
 import { TooManyRequestsError } from "../error";
 
@@ -9,16 +10,16 @@ import { TooManyRequestsError } from "../error";
  * Else use a bigger model (Llama 4 Scout)
  */
 async function summarizeFileDiff(patch: string): Promise<string> {
-	const completion = await groq.chat.completions.create({
+	const completion = await cerebras.chat.completions.create({
 		model:
-			patch.length < 1000
-				? "llama-3.1-8b-instant"
-				: "meta-llama/llama-4-scout-17b-16e-instruct",
+			patch.length < 2000
+				? "llama3.1-8b"
+				: "gpt-oss-120b",
 		messages: [
 			{
 				role: "system",
 				content:
-					"You are a senior software enginner generating a detailled summary of code changes from file diffs in 150 tokens or fewer.",
+					"Summarize what changed and why in this file diff (150 tokens max). Write for a non-technical reader. No code specifics (component names, class names, CSS, variables, functions) — only user-facing or architectural impact.",
 			},
 			{
 				role: "user",
@@ -28,7 +29,7 @@ async function summarizeFileDiff(patch: string): Promise<string> {
 		max_completion_tokens: 150,
 	});
 
-	const content = completion.choices[0].message.content;
+	const content = (completion as ChatCompletion.ChatCompletionResponse).choices[0].message.content;
 
 	return content?.trim() || "";
 }
