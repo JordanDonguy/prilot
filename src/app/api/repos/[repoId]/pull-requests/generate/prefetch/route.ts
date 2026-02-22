@@ -9,13 +9,14 @@ import {
 	NotFoundError,
 	UnauthorizedError,
 } from "@/lib/server/error";
-import { getFileDiffs } from "@/lib/server/github/fileDiffs";
+import { githubFetch } from "@/lib/server/github/client";
 import { handleError } from "@/lib/server/handleError";
 import { redis } from "@/lib/server/redis/client";
-import { buildDiffsCacheKey } from "@/lib/server/redis/diffsCacheKey";
+import { buildCompareCacheKey } from "@/lib/server/redis/compareCacheKey";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import { githubCompareCommitsLimiter } from "@/lib/server/redis/rate-limiters";
 import { getCurrentUser } from "@/lib/server/session";
+import type { IGitHubCompareResponse } from "@/types/commits";
 
 const prisma = getPrisma();
 const MAX_CACHE_SIZE_BYTES = 512 * 1024; // 512 KB
@@ -71,20 +72,22 @@ export async function POST(
 		);
 		rateLimitOrThrow(ghLimit);
 
-		// 7. Fetch file diffs from GitHub
-		const files = await getFileDiffs(
+		// 7. Fetch compare data from GitHub (files + commits in one call)
+		const compare = await githubFetch<IGitHubCompareResponse>(
 			repo.installation.installationId,
-			repo.owner,
-			repo.name,
-			safeBase,
-			safeCompare,
+			`/repos/${repo.owner}/${repo.name}/compare/${safeBase}...${safeCompare}`,
 		);
 
+		const files = compare.data.files;
+		const commits = compare.data.commits
+			.filter((c) => c.parents.length === 1)
+			.map((c) => c.commit.message);
+
 		// 8. Cache in Redis if within size limit
-		if (files && files.length > 0) {
-			const serialized = JSON.stringify(files);
+		if ((files && files.length > 0) || commits.length > 0) {
+			const serialized = JSON.stringify({ files, commits });
 			if (serialized.length <= MAX_CACHE_SIZE_BYTES) {
-				const cacheKey = buildDiffsCacheKey(repoId, safeBase, safeCompare);
+				const cacheKey = buildCompareCacheKey(repoId, safeBase, safeCompare);
 				await redis.set(cacheKey, serialized, { ex: CACHE_TTL_SECONDS });
 			}
 		}

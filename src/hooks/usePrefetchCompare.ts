@@ -4,20 +4,19 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 const DEBOUNCE_MS = 600;
 
 /**
- * Prefetches file diffs for deep PR generation when both branches are selected.
+ * Prefetches GitHub compare data (file diffs + commit messages) when both branches are selected.
+ * Serves both fast and deep PR generation modes from a single cache.
  * Fire-and-forget: errors are silently ignored.
  */
-export function usePrefetchDiffs(
+export function usePrefetchCompare(
 	repoId: string,
 	baseBranch: string,
 	compareBranch: string,
-	mode: "fast" | "deep",
 ) {
 	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const lastPrefetchedRef = useRef("");
 
 	useEffect(() => {
-		if (mode !== "deep") return;
 		if (!baseBranch || !compareBranch || baseBranch === compareBranch) return;
 
 		const key = `${repoId}:${baseBranch}:${compareBranch}`;
@@ -29,7 +28,7 @@ export function usePrefetchDiffs(
 			lastPrefetchedRef.current = key;
 
 			fetchWithAuth(
-				`/api/repos/${repoId}/pull-requests/generate/deep/prefetch`,
+				`/api/repos/${repoId}/pull-requests/generate/prefetch`,
 				{
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -41,5 +40,5 @@ export function usePrefetchDiffs(
 		return () => {
 			if (timeoutRef.current) clearTimeout(timeoutRef.current);
 		};
-	}, [repoId, baseBranch, compareBranch, mode]);
+	}, [repoId, baseBranch, compareBranch]);
 }
