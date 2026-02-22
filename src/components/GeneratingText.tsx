@@ -23,10 +23,10 @@ export function GeneratingText({ mode }: GeneratingTextProps) {
 	const [dotCount, setDotCount] = useState(1);
 
 	const phrases = mode === "deep" ? DEEP_PHRASES : FAST_PHRASES;
-	// Deep: 1500ms per phrase (4 phrases = 6s), then "Almost there"
-	// Fast: 833ms per phrase (3 phrases = 2.5s), then "Almost there"
-	const msPerPhrase = mode === "deep" ? 1500 : 833;
-	const almostThereThreshold = mode === "deep" ? 6000 : 2500;
+	// Deep: 750ms per phrase (4 phrases = 3s), then "Almost there"
+	// Fast: 500ms per phrase (3 phrases = 1.5s), then "Almost there"
+	const msPerPhrase = mode === "deep" ? 750 : 500;
+	const almostThereThreshold = mode === "deep" ? 3000 : 1500;
 
 	// Track elapsed time
 	useEffect(() => {
