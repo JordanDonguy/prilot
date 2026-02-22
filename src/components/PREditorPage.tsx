@@ -13,7 +13,7 @@ import { BranchSelect, LanguageSelect } from "@/components/Select";
 import { useAutoSavePR } from "@/hooks/useAutoSavePR";
 import { useFetchPR } from "@/hooks/useFetchPR";
 import { useGeneratePR } from "@/hooks/useGeneratePR";
-import { usePrefetchDiffs } from "@/hooks/usePrefetchDiffs";
+import { usePrefetchCompare } from "@/hooks/usePrefetchCompare";
 import { useRepository } from "@/hooks/useRepository";
 import { useSendPR } from "@/hooks/useSendPR";
 import type { PRLanguage } from "@/types/languages";
@@ -64,25 +64,56 @@ export default function PREditorPageContent({
 		skipNextFetch,
 	});
 
-	const { isGenerating, generatePR } = useGeneratePR({
-		repoId,
-		prId,
-		baseBranch,
-		compareBranch,
-		language,
-		mode,
-		setPrId,
-	});
+	const { isGenerating, generatePR, streamingTitle, streamingDescription } =
+		useGeneratePR({
+			repoId,
+			prId,
+			baseBranch,
+			compareBranch,
+			language,
+			mode,
+			setPrId,
+		});
 
 	const { isSendingPr, providerPrUrl, sendPR } = useSendPR(repoId, prId);
 
+	// Sync streaming values → title/description during generation
+	const hasScrolledToStreamRef = useRef(false);
+
+	useEffect(() => {
+		if (isGenerating && streamingTitle) {
+			setTitle(streamingTitle);
+
+			// Scroll to editor on first token
+			if (!hasScrolledToStreamRef.current) {
+				hasScrolledToStreamRef.current = true;
+				editorRef.current?.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+			}
+		}
+	}, [isGenerating, streamingTitle]);
+
+	useEffect(() => {
+		if (isGenerating && streamingDescription) {
+			setDescription(streamingDescription);
+		}
+	}, [isGenerating, streamingDescription]);
+
 	useAutoSavePR({ prId, repoId, title, description, startAutoSave });
-	usePrefetchDiffs(repoId, baseBranch, compareBranch, mode);
+	usePrefetchCompare(repoId, baseBranch, compareBranch);
 
 	// ----- Functions -----
 	const handleGenerate = useCallback(async () => {
 		startAutoSave.current = false; // suspend auto save
 		skipNextFetch.current = true; // prevent fetching PR after prId is modified
+
+		// Switch to preview immediately so tokens appear live
+		setTitle("");
+		setDescription("");
+		setShowEditOrPreview("preview");
+		hasScrolledToStreamRef.current = false;
 
 		const {
 			success,
@@ -91,20 +122,18 @@ export default function PREditorPageContent({
 		} = await generatePR();
 
 		if (success) {
+			// Set authoritative final values (overrides streaming partials)
 			setTitle(generatedTitle);
 			setDescription(generatedDescription);
-			setShowEditOrPreview("preview");
-
-			// Scroll to pull requests editor
-			editorRef.current?.scrollIntoView({
-				behavior: "smooth",
-				block: "start",
-			});
+		} else {
+			// Revert preview if generation failed
+			setShowEditOrPreview("edit");
 		}
 
 		// Delay re-enabling auto-save to prevent immediate PATCH after PR creation
 		// Double rAF ensures React has flushed all state updates and effects
-		if (autoSaveFrameRef.current) cancelAnimationFrame(autoSaveFrameRef.current);
+		if (autoSaveFrameRef.current)
+			cancelAnimationFrame(autoSaveFrameRef.current);
 		autoSaveFrameRef.current = requestAnimationFrame(() => {
 			autoSaveFrameRef.current = requestAnimationFrame(() => {
 				startAutoSave.current = true;
@@ -166,7 +195,8 @@ export default function PREditorPageContent({
 	// Cleanup animation frame on unmount
 	useEffect(() => {
 		return () => {
-			if (autoSaveFrameRef.current) cancelAnimationFrame(autoSaveFrameRef.current);
+			if (autoSaveFrameRef.current)
+				cancelAnimationFrame(autoSaveFrameRef.current);
 		};
 	}, []);
 
@@ -301,7 +331,6 @@ export default function PREditorPageContent({
 						y={20}
 						triggerOnView={false}
 						ref={editorRef}
-						className="scroll-mt-2"
 					>
 						<PREditor
 							title={title}
