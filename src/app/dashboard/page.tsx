@@ -1,6 +1,12 @@
 "use client";
 
-import { AlertCircle, CheckCircle, Clock, Github, GitPullRequest } from "lucide-react";
+import {
+	AlertCircle,
+	CheckCircle,
+	Clock,
+	Github,
+	GitPullRequest,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedScale from "@/components/animations/AnimatedScale";
@@ -13,8 +19,12 @@ import {
 	CardTitle,
 	StatCard,
 } from "@/components/Card";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 import GithubAppButton from "@/components/GithubAppButton";
-import { DashboardPRListItem, DashboardRepoListItem } from "@/components/ListItem";
+import {
+	DashboardPRListItem,
+	DashboardRepoListItem,
+} from "@/components/ListItem";
 import { useInstallations } from "@/contexts/InstallationContext";
 import { useRepos } from "@/contexts/ReposContext";
 import { usePrefetchRepos } from "@/hooks/usePrefetchRepos";
@@ -42,10 +52,11 @@ interface IRecentPRsResponse {
 
 export default function DashboardPage() {
 	const { installations } = useInstallations();
-	const { repositories, invitations } = useRepos();
+	const { repositories, invitations, loading: reposLoading } = useRepos();
 
 	const hasGithub = installations.some((i) => i.provider === "github");
-	const hasNoRepos = repositories.length === 0 && (invitations?.length ?? 0) === 0;
+	const hasNoRepos =
+		repositories.length === 0 && (invitations?.length ?? 0) === 0;
 	const [recentPRs, setRecentPRs] = useState<IRecentPR[]>([]);
 	const [weeklyStats, setWeeklyStats] = useState<{
 		thisWeek: number;
@@ -129,6 +140,8 @@ export default function DashboardPage() {
 		const pct = Math.round(getPercentageChange(thisWeek, lastWeek));
 		return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
 	})();
+
+	if (reposLoading) return <DashboardSkeleton />;
 
 	return (
 		<div className="p-6 space-y-6 fade-in-fast">
@@ -222,6 +235,38 @@ export default function DashboardPage() {
 
 					{/* ---- Recent Activity ---- */}
 					<div className="grid gap-6 xl:grid-cols-2">
+						{/* ---- Top repositories ---- */}
+						<AnimatedSlide x={-20} y={-20} triggerOnView={false}>
+							<Card className="flex flex-col h-full">
+								<CardHeader>
+									<CardTitle>Your Repositories</CardTitle>
+									<CardDescription>
+										Quick access to your most active repos
+									</CardDescription>
+								</CardHeader>
+								<CardContent
+									className={`flex flex-col space-y-4 h-full ${topRepos.length === 0 && "justify-center pt-8"}`}
+								>
+									{topRepos.length > 0 ? (
+										topRepos.map((repo) => (
+											<DashboardRepoListItem
+												key={repo.id}
+												repoId={repo.id}
+												name={repo.name}
+												provider={repo.provider}
+												draftPrCount={repo.draftPrCount}
+												sentPrCount={repo.sentPrCount}
+											/>
+										))
+									) : (
+										<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
+											No recent repository found
+										</p>
+									)}
+								</CardContent>
+							</Card>
+						</AnimatedSlide>
+
 						{/* ---- Recent PRs ---- */}
 						<AnimatedSlide x={20} y={-20} triggerOnView={false}>
 							<Card className="flex flex-col h-full">
@@ -255,38 +300,6 @@ export default function DashboardPage() {
 									) : (
 										<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
 											No recent PRs found
-										</p>
-									)}
-								</CardContent>
-							</Card>
-						</AnimatedSlide>
-
-						{/* ---- Top repositories ---- */}
-						<AnimatedSlide x={-20} y={-20} triggerOnView={false}>
-							<Card className="flex flex-col h-full">
-								<CardHeader>
-									<CardTitle>Your Repositories</CardTitle>
-									<CardDescription>
-										Quick access to your most active repos
-									</CardDescription>
-								</CardHeader>
-								<CardContent
-									className={`flex flex-col space-y-4 h-full ${topRepos.length === 0 && "justify-center pt-8"}`}
-								>
-									{topRepos.length > 0 ? (
-										topRepos.map((repo) => (
-											<DashboardRepoListItem
-												key={repo.id}
-												repoId={repo.id}
-												name={repo.name}
-												provider={repo.provider}
-												draftPrCount={repo.draftPrCount}
-												sentPrCount={repo.sentPrCount}
-											/>
-										))
-									) : (
-										<p className="text-gray-500 text-lg text-center self-center my-4 md:mt-0 fade-in">
-											No recent repository found
 										</p>
 									)}
 								</CardContent>
