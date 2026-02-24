@@ -40,7 +40,7 @@ export function useGeneratePR({
 	setPrId,
 }: useGeneratePRProps) {
 	const { addDraftPR } = usePullRequestActions(repoId ?? "");
-	const { setCredits, decrementCredits } = useCreditsStore();
+	const { setCredits } = useCreditsStore();
 
 	const [isGenerating, setIsGenerating] = useState(false);
 	const abortControllerRef = useRef<AbortController | null>(null);
@@ -180,16 +180,14 @@ export function useGeneratePR({
 				if (!updateRes.ok) throw new Error("Failed to update PR");
 			}
 
-			// Sync credits: use exact value from API if owner, otherwise decrement locally
-		if (finalResult.rateLimit) {
-			setCredits({
-				remaining: finalResult.rateLimit.weeklyRemaining,
-				total: 20,
-				reset: finalResult.rateLimit.weeklyReset,
-			});
-		} else {
-			decrementCredits();
-		}
+			// Sync credits locally — rateLimit is only returned when the current user is the repo owner
+			if (finalResult.rateLimit) {
+				setCredits({
+					remaining: finalResult.rateLimit.weeklyRemaining,
+					total: 20,
+					reset: finalResult.rateLimit.weeklyReset,
+				});
+			}
 
 		return { success: true, title, description: safeDescription };
 		} catch (err) {
@@ -205,7 +203,7 @@ export function useGeneratePR({
 				abortControllerRef.current = null;
 			}
 		}
-	}, [repoId, addDraftPR, baseBranch, compareBranch, mode, language, prId, setPrId, setCredits, decrementCredits]);
+	}, [repoId, addDraftPR, baseBranch, compareBranch, mode, language, prId, setPrId, setCredits]);
 
 	return { isGenerating, generatePR, streamingTitle, streamingDescription };
 }

@@ -10,8 +10,6 @@ interface CreditsStore {
 	fetchCredits: (force?: boolean) => Promise<void>;
 	/** Sync exact values from a generate-PR API response. */
 	setCredits: (data: { remaining: number; total: number; reset: number }) => void;
-	/** Optimistically decrement by 1 (used when the API doesn't return rateLimit). */
-	decrementCredits: () => void;
 }
 
 export const useCreditsStore = create<CreditsStore>((set, get) => ({
@@ -39,10 +37,4 @@ export const useCreditsStore = create<CreditsStore>((set, get) => ({
 
 	setCredits: ({ remaining, total, reset }) =>
 		set({ remaining, total, reset }),
-
-	decrementCredits: () =>
-		set((state) => ({
-			remaining:
-				state.remaining !== null ? Math.max(0, state.remaining - 1) : null,
-		})),
 }));

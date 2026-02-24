@@ -58,9 +58,7 @@ export default function NavbarUserButton({ onOpen }: NavbarUserButtonProps) {
 			<button
 				type="button"
 				onClick={handleToggle}
-				className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-200/80 dark:hover:bg-gray-800 cursor-pointer ${
-					open ? "bg-gray-200/80 dark:bg-gray-800" : ""
-				}`}
+				className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-200/80 dark:hover:bg-gray-800 cursor-pointer"
 			>
 				<div className="w-6 h-6 rounded-full bg-linear-to-br from-blue-600 to-purple-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
 					{userInitial}
