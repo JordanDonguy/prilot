@@ -1,4 +1,5 @@
 import { config } from "../../config";
+import { escapeHtml } from "../../escapeHtml";
 
 interface BaseEmailTemplateParams {
   title: string;        // <title> tag
@@ -12,6 +13,8 @@ export function baseEmailTemplate({
   body,
 }: BaseEmailTemplateParams) {
   const logoUrl = config.logoUrl;
+  const safeTitle = escapeHtml(title);
+  const safeHeading = escapeHtml(heading);
   const year = new Date().getFullYear();
 
   return `
@@ -19,24 +22,22 @@ export function baseEmailTemplate({
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>${title}</title>
+  <title>${safeTitle}</title>
 </head>
-<body style="margin:0; padding:0; background-color:#fafbfd; font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:24px 0;">
+<body style="margin:0; padding:32px; background-color:#dbe1ed; font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" border="0"
-          style="background:linear-gradient(to bottom, #e0f0ff 0%, #ffffff 35%, #ffffff 100%);
-                 border-radius:8px;
-                 overflow:hidden;
-                 border:1px solid #e0f0ff;">
-
+          style="background-color: white; overflow:hidden; border-radius: 16px;
+            border-left: 1px solid #aca9be; border-right: 1px solid #aca9be;
+        ">
           <!-- Header -->
           <tr>
-            <td align="center" style="padding:32px;">
+            <td align="left" style="padding:32px 32px 16px 32px;">
               <img src="${logoUrl}" alt="${config.appName}" style="height:48px; margin-bottom:24px;" />
-              <h1 style="margin:0; font-size:24px; font-weight:700; color:#111827;">
-                ${heading}
+              <h1 style="margin:0; font-size:32px; font-weight:700; color:#111827;">
+                ${safeHeading}
               </h1>
             </td>
           </tr>
@@ -50,7 +51,7 @@ export function baseEmailTemplate({
 
           <!-- Footer -->
           <tr>
-            <td style="background-color:#eff6ff; text-align:center; font-size:12px; color:#9ca3af; padding:16px;">
+            <td style="border-top: 1px solid #dae1ed; text-align:center; font-size:12px; color:#9ca3af; padding:16px;">
               &copy; ${year} ${config.appName}. All rights reserved.
             </td>
           </tr>

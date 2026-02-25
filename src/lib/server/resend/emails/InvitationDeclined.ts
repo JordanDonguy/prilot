@@ -1,4 +1,5 @@
 import { config } from "../../config";
+import { escapeHtml } from "../../escapeHtml";
 import { resend } from "../client";
 import { baseEmailTemplate } from "./baseEmailTemplate";
 
@@ -13,13 +14,16 @@ export async function sendInvitationDeclinedEmail({
   repoName,
   declinedBy,
 }: SendInvitationDeclinedParams) {
+  const safeDeclinedBy = escapeHtml(declinedBy);
+  const safeRepoName = escapeHtml(repoName);
+
   const html = baseEmailTemplate({
     title: "Invitation declined",
     heading: "Invitation declined",
     body: `
       <p>
-        <strong>${declinedBy}</strong> has declined your invitation to join
-        the repository <strong>${repoName}</strong>.
+        <strong>${safeDeclinedBy}</strong> has declined your invitation to join
+        the repository <strong>${safeRepoName}</strong>.
       </p>
 
       <p style="margin-top:16px;">
@@ -32,7 +36,7 @@ export async function sendInvitationDeclinedEmail({
   return resend.emails.send({
     from: `${config.appName} <notify@${config.domainName}>`,
     to,
-    subject: `${declinedBy} declined your invitation to ${repoName}`,
+    subject: `${safeDeclinedBy} declined your invitation to ${safeRepoName}`,
     html,
   });
 }

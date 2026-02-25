@@ -1,4 +1,5 @@
 import { config } from "../../config";
+import { escapeHtml } from "../../escapeHtml";
 import { resend } from "../client";
 import { baseEmailTemplate } from "./baseEmailTemplate";
 
@@ -13,13 +14,16 @@ export async function sendMemberRemovedEmail({
   repoName,
   removedBy,
 }: SendMemberRemovedParams) {
+  const safeRepoName = escapeHtml(repoName);
+  const safeRemovedBy = escapeHtml(removedBy);
+
   const html = baseEmailTemplate({
     title: "Access removed",
     heading: "You’ve been removed from a repository",
     body: `
       <p>
         You have been removed from the repository
-        <strong>${repoName}</strong> by <strong>${removedBy}</strong>.
+        <strong>${safeRepoName}</strong> by <strong>${safeRemovedBy}</strong>.
       </p>
 
       <p style="margin-top:16px;">
@@ -32,7 +36,7 @@ export async function sendMemberRemovedEmail({
   return resend.emails.send({
     from: `${config.appName} <notify@${config.domainName}>`,
     to,
-    subject: `Removed from ${repoName}`,
+    subject: `Removed from ${safeRepoName}`,
     html,
   });
 }

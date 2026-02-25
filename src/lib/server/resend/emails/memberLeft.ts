@@ -1,4 +1,5 @@
 import { config } from "../../config";
+import { escapeHtml } from "../../escapeHtml";
 import { resend } from "../client";
 import { baseEmailTemplate } from "./baseEmailTemplate";
 
@@ -13,13 +14,16 @@ export async function sendMemberLeftEmail({
   repoName,
   username,
 }: SendMemberLeftParams) {
+  const safeUsername = escapeHtml(username);
+  const safeRepoName = escapeHtml(repoName);
+
   const html = baseEmailTemplate({
     title: "Member left repository",
     heading: "A member left your repository",
     body: `
       <p>
-        <strong>${username}</strong> has left the repository
-        <strong>${repoName}</strong>.
+        <strong>${safeUsername}</strong> has left the repository
+        <strong>${safeRepoName}</strong>.
       </p>
     `,
   });
@@ -27,7 +31,7 @@ export async function sendMemberLeftEmail({
   return resend.emails.send({
     from: `${config.appName} <notify@${config.domainName}>`,
     to,
-    subject: `${username} left ${repoName}`,
+    subject: `${safeUsername} left ${safeRepoName}`,
     html,
   });
 }
