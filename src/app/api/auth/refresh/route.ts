@@ -4,7 +4,7 @@ import { getPrisma } from "@/db";
 import { handleError } from "@/lib/server/handleError";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
 import { refreshLimiter } from "@/lib/server/redis/rate-limiters"; // new limiter
-import { generateAccessToken, setTokensInCookies } from "@/lib/server/token";
+import { generateAccessToken, generateRefreshToken, setTokensInCookies } from "@/lib/server/token";
 
 const prisma = getPrisma();
 
@@ -31,15 +31,17 @@ export async function GET() {
     const limit = await refreshLimiter.limit(`refresh:user:${stored.userId}`);
     rateLimitOrThrow(limit);
 
-    // 4. Generate new access token
+    // 4. Get user
     const user = await prisma.user.findUnique({ where: { id: stored.userId } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 401 });
 
+    // 5. Rotate tokens (new access + new refresh, old refresh is invalidated)
     const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = await generateRefreshToken(user);
 
-    // 5. Return response with new tokens in cookies
+    // 6. Return response with new tokens in cookies
     const res = NextResponse.json({ success: true });
-    setTokensInCookies(res, newAccessToken, refreshToken);
+    setTokensInCookies(res, newAccessToken, newRefreshToken);
 
     return res;
   } catch (error) {
