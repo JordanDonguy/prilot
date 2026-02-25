@@ -1,4 +1,5 @@
 import { config } from "../../config";
+import { escapeHtml } from "../../escapeHtml";
 import { resend } from "../client";
 import { baseEmailTemplate } from "./baseEmailTemplate";
 
@@ -13,13 +14,16 @@ export async function sendMemberJoinedEmail({
   repoName,
   username,
 }: SendMemberJoinedParams) {
+  const safeUsername = escapeHtml(username);
+  const safeRepoName = escapeHtml(repoName);
+
   const html = baseEmailTemplate({
     title: "New member joined",
     heading: "A new member joined your repository",
     body: `
       <p>
-        <strong>${username}</strong> has accepted the invitation and joined
-        the repository <strong>${repoName}</strong>.
+        <strong>${safeUsername}</strong> has accepted the invitation and joined
+        the repository <strong>${safeRepoName}</strong>.
       </p>
     `,
   });
@@ -27,7 +31,7 @@ export async function sendMemberJoinedEmail({
   return resend.emails.send({
     from: `${config.appName} <notify@${config.domainName}>`,
     to,
-    subject: `${username} joined ${repoName}`,
+    subject: `${safeUsername} joined ${safeRepoName}`,
     html,
   });
 }

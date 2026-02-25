@@ -1,4 +1,5 @@
 import { config } from "../../config";
+import { escapeHtml } from "../../escapeHtml";
 import { resend } from "../client";
 import { baseEmailTemplate } from "./baseEmailTemplate";
 
@@ -17,12 +18,15 @@ export async function sendRepoInviteEmail({
 	inviteUrl,
 	declineUrl,
 }: SendRepoInviteParams) {
+	const safeOwner = escapeHtml(owner);
+	const safeRepoName = escapeHtml(repoName);
+
 	const body = `
     <p>Hello,</p>
 
     <p>
-      <strong>${owner}</strong> has invited you to join the repository
-      <strong>${repoName}</strong> on <strong>${config.appName}</strong>.
+      <strong>${safeOwner}</strong> has invited you to join the repository
+      <strong>${safeRepoName}</strong> on <strong>${config.appName}</strong>.
     </p>
 
     <p style="margin-top:16px;">Please choose an option below:</p>
@@ -66,7 +70,7 @@ export async function sendRepoInviteEmail({
 	return resend.emails.send({
 		from: `${config.appName} <invite@${config.domainName}>`,
 		to,
-		subject: `You’ve been invited by ${owner} to join ${repoName}`,
+		subject: `You’ve been invited by ${safeOwner} to join ${safeRepoName}`,
 		html,
 	});
 }
