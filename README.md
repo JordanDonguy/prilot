@@ -2,37 +2,50 @@
 
 ## 📝 Overview
 
-**PRilot** is an intelligent developer tool designed to **simplify and accelerate pull request workflows**.  
-It can analyze commit differences between branches and assist in **automatically generating pull requests using AI** and **GitHub / GitLab integration**.  
-
-**Currently in development**. The project already includes **GitHub integration** and **AI-powered pull request generation**.  
-Upcoming features include sending pull requests directly to GitHub, two-way GitHub synchronization (webhooks), repository member invitations, and GitLab integration.  
+**PRilot** is an intelligent developer tool designed to **simplify and accelerate pull request workflows**.
+It analyzes commit differences between branches and **automatically generates pull requests using AI**, with seamless **GitHub integration** to send them directly to your repositories.
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-- **AI-Powered Pull Requests**: Automatically generate pull requests based on commit differences between branches.  
-- **GitHub & GitLab Integrations**: Connect your repositories and manage PRs seamlessly.  
-- **User Authentication**: Sign in with credentials (currently functional) and GitHub / GitLab OAuth.  
-- **Intuitive UI**: Modern interface built with TailwindCSS, designed for quick navigation and productivity.  
-- **Team Collaboration**: Plan to support multiple members per repository for team workflows.  
+- **AI-Powered PR Generation**: Automatically generate pull request titles and descriptions from branch diffs.
+  - **Fast mode**: Generates from commit messages — quick and lightweight.
+  - **Deep mode**: Analyzes file diffs in detail for thorough, context-aware descriptions.
+- **Send PRs to GitHub**: Create pull requests directly on GitHub from the PRilot dashboard.
+- **Multi-Account GitHub Support**: Connect your personal GitHub account and multiple organizations simultaneously.
+- **Team Collaboration**: Invite members to repositories (up to 4 per repo) with email-based invitations.
+- **Weekly Credit System**: 20 AI-generated PRs per week per user, with per-minute rate limiting.
+- **User Authentication**: Credentials-based signup/login, GitHub OAuth, and password reset via email.
+- **Modern UI**: Built with Tailwind CSS v4, Framer Motion animations, and dark mode support.
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Frontend**: Next.js, TailwindCSS, Framer Motion, Lucide-React, Next-Themes   
-- **Backend / API**: Next.js API Routes  
-- **Database**: PostgreSQL, Prisma ORM  
-- **Authentication**: JWT Based auth system
-- **Containerization & DevOps**: Docker 
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | Next.js 16, React 19, Tailwind CSS v4, Framer Motion, Zustand, Lucide Icons |
+| **Backend** | Next.js API Routes, Zod validation |
+| **Database** | PostgreSQL, Prisma ORM |
+| **AI** | Cerebras Cloud SDK |
+| **Auth** | JWT (jose), Argon2 password hashing |
+| **Caching & Rate Limiting** | Upstash Redis |
+| **Email** | Resend |
+| **DevOps** | Docker, Biome (lint/format) |
+
+---
+
+## 🔮 Upcoming
+
+- **GitLab Integration**: Connect GitLab repositories and generate PRs for merge requests.
+- **Custom PR Templates**: Define reusable templates to match your team's PR format and conventions.
 
 ---
 
 ## 💻 Running Locally
 
-1. Clone the repository:  
+1. Clone the repository:
    ```bash
    git clone https://github.com/JordanDonguy/prilot.git
    cd prilot
@@ -46,7 +59,7 @@ Upcoming features include sending pull requests directly to GitHub, two-way GitH
 
    Replace the placeholder values with your own credentials, database URL, and API keys.
 
-3. Start Docker services (if using Docker for PostgreSQL):
+3. Start Docker services (PostgreSQL + Redis):
 
    ```bash
    docker compose up -d
@@ -60,28 +73,16 @@ Upcoming features include sending pull requests directly to GitHub, two-way GitH
 
 5. Set up the database:
 
-   * Generate Prisma types :
+   * Generate Prisma client:
 
      ```bash
      npx prisma generate
-     ```
-
-   * (Optional) Reset database if needed:
-
-     ```bash
-     npm run db:reset
      ```
 
    * Apply migrations:
 
      ```bash
      npm run db:migrate
-     ```
-
-   * Seed the database:
-
-     ```bash
-     npm run db:seed
      ```
 
 6. Start the development server:
