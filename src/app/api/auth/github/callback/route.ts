@@ -151,7 +151,7 @@ export async function POST(req: Request) {
 		const oauthProviders = oauthIds.map((o) => o.provider);
 
 		// 9. Create response with session
-		const accessToken = generateAccessToken(user);
+		const accessToken = await generateAccessToken(user);
 		const refreshToken = await generateRefreshToken(user);
 
 		const res = NextResponse.json({

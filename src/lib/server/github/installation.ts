@@ -11,7 +11,7 @@ const prisma = getPrisma();
 // -----------------------------------------
 export async function getUserInstallation(
   userId: string,
-  installationId: string
+  installationId: string,
 ) {
   const installation = await prisma.providerInstallation.findFirst({
     where: {
@@ -33,42 +33,42 @@ export async function getUserInstallation(
 // ------------------------------------------
 const TOKEN_CACHE_TTL_SECONDS = 55 * 60; // 55 minutes (tokens expire after 1 hour)
 
-export async function createInstallationAccessToken(
-	installationId: string,
-) {
-	// 1. Check Redis cache
-	const cacheKey = `github:installation-token:${installationId}`;
-	const cached = await redis.get<string>(cacheKey);
-	if (cached) {
-		return { token: decrypt(cached), expires_at: "", permissions: {} };
-	}
+export async function createInstallationAccessToken(installationId: string) {
+  // 1. Check Redis cache
+  const cacheKey = `github:installation-token:${installationId}`;
+  const cached = await redis.get<string>(cacheKey);
+  if (cached) {
+    return { token: decrypt(cached), expires_at: "", permissions: {} };
+  }
 
-	// 2. Create fresh token from GitHub
-	const jwt = createGitHubAppJWT();
+  // 2. Create fresh token from GitHub
+  const jwt = await createGitHubAppJWT();
 
-	const res = await fetch(
-		`https://api.github.com/app/installations/${installationId}/access_tokens`,
-		{
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${jwt}`,
-				Accept: "application/vnd.github+json",
-			},
-		},
-	);
+  const res = await fetch(
+    `https://api.github.com/app/installations/${installationId}/access_tokens`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        Accept: "application/vnd.github+json",
+      },
+    },
+  );
 
-	if (!res.ok) {
-		throw new BadRequestError("Failed to create installation access token");
-	}
+  if (!res.ok) {
+    throw new BadRequestError("Failed to create installation access token");
+  }
 
-	const data = (await res.json()) as {
-		token: string;
-		expires_at: string;
-		permissions: Record<string, string>;
-	};
+  const data = (await res.json()) as {
+    token: string;
+    expires_at: string;
+    permissions: Record<string, string>;
+  };
 
-	// 3. Cache encrypted token in Redis
-	await redis.set(cacheKey, encrypt(data.token), { ex: TOKEN_CACHE_TTL_SECONDS });
+  // 3. Cache encrypted token in Redis
+  await redis.set(cacheKey, encrypt(data.token), {
+    ex: TOKEN_CACHE_TTL_SECONDS,
+  });
 
-	return data;
+  return data;
 }

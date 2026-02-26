@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { getPrisma } from "@/db";
 import { UnauthorizedError } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
-import {
-  decodeJWT,
-  extractAccessToken,
-} from "@/lib/server/token";
+import { decodeJWT, extractAccessToken } from "@/lib/server/token";
 
 const prisma = getPrisma();
 
@@ -13,7 +10,7 @@ export async function POST() {
   try {
     // Extract & decode access token
     const accessToken = await extractAccessToken();
-    const payload = decodeJWT(accessToken);
+    const payload = await decodeJWT(accessToken);
 
     const userId = payload.userId as string;
     if (!userId) {
