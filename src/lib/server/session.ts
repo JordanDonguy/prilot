@@ -1,33 +1,33 @@
-import { extractAccessToken, decodeJWT } from "./token";
 import { getPrisma } from "@/db";
+import { decodeJWT, extractAccessToken } from "./token";
 
 const prisma = getPrisma();
 
 export async function getCurrentUser() {
-	try {
-		const token = await extractAccessToken();
-		const payload = decodeJWT(token);
+  try {
+    const token = await extractAccessToken();
+    const payload = await decodeJWT(token);
 
-		const userId = payload.userId as string;
-		if (!userId) return null;
+    const userId = payload.userId as string;
+    if (!userId) return null;
 
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			include: { oauthIds: true }, // include OAuth associations
-		});
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { oauthIds: true }, // include OAuth associations
+    });
 
-		if (!user) return null;
+    if (!user) return null;
 
-		// Remove password and map oauthIds
-		const { password, oauthIds, ...safeUser } = user;
-		const oauthProviders = oauthIds.map((o) => o.provider);
+    // Remove password and map oauthIds
+    const { password, oauthIds, ...safeUser } = user;
+    const oauthProviders = oauthIds.map((o) => o.provider);
 
-		return {
-			...safeUser,
-			hasPassword: !!password,
-			oauthProviders,
-		};
-	} catch {
-		return null;
-	}
+    return {
+      ...safeUser,
+      hasPassword: !!password,
+      oauthProviders,
+    };
+  } catch {
+    return null;
+  }
 }

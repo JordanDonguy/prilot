@@ -36,7 +36,7 @@ export async function POST() {
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 401 });
 
     // 5. Rotate tokens (new access + new refresh, old refresh is invalidated)
-    const newAccessToken = generateAccessToken(user);
+    const newAccessToken = await generateAccessToken(user);
     const newRefreshToken = await generateRefreshToken(user);
 
     // 6. Return response with new tokens in cookies
