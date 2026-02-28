@@ -4,7 +4,7 @@ import {
 	changePasswordSchema,
 	setPasswordSchema,
 } from "@/lib/schemas/auth.schema";
-import { BadRequestError, ForbiddenError } from "@/lib/server/error";
+import { BadRequestError, UnauthorizedError } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { hashPassword, verifyPassword } from "@/lib/server/password";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
@@ -20,7 +20,7 @@ export async function PATCH(req: Request) {
 	try {
 		// 1. Authenticate
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthorized");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Rate limit
 		const limit = await changePasswordLimiter.limit(
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 	try {
 		// 1. Authenticate
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthorized");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Rate limit
 		const limit = await changePasswordLimiter.limit(

@@ -5,6 +5,7 @@ import {
 	BadRequestError,
 	ForbiddenError,
 	NotFoundError,
+	UnauthorizedError,
 } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { sendMemberLeftEmail } from "@/lib/server/resend/emails/memberLeft";
@@ -32,7 +33,7 @@ export async function GET(
 	try {
 		// 1. Find logged-in user
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthorized");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Parse and validate repoId
 		const { repoId } = await uuidParam("repoId").parseAsync(
@@ -91,7 +92,7 @@ export async function DELETE(
 	try {
 		// 1. Get current user and validate params/body
 		const currentUser = await getCurrentUser();
-		if (!currentUser) throw new ForbiddenError("Unauthorized");
+		if (!currentUser) throw new UnauthorizedError("Unauthenticated");
 
 		const { repoId } = await uuidParam("repoId").parseAsync(
 			await context.params,

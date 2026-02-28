@@ -8,6 +8,7 @@ import {
 	ConflictError,
 	ForbiddenError,
 	NotFoundError,
+	UnauthorizedError,
 } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { rateLimitOrThrow } from "@/lib/server/redis/rate-limit";
@@ -24,7 +25,7 @@ export async function POST(
 	try {
 		// 1. Find user and validate repoId params
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthorized");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		const { repoId } = await uuidParam("repoId").parseAsync(
 			await context.params,

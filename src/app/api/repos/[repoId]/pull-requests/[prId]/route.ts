@@ -7,6 +7,7 @@ import {
 	BadRequestError,
 	ForbiddenError,
 	NotFoundError,
+	UnauthorizedError,
 } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { getCurrentUser } from "@/lib/server/session";
@@ -23,7 +24,7 @@ export async function GET(
 	try {
 		// 1. Find current user
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthenticated");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Get and validate IDs from params
 		const { repoId } = await uuidParam("repoId").parseAsync(
@@ -80,7 +81,7 @@ export async function PATCH(
 	try {
 		// 1. Find current user
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthenticated");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Get and validate IDs from params
 		const { repoId } = await uuidParam("repoId").parseAsync(
@@ -161,7 +162,7 @@ export async function DELETE(
 	try {
 		// 1. Find current user
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthenticated");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Get and validate IDs from params
 		const { repoId } = await uuidParam("repoId").parseAsync(
