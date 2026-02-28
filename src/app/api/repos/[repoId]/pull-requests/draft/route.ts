@@ -3,7 +3,7 @@ import sanitizeHtml from "sanitize-html";
 import { getPrisma } from "@/db";
 import { uuidParam } from "@/lib/schemas/id.schema";
 import { createPrSchema } from "@/lib/schemas/pr.schema";
-import { ForbiddenError, NotFoundError } from "@/lib/server/error";
+import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { getCurrentUser } from "@/lib/server/session";
 
@@ -16,7 +16,7 @@ export async function POST(
 	try {
 		// 1. Find user
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthenticated");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Get repository ID
 		const { repoId } = await uuidParam("repoId").parseAsync(

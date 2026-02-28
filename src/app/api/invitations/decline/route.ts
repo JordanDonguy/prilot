@@ -6,6 +6,7 @@ import {
 	BadRequestError,
 	ForbiddenError,
 	NotFoundError,
+	UnauthorizedError,
 } from "@/lib/server/error";
 import { handleError } from "@/lib/server/handleError";
 import { sendInvitationDeclinedEmail } from "@/lib/server/resend/emails/InvitationDeclined";
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
 	try {
 		// 1. Find user
 		const user = await getCurrentUser();
-		if (!user) throw new ForbiddenError("Unauthorized");
+		if (!user) throw new UnauthorizedError("Unauthenticated");
 
 		// 2. Validate and sanitize body
 		const { token } = await invitationTokenSchema.parseAsync(await req.json());
