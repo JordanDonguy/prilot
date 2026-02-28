@@ -5,6 +5,7 @@ import {
 	type ReactNode,
 	useContext,
 	useEffect,
+	useRef,
 	useState,
 } from "react";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
@@ -26,6 +27,7 @@ interface UserProviderProps {
 export function UserProvider({ children }: UserProviderProps) {
 	const [user, setUser] = useState<IUser | null>(null);
 	const [loading, setLoading] = useState(true);
+	const hasFetchedRef = useRef(false);
 
 	const fetchUser = async () => {
 		// Fetch user with automatic token refresh on 401
@@ -47,8 +49,11 @@ export function UserProvider({ children }: UserProviderProps) {
 		setLoading(false);
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: we only want to run this on mount
+	// Fetch on mount only (ref prevents StrictMode double-fetch)
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only fetch
 	useEffect(() => {
+		if (hasFetchedRef.current) return;
+		hasFetchedRef.current = true;
 		refreshUser();
 	}, []);
 
