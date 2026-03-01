@@ -1,7 +1,7 @@
 import type { IGitHubFile } from "@/types/commits";
 
 /**
- * Prepares a file diff for AI summarization.
+ * Prepares a file diff for AI processing.
  *
  * Returns an object:
  * {
