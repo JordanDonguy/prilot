@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import LoginSkeleton from "@/components/LoginSkeleton";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import ThemeSwitcher from "@/components/navbar/ThemeSwitcher";
+import LoginSkeleton from "@/components/ui/LoginSkeleton";
 import { useUser } from "@/contexts/UserContext";
 
 export default function ForgotPasswordPage() {

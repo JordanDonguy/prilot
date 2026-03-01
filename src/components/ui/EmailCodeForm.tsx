@@ -1,5 +1,5 @@
 import { Mail } from "lucide-react";
-import FormInput from "@/components/FormInput";
+import FormInput from "./FormInput";
 
 interface EmailCodeFormProps {
 	email: string;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useCreditsStore } from "@/stores/creditsStore";
-import LogoutButton from "./LogoutButton";
+import LogoutButton from "../buttons/LogoutButton";
 import ThemeSwitcher from "./ThemeSwitcher";
 
 interface NavbarUserButtonProps {

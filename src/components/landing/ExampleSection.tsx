@@ -5,7 +5,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
-import { Card } from "@/components/Card";
+import { Card } from "@/components/ui/Card";
 
 const PR_DESCRIPTION = `## Description
 

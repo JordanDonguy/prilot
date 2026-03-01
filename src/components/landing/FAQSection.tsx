@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
-import { Card } from "@/components/Card";
+import { Card } from "@/components/ui/Card";
 
 type FAQItem = {
 	question: string;

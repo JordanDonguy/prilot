@@ -6,8 +6,8 @@ import ReactMarkdown from "react-markdown";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
-import { Card } from "@/components/Card";
 import LandingCTA from "@/components/landing/LandingCTA";
+import { Card } from "@/components/ui/Card";
 
 const PR_DESCRIPTION = `## Description
 

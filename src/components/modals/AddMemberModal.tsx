@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
-import { Button } from "./Button";
+import { Button } from "../buttons/Button";
 import { Modal } from "./Modal";
 
 type AddMemberModalProps = {

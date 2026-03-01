@@ -1,4 +1,4 @@
-import { CustomLink } from "@/components/CustomLink";
+import { CustomLink } from "@/components/ui/CustomLink";
 
 export default function LandingCTA({
 	animated = true,

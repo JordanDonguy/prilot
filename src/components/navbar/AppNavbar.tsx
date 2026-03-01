@@ -19,10 +19,10 @@ import { useRepos } from "@/contexts/ReposContext";
 import { config } from "@/lib/client/config";
 import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import type { IInvitation } from "@/types/repos";
-import GithubAppButton from "./GithubAppButton";
+import GithubAppButton from "../buttons/GithubAppButton";
+import { PendingInviteModal } from "../modals/PendingInviteModal";
 import NavbarMobileMenu from "./NavbarMobileMenu";
 import NavbarUserButton from "./NavbarUserButton";
-import { PendingInviteModal } from "./PendingInviteModal";
 
 export default function AppNavbar() {
 	const pathname = usePathname();

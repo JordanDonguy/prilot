@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowBigLeftDash } from "lucide-react";
-import AnimatedOpacity from "./animations/AnimatedOpacity";
+import AnimatedOpacity from "../animations/AnimatedOpacity";
 
 export default function PREditorSkeleton() {
 	return (

@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: Ok to use index for key for skeleton component */
-import { Card, CardContent, CardHeader } from "@/components/Card";
+import { Card, CardContent, CardHeader } from "./Card";
 
 export default function DashboardSkeleton() {
 	return (

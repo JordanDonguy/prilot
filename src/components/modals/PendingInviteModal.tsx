@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { useRepos } from "@/contexts/ReposContext";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import type { IInvitation } from "@/types/repos";
-import { Button } from "./Button";
+import { Button } from "../buttons/Button";
 import { Modal } from "./Modal";
 
 type PendingInviteModalProps = {

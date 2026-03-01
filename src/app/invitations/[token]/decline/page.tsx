@@ -1,4 +1,4 @@
-import { InvitationActionPage } from "@/components/InvitationActionPage";
+import { InvitationActionPage } from "@/components/ui/InvitationActionPage";
 
 export default function DeclineInvitationPage() {
 	return (

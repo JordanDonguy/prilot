@@ -16,8 +16,12 @@ import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
-import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/buttons/Button";
+import { ConfirmDeletePRModal } from "@/components/modals/ConfirmDeletePRModal";
+import { DeleteRepoModal } from "@/components/modals/DeleteRepoModal";
+import { LeaveRepoModal } from "@/components/modals/LeaveRepoModal";
+import { PRFilterModal } from "@/components/modals/PRFilterModal";
+import { Badge } from "@/components/ui/Badge";
 import {
 	Card,
 	CardContent,
@@ -25,14 +29,10 @@ import {
 	CardHeader,
 	CardTitle,
 	StatCard,
-} from "@/components/Card";
-import { ConfirmDeletePRModal } from "@/components/ConfirmDeletePRModal";
-import { DeleteRepoModal } from "@/components/DeleteRepoModal";
-import { LeaveRepoModal } from "@/components/LeaveRepoModal";
-import { PRListItem } from "@/components/ListItem";
-import { PRFilterModal } from "@/components/PRFilterModal";
-import { RepoAccessWarning } from "@/components/RepoAccessWarning";
-import RepoSkeleton from "@/components/RepoSkeleton";
+} from "@/components/ui/Card";
+import { PRListItem } from "@/components/ui/ListItem";
+import { RepoAccessWarning } from "@/components/ui/RepoAccessWarning";
+import RepoSkeleton from "@/components/ui/RepoSkeleton";
 import { useRepos } from "@/contexts/ReposContext";
 import { useFetchPRs } from "@/hooks/useFetchPRs";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";

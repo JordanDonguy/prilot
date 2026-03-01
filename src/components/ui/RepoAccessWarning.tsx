@@ -2,7 +2,7 @@
 
 import { AlertCircle, ExternalLink, LogOut, Trash2 } from "lucide-react";
 import { config } from "@/lib/client/config";
-import AnimatedSlide from "./animations/AnimatedSlide";
+import AnimatedSlide from "../animations/AnimatedSlide";
 
 interface RepoAccessWarningProps {
 	userRole: "owner" | "member";

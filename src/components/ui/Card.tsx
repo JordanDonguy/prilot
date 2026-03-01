@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import AnimatedScale from "./animations/AnimatedScale";
+import AnimatedScale from "../animations/AnimatedScale";
 
 interface CardProps {
 	children: ReactNode;
