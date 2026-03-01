@@ -5,7 +5,7 @@ import { branchSchema } from "@/lib/schemas/branch.schema";
 import { uuidParam } from "@/lib/schemas/id.schema";
 import { languageSchema } from "@/lib/schemas/pr.schema";
 import { cerebras } from "@/lib/server/ai/client";
-import { buildPRFromDiffs } from "@/lib/server/ai/prompt";
+import { buildPRFromDiffs, fixDescriptionHeaders } from "@/lib/server/ai/prompt";
 import { createSSEResponse, streamCerebrasTokens } from "@/lib/server/ai/streamSSE";
 import { summarizeDiffsForPR } from "@/lib/server/ai/summarizeFileDiffs";
 import {
@@ -14,7 +14,7 @@ import {
 	NotFoundError,
 	UnauthorizedError,
 } from "@/lib/server/error";
-import { getFileDiffs } from "@/lib/server/github/fileDiffs";
+import { getCompareData } from "@/lib/server/github/compare";
 import { handleError } from "@/lib/server/handleError";
 import { redis } from "@/lib/server/redis/client";
 import { buildCompareCacheKey, buildSummaryCacheKey } from "@/lib/server/redis/compareCacheKey";
@@ -81,11 +81,12 @@ export async function POST(
 			throw new ForbiddenError("You are not a member of this repository");
 		}
 
-		// 6. Fetch file diffs (try prefetch cache first, fall back to GitHub)
+		// 6. Fetch file diffs + commits (try prefetch cache first, fall back to GitHub)
 		const t0 = performance.now();
 		const cacheKey = buildCompareCacheKey(repoId, safeBase, safeCompare);
 
-		let files: Awaited<ReturnType<typeof getFileDiffs>>;
+		let files: Awaited<ReturnType<typeof getCompareData>>["files"];
+		let commits: string[] = [];
 		let cacheHit = false;
 
 		try {
@@ -93,6 +94,9 @@ export async function POST(
 			if (cached) {
 				const data = JSON.parse(typeof cached === "string" ? cached : JSON.stringify(cached));
 				files = data.files;
+				if (data.commits?.length) {
+					commits = data.commits;
+				}
 				cacheHit = true;
 			}
 		} catch {
@@ -105,13 +109,15 @@ export async function POST(
 			);
 			rateLimitOrThrow(ghLimit);
 
-			files = await getFileDiffs(
+			const compareData = await getCompareData(
 				repo.installation.installationId,
 				repo.owner,
 				repo.name,
 				safeBase,
 				safeCompare,
 			);
+			files = compareData.files;
+			commits = compareData.commits;
 		}
 
 		const t1 = performance.now();
@@ -194,7 +200,7 @@ export async function POST(
 
 		// 10. PR generation (stage 2) — streamed via SSE
 		return createSSEResponse(async (send) => {
-			async function streamGeneration(): Promise<string> {
+			async function streamGeneration() {
 				const completion = await cerebras.chat.completions.create({
 					model: "gpt-oss-120b",
 					messages: [
@@ -204,7 +210,7 @@ export async function POST(
 						},
 						{
 							role: "user",
-							content: `File diffs summary: ${diffSummaries}`,
+							content: `File diffs summary:\n${diffSummaries}${commits.length > 0 ? `\n\nCommit messages:\n${commits.map((c) => `- ${c}`).join("\n")}` : ""}`,
 						},
 					],
 					response_format: {
@@ -215,6 +221,8 @@ export async function POST(
 						},
 					},
 					stream: true,
+					temperature: 0.4,
+					reasoning_effort: "low",
 				});
 
 				return streamCerebrasTokens(completion, send);
@@ -222,12 +230,12 @@ export async function POST(
 
 			// First attempt
 			const t4 = performance.now();
-			let rawJson = await streamGeneration();
+			let result = await streamGeneration();
 			console.log(
-				`[DEEP] PR generation streamed (Cerebras): ${(performance.now() - t4).toFixed(0)}ms`,
+				`[DEEP] PR generation streamed (Cerebras): ${(performance.now() - t4).toFixed(0)}ms | tokens: ${result.usage?.promptTokens ?? "?"}in/${result.usage?.completionTokens ?? "?"}out/${result.usage?.totalTokens ?? "?"}total`,
 			);
 
-			let parsed = JSON.parse(rawJson) as IPRResponse;
+			let parsed = JSON.parse(result.text) as IPRResponse;
 
 			// Retry if description is too short
 			if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
@@ -237,12 +245,12 @@ export async function POST(
 				send("retry", {});
 
 				const t6 = performance.now();
-				rawJson = await streamGeneration();
+				result = await streamGeneration();
 				console.log(
-					`[DEEP] PR generation retry streamed: ${(performance.now() - t6).toFixed(0)}ms`,
+					`[DEEP] PR generation retry streamed: ${(performance.now() - t6).toFixed(0)}ms | tokens: ${result.usage?.promptTokens ?? "?"}in/${result.usage?.completionTokens ?? "?"}out/${result.usage?.totalTokens ?? "?"}total`,
 				);
 
-				parsed = JSON.parse(rawJson) as IPRResponse;
+				parsed = JSON.parse(result.text) as IPRResponse;
 
 				if (parsed.description.length < MIN_DESCRIPTION_LENGTH) {
 					send("error", {
@@ -257,6 +265,7 @@ export async function POST(
 			const weeklyLimit =
 				await aiLimiterPerWeek.limit(weeklyLimitKey);
 
+			parsed.description = fixDescriptionHeaders(parsed.description);
 			const response: IPRResponse = { ...parsed };
 			if (user.id === owner.userId) {
 				response.rateLimit = {

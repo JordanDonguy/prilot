@@ -5,7 +5,7 @@ import { branchSchema } from "@/lib/schemas/branch.schema";
 import { uuidParam } from "@/lib/schemas/id.schema";
 import { languageSchema } from "@/lib/schemas/pr.schema";
 import { cerebras } from "@/lib/server/ai/client";
-import { buildPRFromCommits } from "@/lib/server/ai/prompt";
+import { buildPRFromCommits, fixDescriptionHeaders } from "@/lib/server/ai/prompt";
 import { createSSEResponse, streamCerebrasTokens } from "@/lib/server/ai/streamSSE";
 import {
 	BadRequestError,
@@ -13,7 +13,7 @@ import {
 	NotFoundError,
 	UnauthorizedError,
 } from "@/lib/server/error";
-import { getCommitMessages } from "@/lib/server/github/commits";
+import { getCompareData } from "@/lib/server/github/compare";
 import { handleError } from "@/lib/server/handleError";
 import { redis } from "@/lib/server/redis/client";
 import { buildCompareCacheKey } from "@/lib/server/redis/compareCacheKey";
@@ -104,13 +104,14 @@ export async function POST(
 			);
 			rateLimitOrThrow(ghLimit);
 
-			commits = await getCommitMessages(
+			const compareData = await getCompareData(
 				repo.installation.installationId,
 				repo.owner,
 				repo.name,
 				safeBase,
 				safeCompare,
 			);
+			commits = compareData.commits;
 		}
 
 		console.log(`[FAST] Commits: ${cacheHit ? "cache hit" : "GitHub fetch"} (${commits.length} commits)`);
@@ -180,18 +181,21 @@ export async function POST(
 					},
 				},
 				stream: true,
+				reasoning_effort: "low",
+				temperature: 0.4,
 			});
 
-			const accumulated = await streamCerebrasTokens(completion, send);
+			const { text, usage } = await streamCerebrasTokens(completion, send);
 			console.log(
-				`[FAST] PR generation streamed (Cerebras): ${(performance.now() - t0).toFixed(0)}ms`,
+				`[FAST] PR generation streamed (Cerebras): ${(performance.now() - t0).toFixed(0)}ms | tokens: ${usage?.promptTokens ?? "?"}in/${usage?.completionTokens ?? "?"}out/${usage?.totalTokens ?? "?"}total`,
 			);
 
-			const parsed = JSON.parse(accumulated) as IPRResponse;
+			const parsed = JSON.parse(text) as IPRResponse;
 
 			// Success — consume weekly rate limit credit
 			const weeklyLimit = await aiLimiterPerWeek.limit(weeklyLimitKey);
 
+			parsed.description = fixDescriptionHeaders(parsed.description);
 			const response: IPRResponse = { ...parsed };
 			if (user.id === owner.userId) {
 				response.rateLimit = {
