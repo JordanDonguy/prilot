@@ -2,8 +2,8 @@
 
 import { Code, Eye, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { AutoResizeTextarea } from "./AutoResizeTextArea";
-import { Card } from "./Card";
+import { AutoResizeTextarea } from "./ui/AutoResizeTextArea";
+import { Card } from "./ui/Card";
 
 type PREditorProps = {
 	title: string | undefined;

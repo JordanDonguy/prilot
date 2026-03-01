@@ -23,9 +23,9 @@ import { config } from "@/lib/client/config";
 import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { useCreditsStore } from "@/stores/creditsStore";
 import type { IInvitation } from "@/types/repos";
-import AnimatedSlide from "./animations/AnimatedSlide";
-import GithubAppButton from "./GithubAppButton";
-import LogoutButton from "./LogoutButton";
+import AnimatedSlide from "../animations/AnimatedSlide";
+import GithubAppButton from "../buttons/GithubAppButton";
+import LogoutButton from "../buttons/LogoutButton";
 import ThemeSwitcher from "./ThemeSwitcher";
 
 interface NavbarMobileMenuProps {

@@ -6,10 +6,10 @@ import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedScale from "@/components/animations/AnimatedScale";
-import { Button } from "@/components/Button";
-import { Card, CardContent, CardHeader } from "@/components/Card";
+import { Button } from "@/components/buttons/Button";
 import { useUser } from "@/contexts/UserContext";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { Card, CardContent, CardHeader } from "./Card";
 
 type InvitationActionPageProps = {
 	title: string;

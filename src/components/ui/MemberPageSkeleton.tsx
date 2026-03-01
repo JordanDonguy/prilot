@@ -1,6 +1,7 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: Ok to use index for key for skeleton component */
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card";
-import AnimatedOpacity from "./animations/AnimatedOpacity";
+
+import AnimatedOpacity from "../animations/AnimatedOpacity";
+import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 
 export default function MemberPageSkeleton() {
   return (

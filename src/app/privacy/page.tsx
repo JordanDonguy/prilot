@@ -1,4 +1,4 @@
-import AdaptiveNavbar from "@/components/AdaptiveNavbar";
+import AdaptiveNavbar from "@/components/navbar/AdaptiveNavbar";
 
 export const metadata = {
 	title: "Privacy Policy – PRilot",

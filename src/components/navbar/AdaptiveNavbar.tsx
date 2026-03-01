@@ -13,8 +13,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
-import AnimatedSlide from "./animations/AnimatedSlide";
-import LandingCTA from "./landing/LandingCTA";
+import AnimatedSlide from "../animations/AnimatedSlide";
+import LandingCTA from "../landing/LandingCTA";
 import NavbarUserButton from "./NavbarUserButton";
 import ThemeSwitcher from "./ThemeSwitcher";
 

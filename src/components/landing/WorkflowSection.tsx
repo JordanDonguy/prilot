@@ -1,7 +1,7 @@
 import { Clock, Zap } from "lucide-react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
-import { Card } from "@/components/Card";
+import { Card } from "@/components/ui/Card";
 
 export default function WorkflowSection() {
 	return (

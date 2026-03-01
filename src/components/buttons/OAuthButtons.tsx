@@ -1,6 +1,6 @@
 import { Gitlab } from "lucide-react";
 import { toast } from "react-toastify";
-import GithubButton from "@/components/GithubButton";
+import GithubButton from "./GithubButton";
 
 export default function OAuthButtons() {
 	return (

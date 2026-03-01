@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { Button } from "@/components/Button";
-import { GeneratingText } from "@/components/GeneratingText";
+import { Button } from "@/components/buttons/Button";
 import { PREditor } from "@/components/PREditor";
-import PREditorSkeleton from "@/components/PREditorSkeleton";
-import { BranchSelect, LanguageSelect } from "@/components/Select";
+import { GeneratingText } from "@/components/ui/GeneratingText";
+import PREditorSkeleton from "@/components/ui/PREditorSkeleton";
+import { BranchSelect, LanguageSelect } from "@/components/ui/Select";
 import { useAutoSavePR } from "@/hooks/useAutoSavePR";
 import { useFetchPR } from "@/hooks/useFetchPR";
 import { useGeneratePR } from "@/hooks/useGeneratePR";
@@ -18,8 +18,8 @@ import { useRepository } from "@/hooks/useRepository";
 import { useSendPR } from "@/hooks/useSendPR";
 import type { PRLanguage } from "@/types/languages";
 import AnimatedSlide from "./animations/AnimatedSlide";
+import { PRModeModal } from "./modals/PRmodeModal";
 import { PRGenerationModeSelector } from "./PRGenerationModeSelector";
-import { PRModeModal } from "./PRmodeModal";
 
 interface PREditorProps {
 	repoId: string;

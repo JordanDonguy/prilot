@@ -1,6 +1,6 @@
 import { CheckCircle, Clock, Users, Zap } from "lucide-react";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
-import { Card } from "@/components/Card";
+import { Card } from "@/components/ui/Card";
 
 const benefits = [
 	{

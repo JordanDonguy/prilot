@@ -1,4 +1,4 @@
-import OtpInput from "@/components/OtpInput";
+import OtpInput from "./OtpInput";
 
 interface CodeVerificationProps {
 	email: string;

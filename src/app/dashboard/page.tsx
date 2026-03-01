@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
+import GithubAppButton from "@/components/buttons/GithubAppButton";
 import {
 	Card,
 	CardContent,
@@ -18,13 +19,12 @@ import {
 	CardHeader,
 	CardTitle,
 	StatCard,
-} from "@/components/Card";
-import DashboardSkeleton from "@/components/DashboardSkeleton";
-import GithubAppButton from "@/components/GithubAppButton";
+} from "@/components/ui/Card";
+import DashboardSkeleton from "@/components/ui/DashboardSkeleton";
 import {
 	DashboardPRListItem,
 	DashboardRepoListItem,
-} from "@/components/ListItem";
+} from "@/components/ui/ListItem";
 import { useInstallations } from "@/contexts/InstallationContext";
 import { useRepos } from "@/contexts/ReposContext";
 import { usePrefetchRepos } from "@/hooks/usePrefetchRepos";

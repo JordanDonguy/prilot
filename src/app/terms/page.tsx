@@ -1,5 +1,5 @@
 import Link from "next/link";
-import AdaptiveNavbar from "@/components/AdaptiveNavbar";
+import AdaptiveNavbar from "@/components/navbar/AdaptiveNavbar";
 
 export const metadata = {
 	title: "Terms of Service – PRilot",

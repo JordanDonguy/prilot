@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import LandingCTA from "@/components/landing/LandingCTA";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import ThemeSwitcher from "@/components/navbar/ThemeSwitcher";
 
 const navLinks = [
 	{ label: "Features", href: "#features" },

@@ -2,11 +2,11 @@
 
 import { ArrowRight, Edit, GitPullRequest, Send, Sparkles, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/Badge";
 import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import type { Member } from "@/types/members";
-import AnimatedScale from "./animations/AnimatedScale";
+import AnimatedScale from "../animations/AnimatedScale";
+import { Badge } from "./Badge";
 
 // ------------------------------------
 // ------ Dashboard PR List item ------

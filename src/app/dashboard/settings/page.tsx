@@ -5,16 +5,16 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
+import { ConnectButton } from "@/components/buttons/ConnectButton";
+import GithubAppButton from "@/components/buttons/GithubAppButton";
+import { PasswordModal } from "@/components/modals/PasswordModal";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/Card";
-import { ConnectButton } from "@/components/ConnectButton";
-import GithubAppButton from "@/components/GithubAppButton";
-import { PasswordModal } from "@/components/PasswordModal";
+} from "@/components/ui/Card";
 import { useInstallations } from "@/contexts/InstallationContext";
 import { useUser } from "@/contexts/UserContext";
 import { config } from "@/lib/client/config";

@@ -4,21 +4,21 @@ import { LogOut, UserPlus } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { AddMemberModal } from "@/components/AddMemberModal";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
-import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/buttons/Button";
+import { AddMemberModal } from "@/components/modals/AddMemberModal";
+import { DeleteMemberModal } from "@/components/modals/DeleteMemberModal";
+import { LeaveRepoModal } from "@/components/modals/LeaveRepoModal";
+import { Badge } from "@/components/ui/Badge";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/Card";
-import { DeleteMemberModal } from "@/components/DeleteMemberModal";
-import { LeaveRepoModal } from "@/components/LeaveRepoModal";
-import { MemberListItem } from "@/components/ListItem";
-import MemberPageSkeleton from "@/components/MemberPageSkeleton";
+} from "@/components/ui/Card";
+import { MemberListItem } from "@/components/ui/ListItem";
+import MemberPageSkeleton from "@/components/ui/MemberPageSkeleton";
 import { useRepos } from "@/contexts/ReposContext";
 import { useUser } from "@/contexts/UserContext";
 import { useRepository } from "@/hooks/useRepository";

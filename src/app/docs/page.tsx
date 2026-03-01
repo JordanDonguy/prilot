@@ -1,5 +1,5 @@
-import AdaptiveNavbar from "@/components/AdaptiveNavbar";
-import DocsSidebar from "@/components/DocsSidebar";
+import AdaptiveNavbar from "@/components/navbar/AdaptiveNavbar";
+import DocsSidebar from "@/components/navbar/DocsSidebar";
 
 export const metadata = {
 	title: "Documentation – PRilot",
