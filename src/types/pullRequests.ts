@@ -31,7 +31,7 @@ export interface IPRResponse {
 	title: string;
 	description: string;
 	rateLimit?: {
-		weeklyRemaining: number;
-		weeklyReset: number;
+		monthlyRemaining: number;
+		monthlyReset: number;
 	};
 }
