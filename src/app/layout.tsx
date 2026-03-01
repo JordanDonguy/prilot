@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import "./globals.css";
-import AppProvider from "./providers";
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import AppProvider from "./providers";
 
 const figtree = Figtree({
 	variable: "--font-figtree",
@@ -46,6 +47,7 @@ export default function RootLayout({
 			<body className={`${figtree.variable} antialiased`}>
 				<AppProvider>{children}</AppProvider>
         <Analytics />
+        <SpeedInsights />
 			</body>
 		</html>
 	);
