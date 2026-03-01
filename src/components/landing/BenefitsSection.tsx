@@ -22,10 +22,10 @@ const benefits = [
 const stats = [
 	{
 		icon: Clock,
-		value: "3 Hours Saved",
-		valueShort: "3 Hours Saved",
-		description: "Every week on average",
-		descriptionLong: "On average for each developer of a team",
+		value: "3+ Hours Saved",
+		valueShort: "3+ Hours Saved",
+		description: "Every month on average",
+		descriptionLong: "Per month for each developer of a team",
 		color: "blue",
 	},
 	{
@@ -36,8 +36,8 @@ const stats = [
 	},
 	{
 		icon: Zap,
-		value: "< 10 Seconds",
-		description: "Average Fast mode generation time",
+		value: "< 2 Seconds",
+		description: "Time it takes for PRilot to generate a PR",
 		color: "green",
 	},
 ];

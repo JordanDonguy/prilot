@@ -29,7 +29,7 @@ const features = [
 		icon: GitBranch,
 		title: "Seamless Provider Integration",
 		description:
-			"Connect your GitHub or GitLab account and PRilot handles everything: fetching branch diffs, analyzing changes, and sending pull requests directly to your repository. No copy-pasting or fiddling required.",
+			"Connect your GitHub account and PRilot handles everything: fetching branch diffs, analyzing changes, and sending pull requests directly to your repository. GitLab support is coming soon.",
 		color: "green",
 	},
 ];
