@@ -12,7 +12,7 @@ import AnimatedOpacity from "@/components/animations/AnimatedOpacity";
 import AnimatedScale from "@/components/animations/AnimatedScale";
 import AnimatedSlide from "@/components/animations/AnimatedSlide";
 import GithubAppButton from "@/components/buttons/GithubAppButton";
-import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
+import LoadingSpinner from "@/components/skeletons/LoadingSpinner";
 import {
 	Card,
 	CardContent,
@@ -141,7 +141,12 @@ export default function DashboardPage() {
 		return `${pct > 0 ? "+" : ""}${pct}% vs last week`;
 	})();
 
-	if (reposLoading) return <DashboardSkeleton />;
+	if (reposLoading)
+		return (
+			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+				<LoadingSpinner />
+			</div>
+		);
 
 	return (
 		<div className="p-6 space-y-6 fade-in-fast">
