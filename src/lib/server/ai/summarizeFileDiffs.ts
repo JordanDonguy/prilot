@@ -6,8 +6,8 @@ import { TooManyRequestsError } from "../error";
 
 /**
  * Call AI to summarize one file diffs
- * Use smaller model (Llama 3) if patch changes are under ~250 tokens length
- * Else use a bigger model (Llama 4 Scout)
+ * Use smaller model (Llama 3) if patch changes are under ~500 tokens length
+ * Else use a bigger model (GPT OSS 120B)
  */
 async function summarizeFileDiff(patch: string): Promise<string> {
 	const completion = await cerebras.chat.completions.create({
