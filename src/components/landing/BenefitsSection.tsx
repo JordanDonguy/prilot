@@ -80,7 +80,7 @@ export default function BenefitsSection() {
 
 				{/* Stats Cards */}
 				<AnimatedSlide x={30} triggerOnView amount={0.3}>
-					<div className="bg-white/30 dark:bg-gray-800/50 rounded-3xl flex flex-col justify-center gap-6 p-4 py-8 md:p-8 shadow-lg border border-gray-300/40 dark:border-gray-800/50">
+					<div className="bg-white/30 dark:bg-gray-800/50 rounded-3xl flex flex-col justify-center gap-6 p-4 py-8 md:p-8 shadow-lg dark:shadow-none border border-gray-300/40 dark:border-gray-800/50">
 						{stats.map((stat) => {
 							const Icon = stat.icon;
 							const isBlue = stat.color === "blue";

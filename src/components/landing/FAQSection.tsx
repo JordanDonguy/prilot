@@ -137,7 +137,7 @@ export default function FAQSection() {
 	return (
 		<section
 			id="faq"
-			className="min-h-screen py-20 bg-linear-to-b from-white to-slate-100/80 dark:from-gray-950 dark:to-[#13131d]"
+			className="min-h-screen py-20 bg-white dark:bg-[#0A0A0D]"
 		>
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 				<AnimatedOpacity>
