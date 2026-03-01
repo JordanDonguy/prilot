@@ -14,7 +14,7 @@ interface CreditsStore {
 
 export const useCreditsStore = create<CreditsStore>((set, get) => ({
 	remaining: null,
-	total: 20,
+	total: 30,
 	reset: null,
 	loading: false,
 

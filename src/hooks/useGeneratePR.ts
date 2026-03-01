@@ -9,8 +9,8 @@ interface GeneratePRResponse {
 	title: string;
 	description: string;
 	rateLimit?: {
-		weeklyRemaining: number;
-		weeklyReset: number;
+		monthlyRemaining: number;
+		monthlyReset: number;
 	};
 }
 
@@ -183,9 +183,9 @@ export function useGeneratePR({
 			// Sync credits locally — rateLimit is only returned when the current user is the repo owner
 			if (finalResult.rateLimit) {
 				setCredits({
-					remaining: finalResult.rateLimit.weeklyRemaining,
-					total: 20,
-					reset: finalResult.rateLimit.weeklyReset,
+					remaining: finalResult.rateLimit.monthlyRemaining,
+					total: 30,
+					reset: finalResult.rateLimit.monthlyReset,
 				});
 			}
 
