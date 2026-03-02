@@ -151,14 +151,14 @@ export default function RepositoryPage() {
 						triggerOnView={false}
 						className="grid grid-cols-2 md:flex gap-3 mt-4 md:mt-0 w-full md:w-fit"
 					>
-						<Link href={`/dashboard/repo/${id}/members`} className="w-full">
+						<Link href={`/dashboard/repo/${id}/members`} prefetch={false} className="w-full">
 							<Button className="w-full md:w-28 bg-gray-200 dark:bg-gray-900 shadow-md border border-gray-300 dark:border-gray-800 hover:bg-gray-300 hover:dark:bg-gray-700">
 								<Users className="w-4 h-4 mr-2" />
 								Members
 							</Button>
 						</Link>
 						{repo.isAccessible ? (
-							<Link href={`/dashboard/repo/${id}/pr/new`} className="w-full">
+							<Link href={`/dashboard/repo/${id}/pr/new`} prefetch={false} className="w-full">
 								<Button className="w-full md:w-30 bg-gray-900 text-white shadow-md dark:bg-gray-200 dark:text-black hover:bg-gray-700 hover:dark:bg-gray-400 group">
 									<Plus className="w-4 h-4 mr-2 group-hover:rotate-90 duration-250" />
 									Generate PR
