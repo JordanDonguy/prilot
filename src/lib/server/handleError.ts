@@ -7,13 +7,13 @@ import { HttpError, TooManyRequestsError } from "./error";
 export function handleError(error: unknown) {
 	// Zod
 	if (error instanceof ZodError) {
-		console.info(error);
+		console.warn("[validation]", error.flatten());
 		return NextResponse.json({ error: error.flatten() }, { status: 422 });
 	}
 
 	// Rate limit (needs Retry-After)
 	if (error instanceof TooManyRequestsError) {
-		console.info(error);
+		console.warn("[rate-limit]", error.message);
 		return NextResponse.json(
 			{ error: error.message },
 			{
@@ -27,7 +27,11 @@ export function handleError(error: unknown) {
 
 	// Custom HTTP error
 	if (error instanceof HttpError) {
-		console.info(error);
+		if (error.status >= 500) {
+			console.error(`[http ${error.status}]`, error.message);
+		} else {
+			console.warn(`[http ${error.status}]`, error.message);
+		}
 		return NextResponse.json(
 			{ error: error.message },
 			{ status: error.status },
@@ -35,7 +39,7 @@ export function handleError(error: unknown) {
 	}
 
 	// Unknown
-	console.error(error);
+	console.error("[unhandled]", error);
 	return NextResponse.json(
 		{ error: "Unexpected server error" },
 		{ status: 500 },

@@ -15,6 +15,7 @@ export async function POST() {
     const refreshToken = cookieStore.get("refreshToken")?.value;
 
     if (!refreshToken) {
+      console.error("[refresh] No refresh token cookie found");
       return NextResponse.json({ error: "No refresh token" }, { status: 401 });
     }
 
@@ -23,7 +24,13 @@ export async function POST() {
       where: { token: refreshToken },
     });
 
-    if (!stored || stored.expiresAt < new Date()) {
+    if (!stored) {
+      console.error("[refresh] Token not found in database (possibly rotated)");
+      return NextResponse.json({ error: "Refresh token expired" }, { status: 401 });
+    }
+
+    if (stored.expiresAt < new Date()) {
+      console.error("[refresh] Token expired in database, userId:", stored.userId);
       return NextResponse.json({ error: "Refresh token expired" }, { status: 401 });
     }
 
