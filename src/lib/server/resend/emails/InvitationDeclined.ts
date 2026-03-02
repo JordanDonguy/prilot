@@ -34,7 +34,7 @@ export async function sendInvitationDeclinedEmail({
   });
 
   return resend.emails.send({
-    from: `${config.appName} <notify@${config.domainName}>`,
+    from: `${config.appName} <noreply@${config.domainName}>`,
     to,
     subject: `${safeDeclinedBy} declined your invitation to ${safeRepoName}`,
     html,

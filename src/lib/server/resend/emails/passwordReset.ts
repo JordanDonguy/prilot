@@ -50,7 +50,7 @@ export async function sendPasswordResetEmail({
 	});
 
 	return resend.emails.send({
-		from: `${config.appName} <security@${config.domainName}>`,
+		from: `${config.appName} <noreply@${config.domainName}>`,
 		to,
 		subject: "Reset your password",
 		html,

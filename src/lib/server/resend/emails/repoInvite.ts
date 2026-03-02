@@ -68,7 +68,7 @@ export async function sendRepoInviteEmail({
 	});
 
 	return resend.emails.send({
-		from: `${config.appName} <invite@${config.domainName}>`,
+		from: `${config.appName} <noreply@${config.domainName}>`,
 		to,
 		subject: `You’ve been invited by ${safeOwner} to join ${safeRepoName}`,
 		html,

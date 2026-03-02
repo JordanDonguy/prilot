@@ -29,7 +29,7 @@ export async function sendMemberJoinedEmail({
   });
 
   return resend.emails.send({
-    from: `${config.appName} <notify@${config.domainName}>`,
+    from: `${config.appName} <noreply@${config.domainName}>`,
     to,
     subject: `${safeUsername} joined ${safeRepoName}`,
     html,

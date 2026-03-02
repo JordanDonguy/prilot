@@ -49,7 +49,7 @@ export async function sendVerificationCodeEmail({
 	});
 
 	return resend.emails.send({
-		from: `${config.appName} <security@${config.domainName}>`,
+		from: `${config.appName} <noreply@${config.domainName}>`,
 		to,
 		subject: `${config.appName} : Your sign-in code`,
 		html,
