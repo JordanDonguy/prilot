@@ -2,7 +2,7 @@
 export default function LoginSkeleton() {
 	return (
 		<div className="flex justify-center items-center min-h-screen bg-linear-to-b from-blue-100 to-white dark:from-zinc-950 dark:to-[#13131d]">
-			<div className="fade-in animate-pulse max-w-md w-full p-8 border border-gray-300 dark:border-gray-700 rounded-2xl text-center shadow-md bg-white/40 dark:bg-zinc-900/25 space-y-6">
+			<div className="animate-pulse max-w-md w-full p-8 border border-gray-300 dark:border-gray-700 rounded-2xl text-center shadow-md bg-white/40 dark:bg-zinc-900/25 space-y-6">
 				{/* Top links */}
 				<div className="flex justify-between items-center w-full max-w-md mb-8">
 					<div className="h-4 w-12 bg-gray-300 dark:bg-gray-700 rounded"></div>

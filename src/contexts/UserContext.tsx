@@ -45,8 +45,13 @@ export function UserProvider({ children }: UserProviderProps) {
   // Function to refresh user data
 	const refreshUser = async () => {
 		setLoading(true);
-		await fetchUser();
-		setLoading(false);
+		try {
+			await fetchUser();
+		} catch {
+			setUser(null);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	// Fetch on mount only (ref prevents StrictMode double-fetch)
