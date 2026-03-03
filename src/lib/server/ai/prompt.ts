@@ -61,6 +61,7 @@ Do NOT mention commit scopes (e.g., feat(useAuth), fix, chore(deps)).
 Write ENTIRELY in ${language}, including title and all section headers.
 
 Your task is to write a PR based **only on the commit messages below**.
+Give equal weight to ALL commits — early, middle, and late. Do not over-represent the first commits.
 
 Generate JSON with "title" and "description":
 
