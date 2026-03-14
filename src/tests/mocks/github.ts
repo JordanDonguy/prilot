@@ -4,3 +4,8 @@ import { vi } from "vitest";
 vi.mock("@/lib/server/github/client", () => ({
 	githubFetch: vi.fn(),
 }));
+
+// GitHub compare — used by compare-commits route
+vi.mock("@/lib/server/github/compare", () => ({
+	getCompareData: vi.fn().mockResolvedValue({ commits: [] }),
+}));
