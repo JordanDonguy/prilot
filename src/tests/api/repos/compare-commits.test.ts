@@ -2,16 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/repos/[repoId]/compare-commits/github/route";
 import { getCompareData } from "@/lib/server/github/compare";
 import { getCurrentUser } from "@/lib/server/session";
-import { testPrisma } from "@/tests/db";
 import { seedRepo } from "@/tests/helpers/repo";
 import { buildParams, buildRequest, parseJson } from "@/tests/helpers/request";
-import { mockUser } from "@/tests/helpers/user";
-
-async function seedUser(email = "user@example.com", username = "testuser") {
-	return testPrisma.user.create({
-		data: { email, username, password: "hashed" },
-	});
-}
+import { mockUser, seedUser } from "@/tests/helpers/user";
 
 describe("GET /api/repos/[repoId]/compare-commits/github", () => {
 	function buildCompareRequest(repoId: string, base = "main", compare = "feature") {

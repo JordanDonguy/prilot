@@ -4,13 +4,7 @@ import { getCurrentUser } from "@/lib/server/session";
 import { testPrisma } from "@/tests/db";
 import { seedRepo } from "@/tests/helpers/repo";
 import { buildParams, buildRequest, parseJson } from "@/tests/helpers/request";
-import { mockUser } from "@/tests/helpers/user";
-
-async function seedUser(email = "owner@example.com", username = "owner") {
-	return testPrisma.user.create({
-		data: { email, username, password: "hashed" },
-	});
-}
+import { mockUser, seedUser } from "@/tests/helpers/user";
 
 describe("POST /api/repos/[repoId]/invitations", () => {
 	it("creates an invitation and returns 200", async () => {

@@ -4,13 +4,7 @@ import { getCurrentUser } from "@/lib/server/session";
 import { testPrisma } from "@/tests/db";
 import { seedPullRequest, seedRepo } from "@/tests/helpers/repo";
 import { buildParams, buildRequest, parseJson } from "@/tests/helpers/request";
-import { mockUser } from "@/tests/helpers/user";
-
-async function seedUser(email = "user@example.com", username = "testuser") {
-	return testPrisma.user.create({
-		data: { email, username, password: "hashed" },
-	});
-}
+import { mockUser, seedUser } from "@/tests/helpers/user";
 
 type PrListResponse = {
 	pullRequests: { id: string; title: string; status: string }[];

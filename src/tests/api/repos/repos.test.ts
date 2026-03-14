@@ -4,14 +4,9 @@ import { getCurrentUser } from "@/lib/server/session";
 import { testPrisma } from "@/tests/db";
 import { seedPullRequest, seedRepo } from "@/tests/helpers/repo";
 import { parseJson } from "@/tests/helpers/request";
-import { mockUser } from "@/tests/helpers/user";
+import { mockUser, seedUser } from "@/tests/helpers/user";
 
 describe("GET /api/repos", () => {
-	async function seedUser(email = "user@example.com", username = "testuser") {
-		return testPrisma.user.create({
-			data: { email, username, password: "hashed" },
-		});
-	}
 
 	it("returns 200 with the user's repositories", async () => {
 		// ARRANGE
