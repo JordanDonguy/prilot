@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useRepos } from "@/contexts/ReposContext";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import type { IInvitation } from "@/types/repos";
 import { Button } from "../buttons/Button";
 import { Modal } from "./Modal";
@@ -28,7 +27,7 @@ export function PendingInviteModal({
 	const handleAction = async (action: "accept" | "decline") => {
 		setLoadingAction(action);
 		try {
-			const res = await fetchWithAuth(`/api/invitations/${action}`, {
+			const res = await fetch(`/api/invitations/${action}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ token: invitation.token }),

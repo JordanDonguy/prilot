@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRepoStore } from "@/stores/repoStore";
 import type { IRepositoryResponse } from "@/types/repos";
 
@@ -21,7 +20,7 @@ export function usePrefetchRepos(repoIds: string[]) {
 		for (const id of repoIds) {
 			if (currentRepos[id]) continue;
 
-			fetchWithAuth(`/api/repos/${id}`)
+			fetch(`/api/repos/${id}`)
 				.then((res) => {
 					if (!res.ok) return;
 					return res.json();

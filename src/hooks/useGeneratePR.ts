@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { usePullRequestActions } from "@/hooks/usePullRequestActions";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { parsePartialPRJson } from "@/lib/utils/parsePartialPRJson";
 import { useCreditsStore } from "@/stores/creditsStore";
 
@@ -65,7 +64,7 @@ export function useGeneratePR({
 		abortControllerRef.current = abortController;
 
 		try {
-			const aiRes = await fetchWithAuth(
+			const aiRes = await fetch(
 				`/api/repos/${repoId}/pull-requests/generate/${mode}`,
 				{
 					method: "POST",
@@ -162,7 +161,7 @@ export function useGeneratePR({
 				});
 				if (newPR) setPrId(newPR.id);
 			} else {
-				const updateRes = await fetchWithAuth(
+				const updateRes = await fetch(
 					`/api/repos/${repoId}/pull-requests/${prId}`,
 					{
 						method: "PATCH",

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { Button } from "../buttons/Button";
 import { Modal } from "./Modal";
 
@@ -25,7 +24,7 @@ export function AddMemberModal({
 		setLoading(true);
 
 		try {
-			const res = await fetchWithAuth(`/api/repos/${repoId}/invitations`, {
+			const res = await fetch(`/api/repos/${repoId}/invitations`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email }),

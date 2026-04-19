@@ -29,7 +29,6 @@ import { useInstallations } from "@/contexts/InstallationContext";
 import { useRepos } from "@/contexts/ReposContext";
 import { usePrefetchRepos } from "@/hooks/usePrefetchRepos";
 import { config } from "@/lib/client/config";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import firstCharUpperCase from "@/lib/utils/firstCharUpperCase";
 import { formatDateTime } from "@/lib/utils/formatDateTime";
 import { getPercentageChange } from "@/lib/utils/stats";
@@ -75,7 +74,7 @@ export default function DashboardPage() {
 
 		const fetchRecentPRs = async () => {
 			try {
-				const res = await fetchWithAuth("/api/pull-requests/recent");
+				const res = await fetch("/api/pull-requests/recent");
 				if (!res.ok) throw new Error("Failed to fetch recent PRs");
 
 				const data: IRecentPRsResponse = await res.json();

@@ -1,7 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRepoStore } from "@/stores/repoStore";
 import type { IRepositoryResponse } from "@/types/repos";
 
@@ -24,7 +23,7 @@ export function useRepository(repoId: string) {
 			if (!repoFromStore) setLoading(true); // only show loading on first fetch
 
 			try {
-				const res = await fetchWithAuth(`/api/repos/${repoId}`);
+				const res = await fetch(`/api/repos/${repoId}`);
 
 				if (!res.ok) {
 					const data = await res.json();

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 // ---- Types ----
 
@@ -53,8 +52,8 @@ export function useBlockConfig(repoId: string) {
 		setLoading(true);
 		try {
 			const [blocksRes, repoBlocksRes] = await Promise.all([
-				fetchWithAuth("/api/blocks"),
-				fetchWithAuth(`/api/repos/${repoId}/blocks`),
+				fetch("/api/blocks"),
+				fetch(`/api/repos/${repoId}/blocks`),
 			]);
 
 			if (!blocksRes.ok || !repoBlocksRes.ok) {
@@ -141,7 +140,7 @@ export function useBlockConfig(repoId: string) {
 				detailLevel: rb.detailLevel,
 			}));
 
-			const res = await fetchWithAuth(`/api/repos/${repoId}/blocks`, {
+			const res = await fetch(`/api/repos/${repoId}/blocks`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
