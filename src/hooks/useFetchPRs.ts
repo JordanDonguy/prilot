@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRepoStore } from "@/stores/repoStore";
 import type { IPagination, IPullRequest, PRFilter } from "@/types/pullRequests";
 
@@ -38,7 +37,7 @@ export function useFetchPRs({
 			setLoading(true);
 
 			try {
-				const res = await fetchWithAuth(
+				const res = await fetch(
 					`/api/repos/${repoId}/pull-requests?page=${page}&per_page=${perPage}&status=${filter}`,
 				);
 				if (!res.ok) throw new Error("Failed to fetch pull requests");

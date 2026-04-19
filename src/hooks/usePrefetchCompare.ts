@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const DEBOUNCE_MS = 600;
 
@@ -27,7 +26,7 @@ export function usePrefetchCompare(
 		timeoutRef.current = setTimeout(() => {
 			lastPrefetchedRef.current = key;
 
-			fetchWithAuth(
+			fetch(
 				`/api/repos/${repoId}/pull-requests/generate/prefetch`,
 				{
 					method: "POST",

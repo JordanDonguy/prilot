@@ -1,7 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import type { PRLanguage } from "@/types/languages";
 import type { IPullRequest } from "@/types/pullRequests";
 
@@ -36,7 +35,7 @@ export function useFetchPR({
 			setLoading(true);
 
 			try {
-				const res = await fetchWithAuth(`/api/repos/${repoId}/pull-requests/${prId}`);
+				const res = await fetch(`/api/repos/${repoId}/pull-requests/${prId}`);
 				if (!res.ok) throw new Error("Failed to fetch PR");
 				const data = await res.json();
 

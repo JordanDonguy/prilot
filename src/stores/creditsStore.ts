@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface CreditsStore {
 	remaining: number | null;
@@ -23,7 +22,7 @@ export const useCreditsStore = create<CreditsStore>((set, get) => ({
 		if (!force && get().remaining !== null) return;
 		set({ loading: true });
 		try {
-			const res = await fetchWithAuth("/api/user/credits");
+			const res = await fetch("/api/user/credits");
 			if (res.ok) {
 				const data = await res.json();
 				set({ remaining: data.remaining, total: data.total, reset: data.reset });
