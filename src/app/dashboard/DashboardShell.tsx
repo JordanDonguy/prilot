@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect } from "react";
 import AppNavbar from "@/components/navbar/AppNavbar";
-import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
+import LoadingSpinner from "@/components/skeletons/LoadingSpinner";
 import { InstallationsProvider } from "@/contexts/InstallationContext";
 import { ReposProvider } from "@/contexts/ReposContext";
 import { useUser } from "@/contexts/UserContext";
@@ -23,8 +23,13 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 		}
 	}, [loading, user, router]);
 
-	// Show skeleton until user data is ready
-	if (loading || !user) return <DashboardSkeleton />;
+	if (loading || !user) {
+		return (
+			<div className="flex items-center justify-center h-screen">
+				<LoadingSpinner />
+			</div>
+		);
+	}
 
 	return (
 		<InstallationsProvider>
